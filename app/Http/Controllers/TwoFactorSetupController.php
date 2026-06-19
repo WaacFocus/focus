@@ -27,6 +27,19 @@ class TwoFactorSetupController extends Controller
 
         $request->session()->put('two_factor_totp_secret', $secret);
 
+        return redirect()->route('two-factor.totp.setup');
+    }
+
+    public function showTotpSetup(Request $request)
+    {
+        $secret = $request->session()->get('two_factor_totp_secret');
+
+        if (!$secret) {
+            return redirect()->route('two-factor.index')->with('error', 'Setup session expired. Please try again.');
+        }
+
+        $google2fa = new Google2FA();
+
         $otpauthUrl = $google2fa->getQRCodeUrl(
             config('app.name'),
             Auth::user()->email,

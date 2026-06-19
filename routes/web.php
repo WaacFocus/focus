@@ -45,6 +45,7 @@ Route::middleware('auth')->group(function () {
     // 2FA setup
     Route::get('two-factor', [TwoFactorSetupController::class, 'show'])->name('two-factor.index');
     Route::post('two-factor/totp/enable', [TwoFactorSetupController::class, 'enableTotp'])->name('two-factor.totp.enable');
+    Route::get('two-factor/totp/setup', [TwoFactorSetupController::class, 'showTotpSetup'])->name('two-factor.totp.setup');
     Route::post('two-factor/totp/confirm', [TwoFactorSetupController::class, 'confirmTotp'])->name('two-factor.totp.confirm');
     Route::post('two-factor/totp/disable', [TwoFactorSetupController::class, 'disableTotp'])->name('two-factor.totp.disable');
     Route::delete('two-factor/passkeys/{id}', [TwoFactorSetupController::class, 'deletePasskey'])->name('two-factor.passkey.delete');
