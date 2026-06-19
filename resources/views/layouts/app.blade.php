@@ -14,7 +14,6 @@
             --brand-teal:   #17B4A7;
             --brand-orange: #F7941D;
             --brand-blue:   #1A9DD9;
-            /* Override Bootstrap primary */
             --bs-primary:              #17B4A7;
             --bs-primary-rgb:          23, 180, 167;
             --bs-link-color:           #17B4A7;
@@ -46,12 +45,11 @@
         .bg-primary.bg-opacity-10 { background-color: rgba(23,180,167,.1) !important; }
         a { color: #17B4A7; }
         a:hover { color: #0ea397; }
-        /* Keep white links white (nav, buttons etc.) */
         .nav-link, .btn, .dropdown-item, .alert a,
         .text-white a, .text-decoration-none { color: inherit; }
         .text-decoration-none:hover { color: inherit; }
 
-        /* ── Sidebar ───────────────────────────────────────────────────────── */
+        /* ── Sidebar (desktop — unchanged) ─────────────────────────────────── */
         body { background-color: #f0f4f4; }
         .sidebar {
             min-height: 100vh;
@@ -95,8 +93,46 @@
             padding: .9rem 1.25rem .2rem;
         }
 
+        /* ── Mobile offcanvas sidebar ───────────────────────────────────────── */
+        #mobileSidebar {
+            width: 260px;
+            background: var(--brand-dark);
+        }
+        #mobileSidebar .mob-brand {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: .9rem 1.1rem;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+            flex-shrink: 0;
+        }
+        #mobileSidebar .mob-brand span { color: #fff; font-size: 1.1rem; font-weight: 700; }
+        #mobileSidebar .nav-link {
+            color: rgba(255,255,255,.65);
+            padding: .45rem 1.1rem;
+            border-radius: .375rem;
+            margin: .1rem .5rem;
+            font-size: .875rem;
+            transition: background .12s, color .12s;
+        }
+        #mobileSidebar .nav-link:hover { color: #fff; background: rgba(23,180,167,.18); }
+        #mobileSidebar .nav-link.active {
+            color: #fff;
+            background: rgba(23,180,167,.25);
+            border-left: 3px solid var(--brand-teal);
+            padding-left: calc(1.1rem - 3px);
+        }
+        #mobileSidebar .nav-section {
+            color: rgba(255,255,255,.35);
+            font-size: .67rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .07em;
+            padding: .9rem 1.25rem .2rem;
+        }
+
         /* ── Top bar ───────────────────────────────────────────────────────── */
-        .main-content { flex: 1; overflow-x: hidden; }
+        .main-content { flex: 1; min-width: 0; overflow-x: hidden; }
         .topbar {
             background: #fff;
             border-bottom: 1px solid #e3eceb;
@@ -107,6 +143,19 @@
         /* ── Cards ─────────────────────────────────────────────────────────── */
         .stat-card { border: none; border-radius: .75rem; transition: transform .15s; }
         .stat-card:hover { transform: translateY(-2px); }
+
+        /* ── Responsive (tablet & mobile only) ─────────────────────────────── */
+        @media (max-width: 991.98px) {
+            .content-area { padding: 1rem; }
+            .topbar { padding: .6rem 1rem; }
+        }
+        @media (max-width: 575.98px) {
+            .content-area > .d-flex.justify-content-between,
+            .content-area > div > .d-flex.justify-content-between { flex-wrap: wrap; gap: .5rem; }
+            .card-header.d-flex.justify-content-between { flex-wrap: wrap; gap: .4rem; }
+            h4.mb-0, h4.mb-1, h4.mb-4 { font-size: 1.1rem; }
+            .offcanvas.offcanvas-end { width: 100% !important; }
+        }
     </style>
     <style>
         @media print {
@@ -126,7 +175,9 @@
 </head>
 <body>
 <div class="d-flex">
-    <nav class="sidebar d-flex flex-column">
+
+    {{-- ── Desktop sidebar (hidden on tablet/mobile) ── --}}
+    <nav class="sidebar d-none d-lg-flex flex-column">
         <div class="brand">
             <img src="{{ asset('images/logo.png') }}" alt="Focus logo" onerror="this.style.display='none'">
             <span>Focus</span>
@@ -194,20 +245,101 @@
         </div>
     </nav>
 
+    {{-- ── Mobile/tablet offcanvas sidebar (hidden on desktop) ── --}}
+    <div class="offcanvas offcanvas-start d-lg-none" id="mobileSidebar" tabindex="-1" aria-label="Navigation">
+        <div class="mob-brand">
+            <span>Focus</span>
+            <button type="button" class="btn-close btn-close-white" aria-label="Close"></button>
+        </div>
+        <div class="flex-grow-1 pt-2 d-flex flex-column overflow-auto">
+            <div>
+                <div class="nav-section">Overview</div>
+                <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                    <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                </a>
+
+                <div class="nav-section">Practice</div>
+                <a href="{{ route('clients.index') }}" class="nav-link {{ request()->routeIs('clients.*') ? 'active' : '' }}">
+                    <i class="bi bi-people me-2"></i>Clients
+                </a>
+                <a href="{{ route('jobs.index') }}" class="nav-link {{ request()->routeIs('jobs.*') ? 'active' : '' }}">
+                    <i class="bi bi-briefcase me-2"></i>Jobs
+                </a>
+                <a href="{{ route('projects.index') }}" class="nav-link {{ request()->routeIs('projects.*') ? 'active' : '' }}">
+                    <i class="bi bi-kanban me-2"></i>Projects
+                </a>
+                <a href="{{ route('tasks.index') }}" class="nav-link {{ request()->routeIs('tasks.*') ? 'active' : '' }}">
+                    <i class="bi bi-check2-square me-2"></i>Tasks
+                </a>
+
+                <div class="nav-section">Services & Billing</div>
+                <a href="{{ route('services.index') }}" class="nav-link {{ request()->routeIs('services.*') ? 'active' : '' }}">
+                    <i class="bi bi-grid me-2"></i>Services
+                </a>
+                <a href="{{ route('products.index') }}" class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}">
+                    <i class="bi bi-box-seam me-2"></i>Products
+                </a>
+                <a href="{{ route('renewals.index') }}" class="nav-link {{ request()->routeIs('renewals.*') ? 'active' : '' }}">
+                    <i class="bi bi-arrow-repeat me-2"></i>Renewals
+                </a>
+
+                @can('manager')
+                <div class="nav-section">Insights</div>
+                <a href="{{ route('reports.index') }}" class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">
+                    <i class="bi bi-bar-chart-line me-2"></i>Reports
+                </a>
+
+                <div class="nav-section">Admin</div>
+                <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                    <i class="bi bi-people-fill me-2"></i>Users
+                </a>
+                <a href="{{ route('client-types.index') }}" class="nav-link {{ request()->routeIs('client-types.*') ? 'active' : '' }}">
+                    <i class="bi bi-building me-2"></i>Client Types
+                </a>
+                <a href="{{ route('activity.index') }}" class="nav-link {{ request()->routeIs('activity.*') ? 'active' : '' }}">
+                    <i class="bi bi-activity me-2"></i>Activity
+                </a>
+                @endcan
+            </div>
+
+            <div class="mt-auto pb-2">
+                <div class="nav-section">My Details</div>
+                <a href="{{ route('profile.password') }}" class="nav-link {{ request()->routeIs('profile.password') ? 'active' : '' }}">
+                    <i class="bi bi-key me-2"></i>Password
+                </a>
+                <a href="{{ route('two-factor.index') }}" class="nav-link {{ request()->routeIs('two-factor.*') ? 'active' : '' }}">
+                    <i class="bi bi-shield-lock me-2"></i>Security
+                </a>
+            </div>
+        </div>
+    </div>
+
+    {{-- ── Main content ── --}}
     <div class="main-content d-flex flex-column">
         <div class="topbar d-flex align-items-center justify-content-between">
-            <h6 class="mb-0 fw-semibold text-muted">@yield('page-title', 'Dashboard')</h6>
-            <div class="d-flex align-items-center gap-3">
-                <div class="text-muted small">{{ now()->format('l, d F Y') }}</div>
+            <div class="d-flex align-items-center gap-2">
+                {{-- Hamburger: only visible on tablet/mobile --}}
+                <button class="btn btn-sm btn-outline-secondary d-lg-none"
+                        type="button"
+                        data-bs-toggle="offcanvas"
+                        data-bs-target="#mobileSidebar"
+                        aria-label="Open menu">
+                    <i class="bi bi-list fs-5"></i>
+                </button>
+                <h6 class="mb-0 fw-semibold text-muted">@yield('page-title', 'Dashboard')</h6>
+            </div>
+            <div class="d-flex align-items-center gap-2 gap-md-3">
+                <div class="text-muted small d-none d-md-block">{{ now()->format('l, d F Y') }}</div>
                 @auth
                 <div class="d-flex align-items-center gap-2">
-                    <span class="text-muted small">
+                    <span class="text-muted small d-none d-sm-inline">
                         <i class="bi bi-person-circle me-1"></i>{{ Auth::user()->name }}
                     </span>
                     <form method="POST" action="{{ route('logout') }}" class="d-inline">
                         @csrf
                         <button type="submit" class="btn btn-sm btn-outline-secondary">
-                            <i class="bi bi-box-arrow-right me-1"></i>Sign Out
+                            <i class="bi bi-box-arrow-right"></i>
+                            <span class="d-none d-sm-inline ms-1">Sign Out</span>
                         </button>
                     </form>
                 </div>
