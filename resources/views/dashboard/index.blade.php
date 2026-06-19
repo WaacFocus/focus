@@ -206,10 +206,11 @@
                             <label class="form-label form-label-sm mb-1">Frequency</label>
                             <select name="jf_frequency" class="form-select form-select-sm">
                                 <option value="">All</option>
-                                <option value="weekly"  {{ request('jf_frequency') === 'weekly'  ? 'selected' : '' }}>Weekly</option>
-                                <option value="monthly" {{ request('jf_frequency') === 'monthly' ? 'selected' : '' }}>Monthly</option>
-                                <option value="yearly"  {{ request('jf_frequency') === 'yearly'  ? 'selected' : '' }}>Yearly</option>
-                                <option value="one-off" {{ request('jf_frequency') === 'one-off' ? 'selected' : '' }}>One-off</option>
+                                <option value="weekly"    {{ request('jf_frequency') === 'weekly'    ? 'selected' : '' }}>Weekly</option>
+                                <option value="monthly"   {{ request('jf_frequency') === 'monthly'   ? 'selected' : '' }}>Monthly</option>
+                                <option value="quarterly" {{ request('jf_frequency') === 'quarterly' ? 'selected' : '' }}>Quarterly</option>
+                                <option value="yearly"    {{ request('jf_frequency') === 'yearly'    ? 'selected' : '' }}>Yearly</option>
+                                <option value="one-off"   {{ request('jf_frequency') === 'one-off'   ? 'selected' : '' }}>One-off</option>
                             </select>
                         </div>
                         <div class="col-sm-6 col-md-3">

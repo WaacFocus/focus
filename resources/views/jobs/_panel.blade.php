@@ -66,6 +66,7 @@
                     <select name="frequency" class="form-select form-select-sm" required>
                         <option value="weekly">Weekly</option>
                         <option value="monthly" selected>Monthly</option>
+                        <option value="quarterly">Quarterly</option>
                         <option value="yearly">Yearly</option>
                         <option value="one-off">One-off</option>
                     </select>

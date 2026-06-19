@@ -42,10 +42,11 @@ class Job extends Model
     public function getFrequencyLabelAttribute(): string
     {
         return match ($this->frequency) {
-            'weekly'  => 'Weekly',
-            'monthly' => 'Monthly',
-            'yearly'  => 'Yearly',
-            'one-off' => 'One-off',
+            'weekly'    => 'Weekly',
+            'monthly'   => 'Monthly',
+            'quarterly' => 'Quarterly',
+            'yearly'    => 'Yearly',
+            'one-off'   => 'One-off',
             default   => ucfirst($this->frequency),
         };
     }
@@ -57,9 +58,10 @@ class Job extends Model
         }
 
         $nextDue = match ($this->frequency) {
-            'weekly'  => $this->due_date->copy()->addWeek(),
-            'monthly' => $this->due_date->copy()->addMonth(),
-            'yearly'  => $this->due_date->copy()->addYear(),
+            'weekly'    => $this->due_date->copy()->addWeek(),
+            'monthly'   => $this->due_date->copy()->addMonth(),
+            'quarterly' => $this->due_date->copy()->addMonths(3),
+            'yearly'    => $this->due_date->copy()->addYear(),
         };
 
         return self::create([
