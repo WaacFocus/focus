@@ -13,6 +13,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\JobController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\ImpersonateController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -46,6 +47,7 @@ Route::middleware('auth')->group(function () {
     Route::middleware('manager')->group(function () {
         Route::resource('users', UserController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
         Route::resource('client-types', ClientTypeController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
+        Route::get('activity', [ActivityController::class, 'index'])->name('activity.index');
 
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('reports/fixed-prices', [ReportController::class, 'fixedPrices'])->name('reports.fixed-prices');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\UserActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -26,6 +27,15 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
+            UserActivityLog::create([
+                'user_id'    => Auth::id(),
+                'event'      => 'login',
+                'description'=> 'Signed in',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'session_id' => session()->getId(),
+            ]);
+
             return redirect()->intended(route('dashboard'));
         }
 
@@ -36,6 +46,8 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        UserActivityLog::record('logout', 'Signed out');
+
         Auth::logout();
 
         $request->session()->invalidate();

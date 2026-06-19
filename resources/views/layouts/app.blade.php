@@ -175,6 +175,9 @@
             <a href="{{ route('client-types.index') }}" class="nav-link {{ request()->routeIs('client-types.*') ? 'active' : '' }}">
                 <i class="bi bi-building me-2"></i>Client Types
             </a>
+            <a href="{{ route('activity.index') }}" class="nav-link {{ request()->routeIs('activity.*') ? 'active' : '' }}">
+                <i class="bi bi-activity me-2"></i>Activity
+            </a>
             @endcan
         </div>
     </nav>

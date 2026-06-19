@@ -15,6 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'manager' => \App\Http\Middleware\EnsureManager::class,
         ]);
+        $middleware->appendToGroup('web', \App\Http\Middleware\LogUserActivity::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
