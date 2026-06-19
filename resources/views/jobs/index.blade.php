@@ -139,15 +139,13 @@
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script>
 (function () {
-    const KEY   = 'jobs_col_order';
-    const thead = document.getElementById('jobsTableHead');
-    const table = document.getElementById('jobsTable');
+    const PREF_KEY  = 'jobs_col_order';
+    const SAVE_URL  = '{{ route('profile.preferences.save') }}';
+    const CSRF      = document.querySelector('meta[name="csrf-token"]').content;
+    const thead     = document.getElementById('jobsTableHead');
+    const table     = document.getElementById('jobsTable');
 
-    // Reorder headers and all body rows by an array of data-col values.
-    // Uses DocumentFragment so all nodes are placed at once — avoids
-    // the accumulation-in-reverse bug that hits with repeated insertBefore.
     function applyOrder(order) {
-        // Headers
         const thFixed = thead.querySelector('[data-col="fixed"]');
         const thFrag  = document.createDocumentFragment();
         order.forEach(col => {
@@ -156,7 +154,6 @@
         });
         thead.insertBefore(thFrag, thFixed);
 
-        // Body rows — find each cell by its stable data-col attribute
         table.querySelectorAll('tbody tr').forEach(row => {
             const tdFixed = row.querySelector('[data-col="fixed"]');
             if (!tdFixed) return;
@@ -169,7 +166,10 @@
         });
     }
 
-    const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+    // Server-saved order takes priority; fall back to localStorage
+    const serverOrder = @json(auth()->user()->preferences['jobs_col_order'] ?? null);
+    const localOrder  = JSON.parse(localStorage.getItem(PREF_KEY) || 'null');
+    const saved = serverOrder || localOrder;
     if (saved) applyOrder(saved);
 
     Sortable.create(thead, {
@@ -180,7 +180,17 @@
                 .map(th => th.dataset.col)
                 .filter(col => col !== 'fixed');
             applyOrder(order);
-            localStorage.setItem(KEY, JSON.stringify(order));
+            // Persist locally immediately, then save to server
+            localStorage.setItem(PREF_KEY, JSON.stringify(order));
+            fetch(SAVE_URL, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': CSRF,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({ key: PREF_KEY, value: order }),
+            });
         },
     });
 })();

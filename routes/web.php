@@ -41,6 +41,7 @@ Route::middleware('auth')->group(function () {
     // Profile
     Route::get('profile/password', [ProfileController::class, 'password'])->name('profile.password');
     Route::post('profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+    Route::post('profile/preferences', [ProfileController::class, 'savePreference'])->name('profile.preferences.save');
 
     // 2FA setup
     Route::get('two-factor', [TwoFactorSetupController::class, 'show'])->name('two-factor.index');

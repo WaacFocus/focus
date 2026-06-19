@@ -10,7 +10,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laragear\WebAuthn\WebAuthnAuthentication;
 
-#[Fillable(['name', 'email', 'password', 'role', 'two_factor_secret', 'two_factor_confirmed_at'])]
+#[Fillable(['name', 'email', 'password', 'role', 'preferences', 'two_factor_secret', 'two_factor_confirmed_at'])]
 #[Hidden(['password', 'remember_token', 'two_factor_secret'])]
 class User extends Authenticatable
 {
@@ -23,6 +23,7 @@ class User extends Authenticatable
             'email_verified_at'       => 'datetime',
             'two_factor_confirmed_at' => 'datetime',
             'password'                => 'hashed',
+            'preferences'             => 'array',
         ];
     }
 
