@@ -244,6 +244,9 @@
                 <a href="{{ route('two-factor.index') }}" class="nav-link {{ request()->routeIs('two-factor.*') ? 'active' : '' }}">
                     <i class="bi bi-shield-lock me-2"></i>Security
                 </a>
+                <div class="px-3 pt-2" style="color:rgba(255,255,255,.25);font-size:.7rem;">
+                    v{{ config('version.number') }}
+                </div>
             </div>
         </div>
     </nav>
@@ -316,6 +319,9 @@
                 <a href="{{ route('two-factor.index') }}" class="nav-link {{ request()->routeIs('two-factor.*') ? 'active' : '' }}">
                     <i class="bi bi-shield-lock me-2"></i>Security
                 </a>
+                <div class="px-3 pt-2" style="color:rgba(255,255,255,.25);font-size:.7rem;">
+                    v{{ config('version.number') }}
+                </div>
             </div>
         </div>
     </div>
