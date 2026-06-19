@@ -4,6 +4,16 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.08 — 2026-06-19
+
+### Added
+- **Version Log** — admin page under Admin section showing full changelog with styled version/change-type cards
+  - Parsed from `CHANGELOG.md` using `league/commonmark`
+  - Export as PDF (DomPDF, portrait), download raw `.md` file, or print
+  - Version Log link added to Admin section of sidebar (desktop + mobile)
+
+---
+
 ## v1.07 — 2026-06-19
 
 ### Added

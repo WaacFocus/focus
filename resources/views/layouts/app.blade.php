@@ -236,6 +236,9 @@
                 <a href="{{ route('activity.index') }}" class="nav-link {{ request()->routeIs('activity.*') ? 'active' : '' }}">
                     <i class="bi bi-activity me-2"></i>Activity
                 </a>
+                <a href="{{ route('changelog.index') }}" class="nav-link {{ request()->routeIs('changelog.*') ? 'active' : '' }}">
+                    <i class="bi bi-clock-history me-2"></i>Version Log
+                </a>
                 @endcan
             </div>
 
@@ -313,6 +316,9 @@
                 </a>
                 <a href="{{ route('activity.index') }}" class="nav-link {{ request()->routeIs('activity.*') ? 'active' : '' }}">
                     <i class="bi bi-activity me-2"></i>Activity
+                </a>
+                <a href="{{ route('changelog.index') }}" class="nav-link {{ request()->routeIs('changelog.*') ? 'active' : '' }}">
+                    <i class="bi bi-clock-history me-2"></i>Version Log
                 </a>
                 @endcan
             </div>

@@ -9,6 +9,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RenewalController;
+use App\Http\Controllers\ChangelogController;
 use App\Http\Controllers\ReportBuilderController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ServiceController;
@@ -85,6 +86,9 @@ Route::middleware('auth')->group(function () {
         Route::post('users/{user}/2fa/reset', [UserTwoFactorController::class, 'reset'])->name('users.2fa.reset');
         Route::resource('client-types', ClientTypeController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
         Route::get('activity', [ActivityController::class, 'index'])->name('activity.index');
+        Route::get('changelog', [ChangelogController::class, 'index'])->name('changelog.index');
+        Route::get('changelog/pdf', [ChangelogController::class, 'pdf'])->name('changelog.pdf');
+        Route::get('changelog/download', [ChangelogController::class, 'download'])->name('changelog.download');
         Route::post('reports/email', [ReportController::class, 'email'])->name('reports.email');
 
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
