@@ -16,6 +16,8 @@
         'csvUrl'          => route('reports.upcoming-jobs.csv'),
         'pdfPortraitUrl'  => route('reports.upcoming-jobs.pdf', 'portrait'),
         'pdfLandscapeUrl' => route('reports.upcoming-jobs.pdf', 'landscape'),
+        'reportType'      => 'upcoming-jobs',
+        'users'           => $users,
     ])
 </div>
 

@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\Job;
+use App\Models\User;
+use App\Services\Smtp2goService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
@@ -13,6 +16,8 @@ class ReportController extends Controller
     {
         return view('reports.index');
     }
+
+    // ── Upcoming Jobs ──────────────────────────────────────────────────────────
 
     private function upcomingJobsData(): \Illuminate\Database\Eloquent\Collection
     {
@@ -30,8 +35,9 @@ class ReportController extends Controller
         $todayCount    = $jobs->filter(fn($j) => $j->due_date->isToday())->count();
         $upcomingCount = $jobs->filter(fn($j) => $j->due_date->isFuture())->count();
         $byUser        = $jobs->groupBy(fn($j) => $j->assignedTo->name);
+        $users         = User::orderBy('name')->get();
 
-        return view('reports.upcoming-jobs', compact('jobs', 'overdueCount', 'todayCount', 'upcomingCount', 'byUser'));
+        return view('reports.upcoming-jobs', compact('jobs', 'overdueCount', 'todayCount', 'upcomingCount', 'byUser', 'users'));
     }
 
     public function upcomingJobsPdf(string $orientation = 'landscape')
@@ -70,29 +76,31 @@ class ReportController extends Controller
         }, $filename, ['Content-Type' => 'text/csv']);
     }
 
-    public function fixedPrices()
+    // ── Fixed Prices ───────────────────────────────────────────────────────────
+
+    private function fixedPricesData(): \Illuminate\Database\Eloquent\Collection
     {
-        $clients = Client::whereNotNull('fpa_amount')
+        return Client::whereNotNull('fpa_amount')
             ->orWhereNotNull('payroll_fpa')
             ->orderBy('company_name')
             ->get(['id', 'company_name', 'client_code', 'status', 'fpa_amount', 'billing_interval', 'payroll_fpa', 'payroll_billing_interval']);
+    }
 
+    public function fixedPrices()
+    {
+        $clients           = $this->fixedPricesData();
         $totalFpa          = $clients->sum('fpa_amount');
         $totalPayrollFpa   = $clients->sum('payroll_fpa');
         $grandTotal        = $totalFpa + $totalPayrollFpa;
+        $byInterval        = $clients->groupBy(fn ($c) => $c->billing_interval ?: 'Unspecified');
+        $users             = User::orderBy('name')->get();
 
-        $byInterval = $clients->groupBy(fn ($c) => $c->billing_interval ?: 'Unspecified');
-
-        return view('reports.fixed-prices', compact('clients', 'totalFpa', 'totalPayrollFpa', 'grandTotal', 'byInterval'));
+        return view('reports.fixed-prices', compact('clients', 'totalFpa', 'totalPayrollFpa', 'grandTotal', 'byInterval', 'users'));
     }
 
     public function fixedPricesPdf(string $orientation = 'portrait')
     {
-        $clients = Client::whereNotNull('fpa_amount')
-            ->orWhereNotNull('payroll_fpa')
-            ->orderBy('company_name')
-            ->get(['id', 'company_name', 'client_code', 'status', 'fpa_amount', 'billing_interval', 'payroll_fpa', 'payroll_billing_interval']);
-
+        $clients         = $this->fixedPricesData();
         $totalFpa        = $clients->sum('fpa_amount');
         $totalPayrollFpa = $clients->sum('payroll_fpa');
         $grandTotal      = $totalFpa + $totalPayrollFpa;
@@ -105,11 +113,7 @@ class ReportController extends Controller
 
     public function fixedPricesCsv(): StreamedResponse
     {
-        $clients = Client::whereNotNull('fpa_amount')
-            ->orWhereNotNull('payroll_fpa')
-            ->orderBy('company_name')
-            ->get(['id', 'company_name', 'client_code', 'status', 'fpa_amount', 'billing_interval', 'payroll_fpa', 'payroll_billing_interval']);
-
+        $clients  = $this->fixedPricesData();
         $filename = 'fixed-prices-' . now()->format('Y-m-d') . '.csv';
 
         return response()->streamDownload(function () use ($clients) {
@@ -132,5 +136,53 @@ class ReportController extends Controller
 
             fclose($out);
         }, $filename, ['Content-Type' => 'text/csv']);
+    }
+
+    // ── Email ──────────────────────────────────────────────────────────────────
+
+    public function email(Request $request, Smtp2goService $smtp2go)
+    {
+        $request->validate([
+            'report'     => ['required', 'in:upcoming-jobs,fixed-prices'],
+            'user_ids'   => ['required', 'array', 'min:1'],
+            'user_ids.*' => ['exists:users,id'],
+        ]);
+
+        $users = User::whereIn('id', $request->user_ids)->get();
+
+        if ($request->report === 'upcoming-jobs') {
+            $jobs         = $this->upcomingJobsData();
+            $overdueCount = $jobs->filter(fn($j) => $j->due_date->isPast() && !$j->due_date->isToday())->count();
+            $todayCount   = $jobs->filter(fn($j) => $j->due_date->isToday())->count();
+            $byUser       = $jobs->groupBy(fn($j) => $j->assignedTo->name);
+            $subject      = 'Upcoming Jobs Report — ' . now()->format('d F Y');
+            $html         = view('emails.upcoming-jobs', compact('jobs', 'overdueCount', 'todayCount', 'byUser'))->render();
+        } else {
+            $clients         = $this->fixedPricesData();
+            $totalFpa        = $clients->sum('fpa_amount');
+            $totalPayrollFpa = $clients->sum('payroll_fpa');
+            $grandTotal      = $totalFpa + $totalPayrollFpa;
+            $subject         = 'Fixed Price Summary — ' . now()->format('d F Y');
+            $html            = view('emails.fixed-prices', compact('clients', 'totalFpa', 'totalPayrollFpa', 'grandTotal'))->render();
+        }
+
+        $sent   = 0;
+        $failed = 0;
+
+        foreach ($users as $user) {
+            $smtp2go->send($user->email, $user->name, $subject, $html)
+                ? $sent++
+                : $failed++;
+        }
+
+        if ($sent > 0 && $failed === 0) {
+            return back()->with('success', "Report emailed to {$sent} " . str('user')->plural($sent) . '.');
+        }
+
+        if ($sent > 0) {
+            return back()->with('success', "Report emailed to {$sent} " . str('user')->plural($sent) . " ({$failed} failed — check logs).");
+        }
+
+        return back()->with('error', 'Failed to send the report. Please check the SMTP2GO configuration.');
     }
 }

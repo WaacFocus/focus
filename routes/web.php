@@ -48,6 +48,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('users', UserController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
         Route::resource('client-types', ClientTypeController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
         Route::get('activity', [ActivityController::class, 'index'])->name('activity.index');
+        Route::post('reports/email', [ReportController::class, 'email'])->name('reports.email');
 
         Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('reports/fixed-prices', [ReportController::class, 'fixedPrices'])->name('reports.fixed-prices');

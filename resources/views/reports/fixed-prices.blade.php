@@ -13,6 +13,8 @@
         'csvUrl'         => route('reports.fixed-prices.csv'),
         'pdfPortraitUrl' => route('reports.fixed-prices.pdf', 'portrait'),
         'pdfLandscapeUrl'=> route('reports.fixed-prices.pdf', 'landscape'),
+        'reportType'     => 'fixed-prices',
+        'users'          => $users,
     ])
 </div>
 

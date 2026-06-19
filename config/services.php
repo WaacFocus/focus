@@ -39,4 +39,10 @@ return [
         'key' => env('COMPANIES_HOUSE_API_KEY', ''),
     ],
 
+    'smtp2go' => [
+        'key'         => env('SMTP2GO_API_KEY'),
+        'from_address'=> env('MAIL_FROM_ADDRESS', 'david@waac.co.uk'),
+        'from_name'   => env('MAIL_FROM_NAME', 'Focus'),
+    ],
+
 ];
