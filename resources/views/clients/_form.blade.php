@@ -1,0 +1,160 @@
+<div class="row g-4">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white fw-semibold">Company Details</div>
+            <div class="card-body row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Client Code</label>
+                    <input type="text" name="client_code" value="{{ old('client_code', $client->client_code ?? '') }}" class="form-control" placeholder="e.g. CLT001">
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label">Company Name <span class="text-danger">*</span></label>
+                    <input type="text" name="company_name" value="{{ old('company_name', $client->company_name ?? '') }}" class="form-control @error('company_name') is-invalid @enderror" required>
+                    @error('company_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="active"   @selected(old('status', $client->status ?? 'active') === 'active')>Active</option>
+                        <option value="prospect" @selected(old('status', $client->status ?? '') === 'prospect')>Prospect</option>
+                        <option value="inactive" @selected(old('status', $client->status ?? '') === 'inactive')>Inactive</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Contact Name</label>
+                    <input type="text" name="contact_name" value="{{ old('contact_name', $client->contact_name ?? '') }}" class="form-control">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Account Manager</label>
+                    <input type="text" name="account_manager" value="{{ old('account_manager', $client->account_manager ?? '') }}" class="form-control" placeholder="Account manager">
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Email</label>
+                    <input type="email" name="email" value="{{ old('email', $client->email ?? '') }}" class="form-control @error('email') is-invalid @enderror">
+                    @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Phone</label>
+                    <input type="text" name="phone" value="{{ old('phone', $client->phone ?? '') }}" class="form-control">
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Address</label>
+                    <input type="text" name="address" value="{{ old('address', $client->address ?? '') }}" class="form-control" placeholder="Street address">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Town</label>
+                    <input type="text" name="town" value="{{ old('town', $client->town ?? '') }}" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">County</label>
+                    <input type="text" name="county" value="{{ old('county', $client->county ?? '') }}" class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Postcode</label>
+                    <input type="text" name="postcode" value="{{ old('postcode', $client->postcode ?? '') }}" class="form-control">
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-white fw-semibold">Fixed Price Agreement (FPA)</div>
+            <div class="card-body row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">FPA Year End</label>
+                    <input type="date" name="fpa_year_end"
+                        value="{{ old('fpa_year_end', isset($client->fpa_year_end) ? $client->fpa_year_end->format('Y-m-d') : '') }}"
+                        class="form-control">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Current FPA Amount (£)</label>
+                    <input type="number" name="fpa_amount" step="0.01" min="0"
+                        value="{{ old('fpa_amount', $client->fpa_amount ?? '') }}"
+                        class="form-control" placeholder="0.00">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Billing Interval</label>
+                    <select name="billing_interval" class="form-select">
+                        <option value="">— Select —</option>
+                        <option value="monthly"   @selected(old('billing_interval', $client->billing_interval ?? '') === 'monthly')>Monthly</option>
+                        <option value="quarterly" @selected(old('billing_interval', $client->billing_interval ?? '') === 'quarterly')>Quarterly</option>
+                        <option value="annually"  @selected(old('billing_interval', $client->billing_interval ?? '') === 'annually')>Annually</option>
+                        <option value="one-off"   @selected(old('billing_interval', $client->billing_interval ?? '') === 'one-off')>One-off</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Payment Method</label>
+                    <input type="text" name="payment_method"
+                        value="{{ old('payment_method', $client->payment_method ?? '') }}"
+                        class="form-control" placeholder="e.g. Direct Debit, BACS">
+                </div>
+                <div class="col-md-6 d-flex align-items-center">
+                    <div class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox" name="sa_billed_separately" id="sa_billed_separately" value="1"
+                            @checked(old('sa_billed_separately', $client->sa_billed_separately ?? false))>
+                        <label class="form-check-label" for="sa_billed_separately">SA's billed separately to FPA</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-white fw-semibold">Payroll FPA</div>
+            <div class="card-body row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Payroll FPA Amount (£)</label>
+                    <input type="number" name="payroll_fpa" step="0.01" min="0"
+                        value="{{ old('payroll_fpa', $client->payroll_fpa ?? '') }}"
+                        class="form-control" placeholder="0.00">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Payroll Billing Interval</label>
+                    <select name="payroll_billing_interval" class="form-select">
+                        <option value="">— Select —</option>
+                        <option value="monthly"   @selected(old('payroll_billing_interval', $client->payroll_billing_interval ?? '') === 'monthly')>Monthly</option>
+                        <option value="quarterly" @selected(old('payroll_billing_interval', $client->payroll_billing_interval ?? '') === 'quarterly')>Quarterly</option>
+                        <option value="annually"  @selected(old('payroll_billing_interval', $client->payroll_billing_interval ?? '') === 'annually')>Annually</option>
+                        <option value="one-off"   @selected(old('payroll_billing_interval', $client->payroll_billing_interval ?? '') === 'one-off')>One-off</option>
+                    </select>
+                </div>
+                <div class="col-md-4 d-flex align-items-center">
+                    <div class="form-check form-switch mt-2">
+                        <input class="form-check-input" type="checkbox" name="payroll_invoiced_separately" id="payroll_invoiced_separately" value="1"
+                            @checked(old('payroll_invoiced_separately', $client->payroll_invoiced_separately ?? false))>
+                        <label class="form-check-label" for="payroll_invoiced_separately">Payroll invoiced separately</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-white fw-semibold">Notes</div>
+            <div class="card-body">
+                <textarea name="notes" rows="4" class="form-control">{{ old('notes', $client->notes ?? '') }}</textarea>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white fw-semibold">Tax & Regulatory</div>
+            <div class="card-body row g-3">
+                <div class="col-12">
+                    <label class="form-label">VAT Number</label>
+                    <input type="text" name="vat_number" value="{{ old('vat_number', $client->vat_number ?? '') }}" class="form-control" placeholder="GB123456789">
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Company Number</label>
+                    <input type="text" name="company_number" value="{{ old('company_number', $client->company_number ?? '') }}" class="form-control" placeholder="12345678">
+                </div>
+                <div class="col-12">
+                    <label class="form-label">UTR Number</label>
+                    <input type="text" name="utr_number" value="{{ old('utr_number', $client->utr_number ?? '') }}" class="form-control" placeholder="1234567890">
+                </div>
+                <div class="col-12">
+                    <label class="form-label">PAYE Reference</label>
+                    <input type="text" name="paye_ref" value="{{ old('paye_ref', $client->paye_ref ?? '') }}" class="form-control" placeholder="123/AB456">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
