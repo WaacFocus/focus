@@ -98,6 +98,26 @@ class JobController extends Controller
         return redirect()->route('jobs.index')->with('success', 'Job updated.');
     }
 
+    public function updateStatus(Request $request, Job $job)
+    {
+        $request->validate(['status' => 'required|in:pending,in_progress,completed']);
+
+        $data = ['status' => $request->status];
+
+        if ($request->status === 'completed') {
+            $data['completed_at'] = now();
+            $job->update($data);
+            $next = $job->scheduleNext();
+            return response()->json([
+                'message'  => 'Status updated.',
+                'next_due' => $next?->due_date->format('d M Y'),
+            ]);
+        }
+
+        $job->update($data);
+        return response()->json(['message' => 'Status updated.']);
+    }
+
     public function complete(Request $request, Job $job)
     {
         $job->update([

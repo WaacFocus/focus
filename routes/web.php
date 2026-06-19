@@ -15,15 +15,43 @@ use App\Http\Controllers\JobController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\ImpersonateController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TwoFactorChallengeController;
+use App\Http\Controllers\TwoFactorSetupController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\UserTwoFactorController;
+use App\Http\Controllers\WebAuthn\WebAuthnRegisterController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login')->middleware('guest');
 Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
 
+// 2FA challenge — accessible without full auth (user is pending)
+Route::middleware('guest')->group(function () {
+    Route::get('two-factor/challenge', [TwoFactorChallengeController::class, 'show'])->name('two-factor.challenge');
+    Route::post('two-factor/challenge/totp', [TwoFactorChallengeController::class, 'verifyTotp'])->name('two-factor.totp');
+    Route::post('two-factor/challenge/passkey/options', [TwoFactorChallengeController::class, 'passkeyOptions'])->name('two-factor.passkey.options');
+    Route::post('two-factor/challenge/passkey', [TwoFactorChallengeController::class, 'verifyPasskey'])->name('two-factor.passkey.verify');
+});
+
 Route::middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+
+    // Profile
+    Route::get('profile/password', [ProfileController::class, 'password'])->name('profile.password');
+    Route::post('profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+
+    // 2FA setup
+    Route::get('two-factor', [TwoFactorSetupController::class, 'show'])->name('two-factor.index');
+    Route::post('two-factor/totp/enable', [TwoFactorSetupController::class, 'enableTotp'])->name('two-factor.totp.enable');
+    Route::post('two-factor/totp/confirm', [TwoFactorSetupController::class, 'confirmTotp'])->name('two-factor.totp.confirm');
+    Route::post('two-factor/totp/disable', [TwoFactorSetupController::class, 'disableTotp'])->name('two-factor.totp.disable');
+    Route::delete('two-factor/passkeys/{id}', [TwoFactorSetupController::class, 'deletePasskey'])->name('two-factor.passkey.delete');
+
+    // Passkey registration
+    Route::post('webauthn/register/options', [WebAuthnRegisterController::class, 'options'])->name('webauthn.register.options');
+    Route::post('webauthn/register', [WebAuthnRegisterController::class, 'register'])->name('webauthn.register');
 
     Route::resource('clients', ClientController::class);
     Route::post('clients/{client}/services', [ClientServiceController::class, 'store'])->name('clients.services.store');
@@ -37,6 +65,7 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('jobs', JobController::class);
     Route::post('jobs/{job}/complete', [JobController::class, 'complete'])->name('jobs.complete');
+    Route::patch('jobs/{job}/status', [JobController::class, 'updateStatus'])->name('jobs.status');
 
     Route::get('api/companies-house/search', [CompaniesHouseController::class, 'search'])->name('companies-house.search');
     Route::get('api/companies-house/{number}', [CompaniesHouseController::class, 'profile'])->name('companies-house.profile');
@@ -46,6 +75,11 @@ Route::middleware('auth')->group(function () {
 
     Route::middleware('manager')->group(function () {
         Route::resource('users', UserController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
+        Route::post('users/{user}/2fa/totp/generate', [UserTwoFactorController::class, 'generateTotp'])->name('users.2fa.totp.generate');
+        Route::post('users/{user}/2fa/totp/confirm', [UserTwoFactorController::class, 'confirmTotp'])->name('users.2fa.totp.confirm');
+        Route::post('users/{user}/2fa/totp/disable', [UserTwoFactorController::class, 'disableTotp'])->name('users.2fa.totp.disable');
+        Route::delete('users/{user}/2fa/passkeys/{id}', [UserTwoFactorController::class, 'deletePasskey'])->name('users.2fa.passkey.delete');
+        Route::post('users/{user}/2fa/reset', [UserTwoFactorController::class, 'reset'])->name('users.2fa.reset');
         Route::resource('client-types', ClientTypeController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
         Route::get('activity', [ActivityController::class, 'index'])->name('activity.index');
         Route::post('reports/email', [ReportController::class, 'email'])->name('reports.email');

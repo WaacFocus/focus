@@ -19,6 +19,7 @@
                     <th>Name</th>
                     <th>Email</th>
                     <th class="text-center">Role</th>
+                    <th class="text-center">2FA</th>
                     <th class="text-muted small">Last Updated</th>
                     <th></th>
                 </tr>
@@ -48,6 +49,15 @@
                             <span class="badge bg-secondary"><i class="bi bi-person me-1"></i>User</span>
                         @endif
                     </td>
+                    <td class="text-center">
+                        @if($user->hasTwoFactorEnabled())
+                            <span class="badge rounded-pill text-bg-success" title="{{ $user->hasTotpEnabled() ? 'Authenticator' : '' }}{{ $user->hasTotpEnabled() && $user->hasPasskeys() ? ' + ' : '' }}{{ $user->hasPasskeys() ? 'Passkey' : '' }}">
+                                <i class="bi bi-shield-check me-1"></i>On
+                            </span>
+                        @else
+                            <span class="badge rounded-pill text-bg-light text-muted border">Off</span>
+                        @endif
+                    </td>
                     <td class="text-muted small">{{ $user->updated_at->format('d M Y') }}</td>
                     <td class="text-end">
                         <button type="button" class="btn btn-sm btn-outline-secondary"
@@ -73,7 +83,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="5" class="text-center text-muted py-4">No users found.</td></tr>
+                <tr><td colspan="6" class="text-center text-muted py-4">No users found.</td></tr>
                 @endforelse
             </tbody>
         </table>

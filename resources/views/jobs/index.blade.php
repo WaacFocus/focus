@@ -85,17 +85,18 @@
                             <span class="badge bg-warning ms-1">Today</span>
                         @endif
                     </td>
-                    <td class="text-center">
-                        <span class="badge bg-{{ $job->status_badge }}">{{ ucfirst(str_replace('_', ' ', $job->status)) }}</span>
+                    <td class="text-center" style="min-width:140px">
+                        <select class="form-select form-select-sm status-select
+                                       status-{{ $job->status }}"
+                                data-job-id="{{ $job->id }}"
+                                data-original="{{ $job->status }}"
+                                onchange="updateJobStatus(this)">
+                            <option value="pending"     {{ $job->status === 'pending'     ? 'selected' : '' }}>Pending</option>
+                            <option value="in_progress" {{ $job->status === 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                            <option value="completed"   {{ $job->status === 'completed'   ? 'selected' : '' }}>Completed</option>
+                        </select>
                     </td>
                     <td class="text-end">
-                        @if($job->status !== 'completed')
-                            <button type="button" class="btn btn-sm btn-success"
-                                    onclick="completeJobInline({{ $job->id }}, this)"
-                                    title="Mark complete">
-                                <i class="bi bi-check-lg"></i>
-                            </button>
-                        @endif
                         <button type="button" class="btn btn-sm btn-outline-secondary"
                                 onclick="openJobPanel({{ $job->id }})" title="Edit">
                             <i class="bi bi-pencil"></i>
@@ -123,6 +124,17 @@
 @include('jobs._panel', ['clients' => $clients, 'users' => $users])
 @endsection
 
+@push('styles')
+<style>
+.status-select { border: 0; font-size: .75rem; font-weight: 600; border-radius: .375rem; padding: .2rem .5rem; cursor: pointer; }
+.status-select.status-pending     { background: #e2e3e5; color: #41464b; }
+.status-select.status-in_progress { background: #cfe2ff; color: #084298; }
+.status-select.status-completed   { background: #d1e7dd; color: #0a3622; }
+.status-select:focus { box-shadow: none; outline: 2px solid #17B4A7; }
+.status-select option { background: #fff; color: #212529; font-weight: 400; }
+</style>
+@endpush
+
 @push('scripts')
 <script>
 (function () {
@@ -136,33 +148,63 @@
         form.submit();
     }
 
-    // Selects: submit immediately on change
-    form.querySelectorAll('select').forEach(sel => {
-        sel.addEventListener('change', submit);
-    });
-
-    // Search text: debounce 450ms after last keystroke
+    form.querySelectorAll('select').forEach(sel => sel.addEventListener('change', submit));
     search.addEventListener('input', function () {
         clearTimeout(timer);
         timer = setTimeout(submit, 450);
     });
 })();
 
-async function completeJobInline(jobId, btn) {
-    btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+async function updateJobStatus(sel) {
+    const jobId    = sel.dataset.jobId;
+    const newStatus = sel.value;
+    const original = sel.dataset.original;
+
+    sel.disabled = true;
+
     try {
-        const res = await fetch(`/jobs/${jobId}/complete`, {
-            method: 'POST',
+        const res = await fetch(`/jobs/${jobId}/status`, {
+            method: 'PATCH',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                 'Accept': 'application/json',
+                'Content-Type': 'application/json',
             },
+            body: JSON.stringify({ status: newStatus }),
         });
+
         if (res.ok) {
-            window.location.reload();
+            sel.dataset.original = newStatus;
+            sel.className = `form-select form-select-sm status-select status-${newStatus}`;
+
+            const row = sel.closest('tr');
+            if (newStatus === 'completed') {
+                row.classList.remove('table-danger');
+                const data = await res.json();
+                if (data.next_due) {
+                    showToast(`Completed — next job due ${data.next_due}`);
+                }
+            }
+        } else {
+            sel.value = original;
         }
-    } catch (e) { btn.disabled = false; }
+    } catch (e) {
+        sel.value = original;
+    } finally {
+        sel.disabled = false;
+    }
+}
+
+function showToast(msg) {
+    const el = document.createElement('div');
+    el.className = 'position-fixed bottom-0 end-0 p-3';
+    el.style.zIndex = 9999;
+    el.innerHTML = `<div class="toast align-items-center text-bg-success border-0 show" role="alert">
+        <div class="d-flex"><div class="toast-body">${msg}</div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.closest('.position-fixed').remove()"></button>
+        </div></div>`;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 4000);
 }
 </script>
 @endpush

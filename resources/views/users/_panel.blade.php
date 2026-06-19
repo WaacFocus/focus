@@ -11,9 +11,10 @@
     </div>
 
     <form id="userForm" action="{{ route('users.store') }}" method="POST" novalidate
-          style="display:flex;flex-direction:column;flex:1 1 auto;min-height:0;">
+          style="display:flex;flex-direction:column;flex:1 1 auto;min-height:0;overflow-y:auto;">
         @csrf
         <input type="hidden" name="_method" value="">
+        <input type="hidden" id="editingUserId" value="">
 
         <div class="offcanvas-body">
 
@@ -75,9 +76,85 @@
                 </div>
             </div>
 
+            {{-- 2FA section — edit mode only --}}
+            <div id="twoFactorSection" class="d-none">
+                <hr class="my-3">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <p class="text-muted small fw-semibold text-uppercase mb-0" style="letter-spacing:.05em;">
+                        Two-Factor Authentication
+                    </p>
+                    <button type="button" id="resetAllTwoFactorBtn"
+                            class="btn btn-sm btn-outline-danger d-none"
+                            onclick="resetAllTwoFactor()">
+                        <i class="bi bi-shield-x me-1"></i>Reset All
+                    </button>
+                </div>
+
+                <div id="twoFactorLoading" class="text-muted small py-2">
+                    <span class="spinner-border spinner-border-sm me-1"></span>Loading…
+                </div>
+
+                <div id="twoFactorContent" class="d-none">
+
+                    {{-- TOTP row --}}
+                    <div class="rounded-3 p-3 mb-2" style="background:#f8f9fa;border:1px solid #e9ecef;">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-phone text-muted"></i>
+                                <div>
+                                    <div class="small fw-semibold">Authenticator App</div>
+                                    <div id="totpStatusText" class="small text-muted"></div>
+                                </div>
+                            </div>
+                            <div id="totpActions"></div>
+                        </div>
+
+                        {{-- TOTP setup inline --}}
+                        <div id="totpSetupArea" class="d-none mt-3">
+                            <div class="text-center mb-2">
+                                <p class="small text-muted mb-2">Scan with an authenticator app, then enter the 6-digit code to confirm.</p>
+                                <div id="totpQrContainer" class="d-inline-block p-2 bg-white border rounded-2 mb-2"></div>
+                                <div class="input-group input-group-sm mb-1" style="max-width:200px;margin:0 auto;">
+                                    <input type="text" id="adminTotpSecret" class="form-control form-control-sm font-monospace text-center" readonly>
+                                    <button class="btn btn-outline-secondary btn-sm" type="button"
+                                            onclick="navigator.clipboard.writeText(document.getElementById('adminTotpSecret').value);this.textContent='Copied!'">Copy</button>
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <input type="text" id="adminTotpCode" class="form-control form-control-sm font-monospace text-center"
+                                       placeholder="000 000" maxlength="6" inputmode="numeric">
+                                <button type="button" class="btn btn-sm btn-success flex-shrink-0" onclick="confirmAdminTotp()">
+                                    <i class="bi bi-check2 me-1"></i>Confirm
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-secondary flex-shrink-0" onclick="cancelTotpSetup()">
+                                    Cancel
+                                </button>
+                            </div>
+                            <div id="adminTotpError" class="text-danger small mt-1 d-none"></div>
+                        </div>
+                    </div>
+
+                    {{-- Passkeys --}}
+                    <div class="rounded-3 p-3" style="background:#f8f9fa;border:1px solid #e9ecef;">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-fingerprint text-muted"></i>
+                                <div class="small fw-semibold">Passkeys</div>
+                                <span id="passkeyCount" class="badge rounded-pill text-bg-secondary ms-1"></span>
+                            </div>
+                        </div>
+                        <div id="passkeyList"></div>
+                        <p class="text-muted small mb-0 mt-2">
+                            <i class="bi bi-info-circle me-1"></i>Passkeys must be added by the user from their own <strong>Security</strong> page.
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+
         </div>
 
-        <div class="offcanvas-footer border-top d-flex gap-2 p-3 bg-white">
+        <div class="offcanvas-footer border-top d-flex gap-2 p-3 bg-white flex-shrink-0">
             <button type="submit" id="saveUserBtn" class="btn btn-primary flex-grow-1">
                 <span class="btn-label"><i class="bi bi-check-lg me-1"></i><span id="saveUserBtnText">Create User</span></span>
                 <span class="btn-spinner d-none"><span class="spinner-border spinner-border-sm me-1"></span>Saving…</span>
@@ -132,9 +209,70 @@
         pwdField.required     = !isEdit;
     }
 
+    function render2FA(tf) {
+        document.getElementById('twoFactorLoading').classList.add('d-none');
+        document.getElementById('twoFactorContent').classList.remove('d-none');
+        document.getElementById('totpSetupArea').classList.add('d-none');
+
+        const hasAny = tf.totp_enabled || tf.passkeys.length > 0;
+        document.getElementById('resetAllTwoFactorBtn').classList.toggle('d-none', !hasAny);
+
+        // TOTP
+        const totpText    = document.getElementById('totpStatusText');
+        const totpActions = document.getElementById('totpActions');
+        if (tf.totp_enabled) {
+            totpText.innerHTML = `<span class="text-success"><i class="bi bi-check-circle me-1"></i>Enabled since ${tf.totp_confirmed_at}</span>`;
+            totpActions.innerHTML = `<button type="button" class="btn btn-sm btn-outline-danger" onclick="disableTotp()">
+                <i class="bi bi-trash me-1"></i>Disable
+            </button>`;
+        } else {
+            totpText.innerHTML = `<span class="text-muted"><i class="bi bi-dash-circle me-1"></i>Not enabled</span>`;
+            totpActions.innerHTML = `<button type="button" class="btn btn-sm btn-primary" onclick="startTotpSetup()">
+                <i class="bi bi-plus-lg me-1"></i>Set Up
+            </button>`;
+        }
+
+        // Passkeys
+        document.getElementById('passkeyCount').textContent = tf.passkeys.length;
+        const list = document.getElementById('passkeyList');
+        if (tf.passkeys.length === 0) {
+            list.innerHTML = '<p class="text-muted small mb-0">No passkeys registered.</p>';
+        } else {
+            list.innerHTML = tf.passkeys.map(p => `
+                <div class="d-flex align-items-center justify-content-between py-1">
+                    <div>
+                        <i class="bi bi-key me-1 text-muted small"></i>
+                        <span class="small fw-medium">${p.nickname}</span>
+                        <span class="text-muted small ms-1">· ${p.created_at}</span>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2"
+                            onclick="deletePasskey('${p.id}')">
+                        <i class="bi bi-trash small"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+    }
+
+    async function load2FA(userId) {
+        document.getElementById('twoFactorSection').classList.remove('d-none');
+        document.getElementById('twoFactorLoading').classList.remove('d-none');
+        document.getElementById('twoFactorContent').classList.add('d-none');
+
+        try {
+            const res  = await fetch(`/users/${userId}`, { headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf } });
+            const data = await res.json();
+            render2FA(data.two_factor);
+        } catch {
+            document.getElementById('twoFactorLoading').textContent = 'Could not load 2FA status.';
+        }
+    }
+
     window.openUserPanel = async function (userId) {
         form.reset();
         clearErrors();
+        document.getElementById('twoFactorSection').classList.add('d-none');
+        document.getElementById('editingUserId').value = userId ?? '';
 
         if (!userId) {
             panelEl.querySelector('#userPanelIcon').className = 'bi bi-person-plus me-2';
@@ -154,9 +292,7 @@
         bsPanel.show();
 
         try {
-            const res  = await fetch(`/users/${userId}`, {
-                headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
-            });
+            const res  = await fetch(`/users/${userId}`, { headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf } });
             const data = await res.json();
 
             form.querySelector('[name="name"]').value  = data.name  ?? '';
@@ -170,6 +306,12 @@
             form.querySelector('[name="_method"]').value = 'PATCH';
             document.getElementById('saveUserBtnText').textContent = 'Save Changes';
             setEditMode(true);
+
+            render2FA(data.two_factor);
+            document.getElementById('twoFactorSection').classList.remove('d-none');
+            document.getElementById('twoFactorLoading').classList.add('d-none');
+            document.getElementById('twoFactorContent').classList.remove('d-none');
+
         } catch (err) {
             console.error(err);
             bsPanel.hide();
@@ -207,6 +349,114 @@
         form.reset();
         clearErrors();
     });
+
+    // — 2FA admin actions —
+
+    window.disableTotp = async function () {
+        const userId = document.getElementById('editingUserId').value;
+        if (!confirm('Remove this user\'s authenticator app?')) return;
+        await twoFactorAction(`/users/${userId}/2fa/totp/disable`, 'POST');
+        await load2FA(userId);
+    };
+
+    window.deletePasskey = async function (credId) {
+        const userId = document.getElementById('editingUserId').value;
+        if (!confirm('Remove this passkey?')) return;
+        await twoFactorAction(`/users/${userId}/2fa/passkeys/${credId}`, 'DELETE');
+        await load2FA(userId);
+    };
+
+    window.resetAllTwoFactor = async function () {
+        const userId = document.getElementById('editingUserId').value;
+        if (!confirm('Remove ALL two-factor methods for this user? They will no longer require 2FA to log in.')) return;
+        await twoFactorAction(`/users/${userId}/2fa/reset`, 'POST');
+        await load2FA(userId);
+    };
+
+    async function twoFactorAction(url, method) {
+        const body = method === 'DELETE' ? null : new FormData();
+        const res  = await fetch(url, {
+            method,
+            headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+            body,
+        });
+        if (!res.ok) {
+            const d = await res.json().catch(() => ({}));
+            alert(d.message || 'An error occurred.');
+        }
+    }
+
+    // — TOTP setup flow —
+
+    window.startTotpSetup = async function () {
+        const userId = document.getElementById('editingUserId').value;
+        const area   = document.getElementById('totpSetupArea');
+        const qrEl   = document.getElementById('totpQrContainer');
+        const errEl  = document.getElementById('adminTotpError');
+
+        // Swap button to loading state
+        document.querySelector('#totpActions button').disabled = true;
+        document.querySelector('#totpActions button').innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+        errEl.classList.add('d-none');
+
+        try {
+            const res  = await fetch(`/users/${userId}/2fa/totp/generate`, {
+                method: 'POST',
+                headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+            });
+            const data = await res.json();
+
+            qrEl.innerHTML = data.qr_svg;
+            document.getElementById('adminTotpSecret').value = data.secret;
+            document.getElementById('adminTotpCode').value   = '';
+            area.classList.remove('d-none');
+
+            // Restore button
+            document.querySelector('#totpActions button').disabled = false;
+            document.querySelector('#totpActions button').innerHTML = '<i class="bi bi-plus-lg me-1"></i>Set Up';
+        } catch {
+            alert('Could not generate QR code. Please try again.');
+            document.querySelector('#totpActions button').disabled = false;
+            document.querySelector('#totpActions button').innerHTML = '<i class="bi bi-plus-lg me-1"></i>Set Up';
+        }
+    };
+
+    window.confirmAdminTotp = async function () {
+        const userId = document.getElementById('editingUserId').value;
+        const code   = document.getElementById('adminTotpCode').value.trim();
+        const errEl  = document.getElementById('adminTotpError');
+        errEl.classList.add('d-none');
+
+        if (code.length !== 6) {
+            errEl.textContent = 'Please enter the 6-digit code from the authenticator app.';
+            errEl.classList.remove('d-none');
+            return;
+        }
+
+        const body = new FormData();
+        body.append('code', code);
+
+        const res  = await fetch(`/users/${userId}/2fa/totp/confirm`, {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' },
+            body,
+        });
+        const data = await res.json();
+
+        if (res.status === 422) {
+            errEl.textContent = data.errors?.code?.[0] ?? data.message ?? 'Invalid code.';
+            errEl.classList.remove('d-none');
+            return;
+        }
+
+        if (res.ok) {
+            await load2FA(userId);
+        }
+    };
+
+    window.cancelTotpSetup = function () {
+        document.getElementById('totpSetupArea').classList.add('d-none');
+    };
 })();
 
 function togglePwd(fieldId, btn) {

@@ -179,8 +179,74 @@
         <div class="card shadow-sm">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                 <span class="fw-semibold"><i class="bi bi-briefcase me-2 text-primary"></i>My Jobs</span>
-                <a href="{{ route('jobs.index', ['assigned_to' => auth()->id()]) }}" class="btn btn-sm btn-outline-primary">View all</a>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-outline-secondary" type="button"
+                            data-bs-toggle="collapse" data-bs-target="#jobFilters" aria-expanded="{{ request()->hasAny(['jf_status','jf_frequency','jf_client','jf_from','jf_to']) ? 'true' : 'false' }}">
+                        <i class="bi bi-funnel me-1"></i>Filter
+                        @if(request()->hasAny(['jf_status','jf_frequency','jf_client','jf_from','jf_to']))
+                            <span class="badge bg-primary ms-1">On</span>
+                        @endif
+                    </button>
+                    <a href="{{ route('jobs.index', ['assigned_to' => auth()->id()]) }}" class="btn btn-sm btn-outline-primary">View all</a>
+                </div>
             </div>
+
+            <div class="collapse {{ request()->hasAny(['jf_status','jf_frequency','jf_client','jf_from','jf_to']) ? 'show' : '' }}" id="jobFilters">
+                <form method="GET" action="{{ route('dashboard') }}" class="border-bottom px-3 py-2">
+                    <div class="row g-2 align-items-end">
+                        <div class="col-sm-6 col-md-2">
+                            <label class="form-label form-label-sm mb-1">Status</label>
+                            <select name="jf_status" class="form-select form-select-sm">
+                                <option value="">All</option>
+                                <option value="pending"     {{ request('jf_status') === 'pending'     ? 'selected' : '' }}>Pending</option>
+                                <option value="in_progress" {{ request('jf_status') === 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-6 col-md-2">
+                            <label class="form-label form-label-sm mb-1">Frequency</label>
+                            <select name="jf_frequency" class="form-select form-select-sm">
+                                <option value="">All</option>
+                                <option value="weekly"  {{ request('jf_frequency') === 'weekly'  ? 'selected' : '' }}>Weekly</option>
+                                <option value="monthly" {{ request('jf_frequency') === 'monthly' ? 'selected' : '' }}>Monthly</option>
+                                <option value="yearly"  {{ request('jf_frequency') === 'yearly'  ? 'selected' : '' }}>Yearly</option>
+                                <option value="one-off" {{ request('jf_frequency') === 'one-off' ? 'selected' : '' }}>One-off</option>
+                            </select>
+                        </div>
+                        <div class="col-sm-6 col-md-3">
+                            <label class="form-label form-label-sm mb-1">Client</label>
+                            <select name="jf_client" class="form-select form-select-sm">
+                                <option value="">All Clients</option>
+                                @foreach($my_job_clients as $c)
+                                    <option value="{{ $c->id }}" {{ request('jf_client') == $c->id ? 'selected' : '' }}>
+                                        {{ $c->company_name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-sm-6 col-md-2">
+                            <label class="form-label form-label-sm mb-1">Due from</label>
+                            <input type="date" name="jf_from" class="form-control form-control-sm"
+                                   value="{{ request('jf_from') }}">
+                        </div>
+                        <div class="col-sm-6 col-md-2">
+                            <label class="form-label form-label-sm mb-1">Due to</label>
+                            <input type="date" name="jf_to" class="form-control form-control-sm"
+                                   value="{{ request('jf_to') }}">
+                        </div>
+                        <div class="col-sm-6 col-md-1 d-flex gap-1">
+                            <button type="submit" class="btn btn-sm btn-primary flex-grow-1">
+                                <i class="bi bi-search"></i>
+                            </button>
+                            @if(request()->hasAny(['jf_status','jf_frequency','jf_client','jf_from','jf_to']))
+                            <a href="{{ route('dashboard') }}" class="btn btn-sm btn-outline-secondary" title="Clear">
+                                <i class="bi bi-x-lg"></i>
+                            </a>
+                            @endif
+                        </div>
+                    </div>
+                </form>
+            </div>
+
             @if($my_jobs->count())
             <div class="table-responsive">
                 <table class="table table-hover mb-0 align-middle small">
@@ -230,7 +296,11 @@
             </div>
             @else
             <div class="card-body text-muted small">
-                <i class="bi bi-check-circle me-1 text-success"></i>No pending jobs assigned to you. Jobs assigned to you when adding services or from the <a href="{{ route('jobs.index') }}">Jobs</a> page will appear here.
+                @if(request()->hasAny(['jf_status','jf_frequency','jf_client','jf_from','jf_to']))
+                    <i class="bi bi-search me-1"></i>No jobs match your filters. <a href="{{ route('dashboard') }}">Clear filters</a>
+                @else
+                    <i class="bi bi-check-circle me-1 text-success"></i>No pending jobs assigned to you. Jobs assigned to you when adding services or from the <a href="{{ route('jobs.index') }}">Jobs</a> page will appear here.
+                @endif
             </div>
             @endif
         </div>
@@ -241,6 +311,7 @@
 @push('scripts')
 <script>
 async function completeDashboardJob(jobId, btn) {
+    const original = btn.innerHTML;
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
     try {
@@ -252,7 +323,6 @@ async function completeDashboardJob(jobId, btn) {
             },
         });
         if (res.ok) {
-            const data = await res.json();
             const row = document.getElementById(`job-row-${jobId}`);
             row.style.transition = 'opacity .3s';
             row.style.opacity = '0';
@@ -263,8 +333,16 @@ async function completeDashboardJob(jobId, btn) {
                     window.location.reload();
                 }
             }, 320);
+        } else {
+            btn.disabled = false;
+            btn.innerHTML = original;
+            const data = await res.json().catch(() => ({}));
+            alert(data.message || 'Could not mark job as complete. Please try again.');
         }
-    } catch (e) { btn.disabled = false; }
+    } catch (e) {
+        btn.disabled = false;
+        btn.innerHTML = original;
+    }
 }
 </script>
 @endpush

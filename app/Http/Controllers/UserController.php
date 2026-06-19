@@ -23,7 +23,20 @@ class UserController extends Controller
     public function show(Request $request, User $user)
     {
         if ($request->expectsJson()) {
-            return response()->json($user->only('id', 'name', 'email', 'role'));
+            $passkeys = $user->webAuthnCredentials()->whereEnabled()->get(['id', 'nickname', 'created_at']);
+
+            return response()->json([
+                ...$user->only('id', 'name', 'email', 'role'),
+                'two_factor' => [
+                    'totp_enabled'       => $user->hasTotpEnabled(),
+                    'totp_confirmed_at'  => $user->two_factor_confirmed_at?->format('d M Y'),
+                    'passkeys'           => $passkeys->map(fn($c) => [
+                        'id'         => $c->id,
+                        'nickname'   => $c->nickname ?: 'Unnamed passkey',
+                        'created_at' => $c->created_at->format('d M Y'),
+                    ]),
+                ],
+            ]);
         }
         return redirect()->route('users.index');
     }

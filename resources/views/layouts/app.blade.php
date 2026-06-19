@@ -131,54 +131,66 @@
             <img src="{{ asset('images/logo.png') }}" alt="Focus logo" onerror="this.style.display='none'">
             <span>Focus</span>
         </div>
-        <div class="flex-grow-1 pt-2">
-            <div class="nav-section">Overview</div>
-            <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                <i class="bi bi-speedometer2 me-2"></i>Dashboard
-            </a>
+        <div class="flex-grow-1 pt-2 d-flex flex-column">
+            <div>
+                <div class="nav-section">Overview</div>
+                <a href="{{ route('dashboard') }}" class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                    <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                </a>
 
-            <div class="nav-section">Practice</div>
-            <a href="{{ route('clients.index') }}" class="nav-link {{ request()->routeIs('clients.*') ? 'active' : '' }}">
-                <i class="bi bi-people me-2"></i>Clients
-            </a>
-            <a href="{{ route('jobs.index') }}" class="nav-link {{ request()->routeIs('jobs.*') ? 'active' : '' }}">
-                <i class="bi bi-briefcase me-2"></i>Jobs
-            </a>
-            <a href="{{ route('projects.index') }}" class="nav-link {{ request()->routeIs('projects.*') ? 'active' : '' }}">
-                <i class="bi bi-kanban me-2"></i>Projects
-            </a>
-            <a href="{{ route('tasks.index') }}" class="nav-link {{ request()->routeIs('tasks.*') ? 'active' : '' }}">
-                <i class="bi bi-check2-square me-2"></i>Tasks
-            </a>
+                <div class="nav-section">Practice</div>
+                <a href="{{ route('clients.index') }}" class="nav-link {{ request()->routeIs('clients.*') ? 'active' : '' }}">
+                    <i class="bi bi-people me-2"></i>Clients
+                </a>
+                <a href="{{ route('jobs.index') }}" class="nav-link {{ request()->routeIs('jobs.*') ? 'active' : '' }}">
+                    <i class="bi bi-briefcase me-2"></i>Jobs
+                </a>
+                <a href="{{ route('projects.index') }}" class="nav-link {{ request()->routeIs('projects.*') ? 'active' : '' }}">
+                    <i class="bi bi-kanban me-2"></i>Projects
+                </a>
+                <a href="{{ route('tasks.index') }}" class="nav-link {{ request()->routeIs('tasks.*') ? 'active' : '' }}">
+                    <i class="bi bi-check2-square me-2"></i>Tasks
+                </a>
 
-            <div class="nav-section">Services & Billing</div>
-            <a href="{{ route('services.index') }}" class="nav-link {{ request()->routeIs('services.*') ? 'active' : '' }}">
-                <i class="bi bi-grid me-2"></i>Services
-            </a>
-            <a href="{{ route('products.index') }}" class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}">
-                <i class="bi bi-box-seam me-2"></i>Products
-            </a>
-            <a href="{{ route('renewals.index') }}" class="nav-link {{ request()->routeIs('renewals.*') ? 'active' : '' }}">
-                <i class="bi bi-arrow-repeat me-2"></i>Renewals
-            </a>
+                <div class="nav-section">Services & Billing</div>
+                <a href="{{ route('services.index') }}" class="nav-link {{ request()->routeIs('services.*') ? 'active' : '' }}">
+                    <i class="bi bi-grid me-2"></i>Services
+                </a>
+                <a href="{{ route('products.index') }}" class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}">
+                    <i class="bi bi-box-seam me-2"></i>Products
+                </a>
+                <a href="{{ route('renewals.index') }}" class="nav-link {{ request()->routeIs('renewals.*') ? 'active' : '' }}">
+                    <i class="bi bi-arrow-repeat me-2"></i>Renewals
+                </a>
 
-            @can('manager')
-            <div class="nav-section">Insights</div>
-            <a href="{{ route('reports.index') }}" class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">
-                <i class="bi bi-bar-chart-line me-2"></i>Reports
-            </a>
+                @can('manager')
+                <div class="nav-section">Insights</div>
+                <a href="{{ route('reports.index') }}" class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">
+                    <i class="bi bi-bar-chart-line me-2"></i>Reports
+                </a>
 
-            <div class="nav-section">Admin</div>
-            <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
-                <i class="bi bi-people-fill me-2"></i>Users
-            </a>
-            <a href="{{ route('client-types.index') }}" class="nav-link {{ request()->routeIs('client-types.*') ? 'active' : '' }}">
-                <i class="bi bi-building me-2"></i>Client Types
-            </a>
-            <a href="{{ route('activity.index') }}" class="nav-link {{ request()->routeIs('activity.*') ? 'active' : '' }}">
-                <i class="bi bi-activity me-2"></i>Activity
-            </a>
-            @endcan
+                <div class="nav-section">Admin</div>
+                <a href="{{ route('users.index') }}" class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}">
+                    <i class="bi bi-people-fill me-2"></i>Users
+                </a>
+                <a href="{{ route('client-types.index') }}" class="nav-link {{ request()->routeIs('client-types.*') ? 'active' : '' }}">
+                    <i class="bi bi-building me-2"></i>Client Types
+                </a>
+                <a href="{{ route('activity.index') }}" class="nav-link {{ request()->routeIs('activity.*') ? 'active' : '' }}">
+                    <i class="bi bi-activity me-2"></i>Activity
+                </a>
+                @endcan
+            </div>
+
+            <div class="mt-auto pb-2">
+                <div class="nav-section">My Details</div>
+                <a href="{{ route('profile.password') }}" class="nav-link {{ request()->routeIs('profile.password') ? 'active' : '' }}">
+                    <i class="bi bi-key me-2"></i>Password
+                </a>
+                <a href="{{ route('two-factor.index') }}" class="nav-link {{ request()->routeIs('two-factor.*') ? 'active' : '' }}">
+                    <i class="bi bi-shield-lock me-2"></i>Security
+                </a>
+            </div>
         </div>
     </nav>
 
