@@ -68,16 +68,16 @@
             <tbody>
                 @forelse($jobs as $job)
                 <tr class="{{ $job->status !== 'completed' && $job->due_date->isPast() ? 'table-danger' : '' }}">
-                    <td>
+                    <td data-col="0">
                         <div class="fw-semibold">{{ $job->name }}</div>
                         @if($job->description)
                             <small class="text-muted">{{ Str::limit($job->description, 60) }}</small>
                         @endif
                     </td>
-                    <td>{{ $job->client?->company_name ?? '—' }}</td>
-                    <td>{{ $job->assignedTo->name }}</td>
-                    <td><span class="badge bg-light text-dark">{{ $job->frequency_label }}</span></td>
-                    <td class="{{ $job->status !== 'completed' && $job->due_date->isPast() ? 'text-danger fw-semibold' : '' }}">
+                    <td data-col="1">{{ $job->client?->company_name ?? '—' }}</td>
+                    <td data-col="2">{{ $job->assignedTo->name }}</td>
+                    <td data-col="3"><span class="badge bg-light text-dark">{{ $job->frequency_label }}</span></td>
+                    <td data-col="4" class="{{ $job->status !== 'completed' && $job->due_date->isPast() ? 'text-danger fw-semibold' : '' }}">
                         {{ $job->due_date->format('d M Y') }}
                         @if($job->status !== 'completed' && $job->due_date->isPast())
                             <span class="badge bg-danger ms-1">Overdue</span>
@@ -85,7 +85,7 @@
                             <span class="badge bg-warning ms-1">Today</span>
                         @endif
                     </td>
-                    <td class="text-center" style="min-width:140px">
+                    <td data-col="5" class="text-center" style="min-width:140px">
                         <select class="form-select form-select-sm status-select
                                        status-{{ $job->status }}"
                                 data-job-id="{{ $job->id }}"
@@ -96,7 +96,7 @@
                             <option value="completed"   {{ $job->status === 'completed'   ? 'selected' : '' }}>Completed</option>
                         </select>
                     </td>
-                    <td class="text-end">
+                    <td data-col="fixed" class="text-end">
                         <button type="button" class="btn btn-sm btn-outline-secondary"
                                 onclick="openJobPanel({{ $job->id }})" title="Edit">
                             <i class="bi bi-pencil"></i>
@@ -139,35 +139,47 @@
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script>
 (function () {
-    const KEY    = 'jobs_col_order';
-    const thead  = document.getElementById('jobsTableHead');
-    const table  = document.getElementById('jobsTable');
+    const KEY   = 'jobs_col_order';
+    const thead = document.getElementById('jobsTableHead');
+    const table = document.getElementById('jobsTable');
 
-    function reorderBodyRows(order) {
+    // Reorder headers and all body rows by an array of data-col values.
+    // Uses DocumentFragment so all nodes are placed at once — avoids
+    // the accumulation-in-reverse bug that hits with repeated insertBefore.
+    function applyOrder(order) {
+        // Headers
+        const thFixed = thead.querySelector('[data-col="fixed"]');
+        const thFrag  = document.createDocumentFragment();
+        order.forEach(col => {
+            const th = thead.querySelector(`[data-col="${col}"]`);
+            if (th) thFrag.appendChild(th);
+        });
+        thead.insertBefore(thFrag, thFixed);
+
+        // Body rows — find each cell by its stable data-col attribute
         table.querySelectorAll('tbody tr').forEach(row => {
-            if (row.cells.length <= 1) return;
-            const cells = [...row.children];
-            const fixed = cells[cells.length - 1];
-            order.forEach(origIdx => row.insertBefore(cells[origIdx], fixed));
+            const tdFixed = row.querySelector('[data-col="fixed"]');
+            if (!tdFixed) return;
+            const tdFrag = document.createDocumentFragment();
+            order.forEach(col => {
+                const td = row.querySelector(`[data-col="${col}"]`);
+                if (td) tdFrag.appendChild(td);
+            });
+            row.insertBefore(tdFrag, tdFixed);
         });
     }
 
     const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
-    if (saved) {
-        const ths   = [...thead.children];
-        const fixed = ths[ths.length - 1];
-        saved.forEach(origIdx => thead.insertBefore(ths[origIdx], fixed));
-        reorderBodyRows(saved);
-    }
+    if (saved) applyOrder(saved);
 
     Sortable.create(thead, {
         animation: 150,
         filter: '[data-col="fixed"]',
         onEnd() {
             const order = [...thead.children]
-                .filter(th => th.dataset.col !== 'fixed')
-                .map(th => parseInt(th.dataset.col));
-            reorderBodyRows(order);
+                .map(th => th.dataset.col)
+                .filter(col => col !== 'fixed');
+            applyOrder(order);
             localStorage.setItem(KEY, JSON.stringify(order));
         },
     });
