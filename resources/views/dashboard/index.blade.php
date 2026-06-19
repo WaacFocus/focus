@@ -249,29 +249,29 @@
 
             @if($my_jobs->count())
             <div class="table-responsive">
-                <table class="table table-hover mb-0 align-middle small">
+                <table class="table table-hover mb-0 align-middle small" id="dashJobsTable">
                     <thead class="table-light">
-                        <tr>
-                            <th>Job</th>
-                            <th>Client</th>
-                            <th>Frequency</th>
-                            <th>Due Date</th>
-                            <th class="text-center">Status</th>
-                            <th class="text-end">Action</th>
+                        <tr id="dashJobsTableHead">
+                            <th data-col="0" style="cursor:grab;user-select:none" title="Drag to reorder">Job</th>
+                            <th data-col="1" style="cursor:grab;user-select:none" title="Drag to reorder">Client</th>
+                            <th data-col="2" style="cursor:grab;user-select:none" title="Drag to reorder">Frequency</th>
+                            <th data-col="3" style="cursor:grab;user-select:none" title="Drag to reorder">Due Date</th>
+                            <th data-col="4" class="text-center" style="cursor:grab;user-select:none" title="Drag to reorder">Status</th>
+                            <th data-col="fixed" class="text-end">Action</th>
                         </tr>
                     </thead>
                     <tbody id="myJobsTable">
                         @foreach($my_jobs as $job)
                         <tr id="job-row-{{ $job->id }}" class="{{ $job->status !== 'completed' && $job->due_date->isPast() ? 'table-danger' : '' }}">
-                            <td>
+                            <td data-col="0">
                                 <div class="fw-semibold">{{ $job->name }}</div>
                                 @if($job->description)
                                     <span class="text-muted">{{ Str::limit($job->description, 50) }}</span>
                                 @endif
                             </td>
-                            <td>{{ $job->client?->company_name ?? '—' }}</td>
-                            <td><span class="badge bg-light text-dark">{{ $job->frequency_label }}</span></td>
-                            <td class="{{ $job->status !== 'completed' && $job->due_date->isPast() ? 'text-danger fw-semibold' : '' }}">
+                            <td data-col="1">{{ $job->client?->company_name ?? '—' }}</td>
+                            <td data-col="2"><span class="badge bg-light text-dark">{{ $job->frequency_label }}</span></td>
+                            <td data-col="3" class="{{ $job->status !== 'completed' && $job->due_date->isPast() ? 'text-danger fw-semibold' : '' }}">
                                 {{ $job->due_date->format('d M Y') }}
                                 @if($job->due_date->isPast())
                                     <span class="badge bg-danger ms-1">Overdue</span>
@@ -279,10 +279,10 @@
                                     <span class="badge bg-warning ms-1">Today</span>
                                 @endif
                             </td>
-                            <td class="text-center">
+                            <td data-col="4" class="text-center">
                                 <span class="badge bg-{{ $job->status_badge }}">{{ ucfirst(str_replace('_', ' ', $job->status)) }}</span>
                             </td>
-                            <td class="text-end">
+                            <td data-col="fixed" class="text-end">
                                 <button class="btn btn-sm btn-success"
                                         onclick="completeDashboardJob({{ $job->id }}, this)"
                                         title="Mark complete">
@@ -309,7 +309,51 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script>
+(function () {
+    const KEY   = 'dash_jobs_col_order';
+    const thead = document.getElementById('dashJobsTableHead');
+    const table = document.getElementById('dashJobsTable');
+    if (!thead || !table) return;
+
+    function applyOrder(order) {
+        const thFixed = thead.querySelector('[data-col="fixed"]');
+        const thFrag  = document.createDocumentFragment();
+        order.forEach(col => {
+            const th = thead.querySelector(`[data-col="${col}"]`);
+            if (th) thFrag.appendChild(th);
+        });
+        thead.insertBefore(thFrag, thFixed);
+
+        table.querySelectorAll('tbody tr').forEach(row => {
+            const tdFixed = row.querySelector('[data-col="fixed"]');
+            if (!tdFixed) return;
+            const tdFrag = document.createDocumentFragment();
+            order.forEach(col => {
+                const td = row.querySelector(`[data-col="${col}"]`);
+                if (td) tdFrag.appendChild(td);
+            });
+            row.insertBefore(tdFrag, tdFixed);
+        });
+    }
+
+    const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (saved) applyOrder(saved);
+
+    Sortable.create(thead, {
+        animation: 150,
+        filter: '[data-col="fixed"]',
+        onEnd() {
+            const order = [...thead.children]
+                .map(th => th.dataset.col)
+                .filter(col => col !== 'fixed');
+            applyOrder(order);
+            localStorage.setItem(KEY, JSON.stringify(order));
+        },
+    });
+})();
+
 async function completeDashboardJob(jobId, btn) {
     const original = btn.innerHTML;
     btn.disabled = true;
