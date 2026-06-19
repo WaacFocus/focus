@@ -9,7 +9,7 @@ class Smtp2goService
 {
     public function send(string $toAddress, string $toName, string $subject, string $htmlBody): bool
     {
-        $response = Http::post('https://api.smtp2go.com/v3/email/send', [
+        $response = Http::asJson()->post('https://api.smtp2go.com/v3/email/send', [
             'api_key' => config('services.smtp2go.key'),
             'to'      => ["{$toName} <{$toAddress}>"],
             'sender'  => config('services.smtp2go.from_name') . ' <' . config('services.smtp2go.from_address') . '>',
