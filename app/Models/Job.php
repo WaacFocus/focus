@@ -33,7 +33,7 @@ class Job extends Model
     {
         return match ($this->status) {
             'pending'     => 'secondary',
-            'in_progress' => 'primary',
+            'in_progress' => 'in-progress',
             'completed'   => 'success',
             default       => 'secondary',
         };

@@ -144,6 +144,9 @@
         .stat-card { border: none; border-radius: .75rem; transition: transform .15s; }
         .stat-card:hover { transform: translateY(-2px); }
 
+        /* ── Shared status colours ──────────────────────────────────────────── */
+        .bg-in-progress { background-color: #cfe2ff !important; color: #084298 !important; }
+
         /* ── Responsive (tablet & mobile only) ─────────────────────────────── */
         @media (max-width: 991.98px) {
             .content-area { padding: 1rem; }
@@ -248,8 +251,11 @@
     {{-- ── Mobile/tablet offcanvas sidebar (hidden on desktop) ── --}}
     <div class="offcanvas offcanvas-start d-lg-none" id="mobileSidebar" tabindex="-1" aria-label="Navigation">
         <div class="mob-brand">
-            <span>Focus</span>
-            <button type="button" class="btn-close btn-close-white" aria-label="Close"></button>
+            <div class="d-flex align-items-center gap-2">
+                <img src="{{ asset('images/logo.png') }}" alt="Focus logo" style="height:30px;width:auto;" onerror="this.style.display='none'">
+                <span>Focus</span>
+            </div>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="flex-grow-1 pt-2 d-flex flex-column overflow-auto">
             <div>
