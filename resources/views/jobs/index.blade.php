@@ -53,16 +53,16 @@
 
 <div class="card shadow-sm">
     <div class="table-responsive">
-        <table class="table table-hover mb-0 align-middle">
+        <table class="table table-hover mb-0 align-middle" id="jobsTable">
             <thead class="table-light">
-                <tr>
-                    <th>Job</th>
-                    <th>Client</th>
-                    <th>Assigned To</th>
-                    <th>Frequency</th>
-                    <th>Due Date</th>
-                    <th class="text-center">Status</th>
-                    <th></th>
+                <tr id="jobsTableHead">
+                    <th data-col="0" style="cursor:grab;user-select:none" title="Drag to reorder">Job</th>
+                    <th data-col="1" style="cursor:grab;user-select:none" title="Drag to reorder">Client</th>
+                    <th data-col="2" style="cursor:grab;user-select:none" title="Drag to reorder">Assigned To</th>
+                    <th data-col="3" style="cursor:grab;user-select:none" title="Drag to reorder">Frequency</th>
+                    <th data-col="4" style="cursor:grab;user-select:none" title="Drag to reorder">Due Date</th>
+                    <th data-col="5" class="text-center" style="cursor:grab;user-select:none" title="Drag to reorder">Status</th>
+                    <th data-col="fixed"></th>
                 </tr>
             </thead>
             <tbody>
@@ -136,7 +136,43 @@
 @endpush
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 <script>
+(function () {
+    const KEY    = 'jobs_col_order';
+    const thead  = document.getElementById('jobsTableHead');
+    const table  = document.getElementById('jobsTable');
+
+    function reorderBodyRows(order) {
+        table.querySelectorAll('tbody tr').forEach(row => {
+            if (row.cells.length <= 1) return;
+            const cells = [...row.children];
+            const fixed = cells[cells.length - 1];
+            order.forEach(origIdx => row.insertBefore(cells[origIdx], fixed));
+        });
+    }
+
+    const saved = JSON.parse(localStorage.getItem(KEY) || 'null');
+    if (saved) {
+        const ths   = [...thead.children];
+        const fixed = ths[ths.length - 1];
+        saved.forEach(origIdx => thead.insertBefore(ths[origIdx], fixed));
+        reorderBodyRows(saved);
+    }
+
+    Sortable.create(thead, {
+        animation: 150,
+        filter: '[data-col="fixed"]',
+        onEnd() {
+            const order = [...thead.children]
+                .filter(th => th.dataset.col !== 'fixed')
+                .map(th => parseInt(th.dataset.col));
+            reorderBodyRows(order);
+            localStorage.setItem(KEY, JSON.stringify(order));
+        },
+    });
+})();
+
 (function () {
     const form    = document.querySelector('.card.shadow-sm.mb-4 form');
     const search  = form.querySelector('[name="search"]');
