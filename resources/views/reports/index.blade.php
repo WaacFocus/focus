@@ -53,5 +53,27 @@
             </div>
         </a>
     </div>
+
+    <div class="col-md-4">
+        <a href="{{ route('reports.custom.index') }}" class="text-decoration-none">
+            <div class="card shadow-sm h-100 border-0" style="transition: transform .15s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="rounded-3 bg-success bg-opacity-10 p-3 me-3">
+                            <i class="bi bi-sliders fs-4 text-success"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-semibold mb-0">Custom Reports</h6>
+                            <small class="text-muted">Build and save your own reports</small>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-0">Choose a data source, select columns, add filters, and save reports to run again at any time.</p>
+                </div>
+                <div class="card-footer bg-transparent border-top-0">
+                    <small class="text-success fw-semibold">Open builder <i class="bi bi-arrow-right ms-1"></i></small>
+                </div>
+            </div>
+        </a>
+    </div>
 </div>
 @endsection

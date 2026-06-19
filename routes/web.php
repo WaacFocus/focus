@@ -9,6 +9,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RenewalController;
+use App\Http\Controllers\ReportBuilderController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\JobController;
@@ -98,5 +99,23 @@ Route::middleware('auth')->group(function () {
         Route::get('reports/upcoming-jobs/pdf/{orientation}', [ReportController::class, 'upcomingJobsPdf'])
             ->name('reports.upcoming-jobs.pdf')
             ->where('orientation', 'portrait|landscape');
+
+        // Custom report builder
+        Route::post('reports/custom/preview', [ReportBuilderController::class, 'preview'])->name('reports.custom.preview');
+        Route::get('reports/custom/{savedReport}/run', [ReportBuilderController::class, 'run'])->name('reports.custom.run');
+        Route::get('reports/custom/{savedReport}/csv', [ReportBuilderController::class, 'csv'])->name('reports.custom.csv');
+        Route::get('reports/custom/{savedReport}/pdf/{orientation}', [ReportBuilderController::class, 'pdf'])->name('reports.custom.pdf')->where('orientation', 'portrait|landscape');
+        Route::post('reports/custom/{savedReport}/email', [ReportBuilderController::class, 'email'])->name('reports.custom.email');
+        Route::resource('reports/custom', ReportBuilderController::class)
+            ->parameters(['custom' => 'savedReport'])
+            ->names([
+                'index'   => 'reports.custom.index',
+                'create'  => 'reports.custom.create',
+                'store'   => 'reports.custom.store',
+                'show'    => 'reports.custom.show',
+                'edit'    => 'reports.custom.edit',
+                'update'  => 'reports.custom.update',
+                'destroy' => 'reports.custom.destroy',
+            ]);
     });
 });

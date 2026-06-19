@@ -219,8 +219,11 @@
 
                 @can('manager')
                 <div class="nav-section">Insights</div>
-                <a href="{{ route('reports.index') }}" class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">
+                <a href="{{ route('reports.index') }}" class="nav-link {{ request()->routeIs('reports.*') && !request()->routeIs('reports.custom.*') ? 'active' : '' }}">
                     <i class="bi bi-bar-chart-line me-2"></i>Reports
+                </a>
+                <a href="{{ route('reports.custom.index') }}" class="nav-link {{ request()->routeIs('reports.custom.*') ? 'active' : '' }}">
+                    <i class="bi bi-sliders me-2"></i>Custom Reports
                 </a>
 
                 <div class="nav-section">Admin</div>
@@ -294,8 +297,11 @@
 
                 @can('manager')
                 <div class="nav-section">Insights</div>
-                <a href="{{ route('reports.index') }}" class="nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">
+                <a href="{{ route('reports.index') }}" class="nav-link {{ request()->routeIs('reports.*') && !request()->routeIs('reports.custom.*') ? 'active' : '' }}">
                     <i class="bi bi-bar-chart-line me-2"></i>Reports
+                </a>
+                <a href="{{ route('reports.custom.index') }}" class="nav-link {{ request()->routeIs('reports.custom.*') ? 'active' : '' }}">
+                    <i class="bi bi-sliders me-2"></i>Custom Reports
                 </a>
 
                 <div class="nav-section">Admin</div>
