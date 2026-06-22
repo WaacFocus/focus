@@ -21,8 +21,12 @@ class JobController extends Controller
                   ->orWhereHas('client', fn($c) => $c->where('company_name', 'like', "%$s%"));
             });
         }
-        if ($request->filled('status')) {
+        if ($request->status === 'all') {
+            // show every status
+        } elseif ($request->filled('status')) {
             $query->where('status', $request->status);
+        } else {
+            $query->whereIn('status', ['pending', 'in_progress']);
         }
         if ($request->filled('assigned_to')) {
             $query->where('assigned_to', $request->assigned_to);

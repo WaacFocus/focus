@@ -4,6 +4,15 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.09 — 2026-06-22
+
+### Changed
+- **Jobs index** — completed jobs hidden by default; status dropdown defaults to "Active Jobs" (pending + in progress only)
+- Added "All (inc. completed)" option to status filter to explicitly show every status
+- Dashboard My Jobs and Client detail page already excluded completed jobs (no change)
+
+---
+
 ## v1.08 — 2026-06-19
 
 ### Added

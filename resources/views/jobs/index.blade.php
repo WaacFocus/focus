@@ -19,7 +19,8 @@
             </div>
             <div class="col-md-2">
                 <select name="status" class="form-select">
-                    <option value="">All Statuses</option>
+                    <option value=""            @selected(!request()->filled('status'))>Active Jobs</option>
+                    <option value="all"         @selected(request('status') === 'all')>All (inc. completed)</option>
                     <option value="pending"     @selected(request('status') === 'pending')>Pending</option>
                     <option value="in_progress" @selected(request('status') === 'in_progress')>In Progress</option>
                     <option value="completed"   @selected(request('status') === 'completed')>Completed</option>
