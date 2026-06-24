@@ -4,6 +4,14 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.11 — 2026-06-24
+
+### Fixed
+- **Dashboard My Jobs** — status filter was stacking on top of the base `whereIn` instead of replacing it; now correctly replaces the default so filtering by a specific status returns accurate results
+- `assigned_to = Auth::id()` enforced on all dashboard job queries regardless of filters applied
+
+---
+
 ## v1.10 — 2026-06-24
 
 ### Added

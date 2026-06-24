@@ -44,11 +44,12 @@ class DashboardController extends Controller
             ->get();
 
         $jobsQuery = Job::with('client')
-            ->where('assigned_to', Auth::id())
-            ->whereIn('status', ['pending', 'in_progress']);
+            ->where('assigned_to', Auth::id());
 
         if ($request->filled('jf_status')) {
             $jobsQuery->where('status', $request->jf_status);
+        } else {
+            $jobsQuery->whereIn('status', ['pending', 'in_progress']);
         }
         if ($request->filled('jf_frequency')) {
             $jobsQuery->where('frequency', $request->jf_frequency);
@@ -64,8 +65,7 @@ class DashboardController extends Controller
         }
 
         $my_jobs       = $jobsQuery->orderBy('due_date')->get();
-        $my_job_clients = Client::whereHas('jobs', fn($q) => $q->where('assigned_to', Auth::id())
-            ->whereIn('status', ['pending', 'in_progress']))
+        $my_job_clients = Client::whereHas('jobs', fn($q) => $q->where('assigned_to', Auth::id()))
             ->orderBy('company_name')->get(['id', 'company_name']);
 
         return view('dashboard.index', compact('stats', 'upcoming_renewals', 'recent_tasks', 'recent_projects', 'my_jobs', 'my_job_clients'));
