@@ -28,7 +28,8 @@
             </div>
             <div class="col-md-2">
                 <select name="assigned_to" class="form-select">
-                    <option value="">All Users</option>
+                    <option value=""    @selected(!request()->filled('assigned_to'))>My Jobs</option>
+                    <option value="all" @selected(request('assigned_to') === 'all')>All Users</option>
                     @foreach($users as $user)
                         <option value="{{ $user->id }}" @selected(request('assigned_to') == $user->id)>{{ $user->name }}</option>
                     @endforeach

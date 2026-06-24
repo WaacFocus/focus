@@ -28,8 +28,12 @@ class JobController extends Controller
         } else {
             $query->whereIn('status', ['pending', 'in_progress']);
         }
-        if ($request->filled('assigned_to')) {
+        if ($request->assigned_to === 'all') {
+            // show all users
+        } elseif ($request->filled('assigned_to')) {
             $query->where('assigned_to', $request->assigned_to);
+        } else {
+            $query->where('assigned_to', Auth::id());
         }
         if ($request->filled('client_id')) {
             $query->where('client_id', $request->client_id);

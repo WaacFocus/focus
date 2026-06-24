@@ -4,6 +4,13 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.12 — 2026-06-24
+
+### Changed
+- **Jobs index** — defaults to current user's jobs ("My Jobs"); dropdown options: My Jobs (default), All Users, or any individual user
+
+---
+
 ## v1.11 — 2026-06-24
 
 ### Fixed
