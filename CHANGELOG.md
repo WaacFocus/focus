@@ -4,6 +4,13 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.10 — 2026-06-24
+
+### Added
+- **Favicon** — logo used as browser tab / bookmark icon (32×32 and 16×16 PNG, generated from logo.png)
+
+---
+
 ## v1.09 — 2026-06-22
 
 ### Changed
