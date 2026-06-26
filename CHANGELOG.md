@@ -4,6 +4,23 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.13 — 2026-06-26
+
+### Added
+- **Backup & Import** — admin page under Admin section for data portability
+  - CSV export for Clients, Jobs, Renewals, and Tasks
+  - Download blank example/template CSV for each data type
+  - CSV import with validation for all four data types
+- **Clients index** — Client Code column now visible in the table
+- **Column visibility toggle** — show/hide columns on the clients index (saved to localStorage)
+
+### Changed
+- **Projects and Products removed** — both sections (models, controllers, views, routes, nav links) have been removed from the application
+- `client_code` and `client_type` are now mandatory fields when creating or editing a client
+- Client edit offcanvas panel now shows red asterisk on required fields with client-side validation before submit
+
+---
+
 ## v1.12 — 2026-06-24
 
 ### Changed
