@@ -18,7 +18,6 @@ class ClientServiceController extends Controller
                 'exists:services,id',
                 Rule::unique('client_service', 'service_id')->where('client_id', $client->id),
             ],
-            'price_override'  => 'nullable|numeric|min:0',
             'start_date'      => 'nullable|date',
             'end_date'        => 'nullable|date|after_or_equal:start_date',
             'notes'           => 'nullable|string',
@@ -30,10 +29,9 @@ class ClientServiceController extends Controller
         ]);
 
         $client->services()->attach($data['service_id'], [
-            'price_override' => $data['price_override'] ?? null,
-            'start_date'     => $data['start_date']     ?? null,
-            'end_date'       => $data['end_date']        ?? null,
-            'notes'          => $data['notes']           ?? null,
+            'start_date' => $data['start_date'] ?? null,
+            'end_date'   => $data['end_date']   ?? null,
+            'notes'      => $data['notes']      ?? null,
         ]);
 
         $service = Service::find($data['service_id']);

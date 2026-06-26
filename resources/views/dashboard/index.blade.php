@@ -28,23 +28,7 @@
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
-        <div class="card stat-card shadow-sm">
-            <div class="card-body d-flex align-items-center gap-3">
-                <div class="bg-success bg-opacity-10 rounded-3 p-3">
-                    <i class="bi bi-kanban fs-4 text-success"></i>
-                </div>
-                <div>
-                    <div class="fs-2 fw-bold">{{ $stats['active_projects'] }}</div>
-                    <div class="text-muted small">Active Projects</div>
-                </div>
-            </div>
-            <div class="card-footer bg-transparent border-0 pt-0">
-                <a href="{{ route('projects.index') }}" class="small text-decoration-none">View all <i class="bi bi-arrow-right"></i></a>
-            </div>
-        </div>
-    </div>
-    <div class="col-sm-6 col-xl-3">
+    <div class="col-sm-6 col-xl-4">
         <div class="card stat-card shadow-sm">
             <div class="card-body d-flex align-items-center gap-3">
                 <div class="bg-warning bg-opacity-10 rounded-3 p-3">
@@ -60,7 +44,7 @@
             </div>
         </div>
     </div>
-    <div class="col-sm-6 col-xl-3">
+    <div class="col-sm-6 col-xl-4">
         <div class="card stat-card shadow-sm">
             <div class="card-body d-flex align-items-center gap-3">
                 <div class="bg-danger bg-opacity-10 rounded-3 p-3">
@@ -79,7 +63,7 @@
 </div>
 
 <div class="row g-4">
-    <div class="col-lg-4">
+    <div class="col-lg-6">
         <div class="card shadow-sm h-100">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                 <span class="fw-semibold"><i class="bi bi-arrow-repeat me-2 text-danger"></i>Upcoming Renewals</span>
@@ -110,7 +94,7 @@
         </div>
     </div>
 
-    <div class="col-lg-4">
+    <div class="col-lg-6">
         <div class="card shadow-sm h-100">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                 <span class="fw-semibold"><i class="bi bi-check2-square me-2 text-warning"></i>Open Tasks</span>
@@ -128,7 +112,6 @@
                                     @endif
                                     <span>{{ $task->name }}</span>
                                 </div>
-                                <small class="text-muted">{{ $task->project->client->company_name }} — {{ $task->project->name }}</small>
                             </div>
                             <div class="text-end flex-shrink-0">
                                 <span class="badge bg-{{ $task->priority_badge }}">{{ $task->priority }}</span>
@@ -142,32 +125,6 @@
                     </a>
                 @empty
                     <div class="list-group-item text-muted small">No open tasks.</div>
-                @endforelse
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-4">
-        <div class="card shadow-sm h-100">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <span class="fw-semibold"><i class="bi bi-kanban me-2 text-success"></i>Active Projects</span>
-                <a href="{{ route('projects.create') }}" class="btn btn-sm btn-outline-primary">Add</a>
-            </div>
-            <div class="list-group list-group-flush">
-                @forelse($recent_projects as $project)
-                    <a href="{{ route('projects.show', $project) }}" class="list-group-item list-group-item-action">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div>
-                                <div class="fw-medium">{{ $project->name }}</div>
-                                <small class="text-muted">{{ $project->client->company_name }}</small>
-                            </div>
-                            @if($project->budget)
-                                <small class="text-muted">£{{ number_format($project->budget, 0) }}</small>
-                            @endif
-                        </div>
-                    </a>
-                @empty
-                    <div class="list-group-item text-muted small">No active projects.</div>
                 @endforelse
             </div>
         </div>

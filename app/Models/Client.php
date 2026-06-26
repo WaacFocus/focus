@@ -33,11 +33,6 @@ class Client extends Model
         return $this->belongsTo(ClientType::class);
     }
 
-    public function projects(): HasMany
-    {
-        return $this->hasMany(Project::class);
-    }
-
     public function services(): BelongsToMany
     {
         return $this->belongsToMany(Service::class, 'client_service')

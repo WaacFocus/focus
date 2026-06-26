@@ -16,7 +16,6 @@
         @endif
     </div>
     <div class="d-flex gap-2">
-        <a href="{{ route('projects.create', ['client_id' => $client->id]) }}" class="btn btn-outline-primary"><i class="bi bi-plus-lg me-1"></i>New Project</a>
         <a href="{{ route('renewals.create', ['client_id' => $client->id]) }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-repeat me-1"></i>Add Renewal</a>
         <button type="button" class="btn btn-primary" onclick="openClientPanel({{ $client->id }})"><i class="bi bi-pencil me-1"></i>Edit</button>
     </div>
@@ -158,35 +157,6 @@
             <div class="card-body">{{ $client->notes }}</div>
         </div>
         @endif
-
-        <div class="card shadow-sm mb-4">
-            <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <span class="fw-semibold">Projects ({{ $client->projects->count() }})</span>
-                <a href="{{ route('projects.create', ['client_id' => $client->id]) }}" class="btn btn-sm btn-outline-primary">Add Project</a>
-            </div>
-            @if($client->projects->isNotEmpty())
-            <div class="table-responsive">
-                <table class="table mb-0 align-middle">
-                    <thead class="table-light">
-                        <tr><th>Name</th><th>Status</th><th>Tasks</th><th>Budget</th><th></th></tr>
-                    </thead>
-                    <tbody>
-                        @foreach($client->projects as $project)
-                        <tr>
-                            <td><a href="{{ route('projects.show', $project) }}" class="text-decoration-none fw-medium">{{ $project->name }}</a></td>
-                            <td><span class="badge bg-{{ $project->status_badge }}">{{ ucfirst(str_replace('_', ' ', $project->status)) }}</span></td>
-                            <td>{{ $project->tasks->count() }}</td>
-                            <td>{{ $project->budget ? '£'.number_format($project->budget, 0) : '—' }}</td>
-                            <td><a href="{{ route('projects.show', $project) }}" class="btn btn-sm btn-outline-secondary">View</a></td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-            @else
-            <div class="card-body text-muted small">No projects yet.</div>
-            @endif
-        </div>
 
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">

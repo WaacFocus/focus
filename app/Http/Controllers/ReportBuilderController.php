@@ -62,8 +62,6 @@ class ReportBuilderController extends Controller
                 'icon'    => 'bi-check2-square',
                 'columns' => [
                     'name'      => 'Task Name',
-                    'project'   => 'Project',
-                    'client'    => 'Client',
                     'priority'  => 'Priority',
                     'status'    => 'Status',
                     'due_date'  => 'Due Date',
@@ -322,15 +320,13 @@ class ReportBuilderController extends Controller
 
     private function queryTasks(array $cols, array $filters, ?string $sortBy, string $sortDir): array
     {
-        $q = Task::with(['project.client']);
+        $q = Task::query();
         $this->applyFilters($q, $filters, 'tasks');
         $sortCol = in_array($sortBy, ['name','priority','status','due_date','is_urgent']) ? $sortBy : 'due_date';
         $q->orderBy($sortCol, $sortDir);
 
         return $q->get()->map(fn($t) => $this->pickCols([
             'name'      => $t->name,
-            'project'   => $t->project?->name ?? '—',
-            'client'    => $t->project?->client?->company_name ?? '—',
             'priority'  => ucfirst($t->priority),
             'status'    => ucfirst(str_replace('_', ' ', $t->status)),
             'due_date'  => $t->due_date?->format('d M Y') ?? '—',

@@ -48,8 +48,8 @@
             <p class="text-muted small fw-semibold text-uppercase mb-2" style="letter-spacing:.05em;">Core Details</p>
             <div class="row g-3 mb-3">
                 <div class="col-4">
-                    <label class="form-label small fw-semibold">Client Code</label>
-                    <input type="text" name="client_code" class="form-control form-control-sm" placeholder="CLT001">
+                    <label class="form-label small fw-semibold">Client Code <span class="text-danger">*</span></label>
+                    <input type="text" name="client_code" class="form-control form-control-sm" placeholder="CLT001" required>
                     <div class="invalid-feedback" data-field="client_code"></div>
                 </div>
                 <div class="col-8">
@@ -58,8 +58,8 @@
                     <div class="invalid-feedback" data-field="company_name"></div>
                 </div>
                 <div class="col-6">
-                    <label class="form-label small fw-semibold">Client Type</label>
-                    <select name="client_type_id" class="form-select form-select-sm">
+                    <label class="form-label small fw-semibold">Client Type <span class="text-danger">*</span></label>
+                    <select name="client_type_id" class="form-select form-select-sm" required>
                         <option value="">— Select type —</option>
                         @foreach($clientTypes ?? [] as $ct)
                             <option value="{{ $ct->id }}">{{ $ct->name }}</option>
@@ -463,6 +463,23 @@
     form.addEventListener('submit', async function (e) {
         e.preventDefault();
         clearErrors();
+
+        // Client-side required field check
+        let hasClientErrors = false;
+        form.querySelectorAll('[required]').forEach(function (el) {
+            if (!el.value.trim()) {
+                el.classList.add('is-invalid');
+                const fb = form.querySelector('[data-field="' + el.name + '"]');
+                if (fb && !fb.textContent) fb.textContent = 'This field is required.';
+                hasClientErrors = true;
+            }
+        });
+        if (hasClientErrors) {
+            const first = form.querySelector('.is-invalid');
+            if (first) first.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+        }
+
         setLoading(true);
 
         try {

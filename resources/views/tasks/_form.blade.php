@@ -6,18 +6,6 @@
             @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
         <div class="col-12">
-            <label class="form-label">Project <span class="text-danger">*</span></label>
-            <select name="project_id" class="form-select @error('project_id') is-invalid @enderror" required>
-                <option value="">— Select Project —</option>
-                @foreach($projects as $project)
-                    <option value="{{ $project->id }}" @selected(old('project_id', ($task->project_id ?? $selected ?? null)) == $project->id)>
-                        {{ $project->client->company_name }} — {{ $project->name }}
-                    </option>
-                @endforeach
-            </select>
-            @error('project_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
-        </div>
-        <div class="col-12">
             <label class="form-label">Description</label>
             <textarea name="description" rows="3" class="form-control">{{ old('description', $task->description ?? '') }}</textarea>
         </div>
@@ -32,9 +20,9 @@
         <div class="col-md-4">
             <label class="form-label">Priority</label>
             <select name="priority" class="form-select">
-                <option value="high" @selected(old('priority', $task->priority ?? 'medium') === 'high')>High</option>
+                <option value="high"   @selected(old('priority', $task->priority ?? 'medium') === 'high')>High</option>
                 <option value="medium" @selected(old('priority', $task->priority ?? 'medium') === 'medium')>Medium</option>
-                <option value="low" @selected(old('priority', $task->priority ?? 'medium') === 'low')>Low</option>
+                <option value="low"    @selected(old('priority', $task->priority ?? 'medium') === 'low')>Low</option>
             </select>
         </div>
         <div class="col-md-4">

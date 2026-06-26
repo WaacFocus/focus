@@ -9,7 +9,7 @@
     <a href="{{ route('clients.index') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back</a>
 </div>
 
-<form method="POST" action="{{ route('clients.store') }}">
+<form method="POST" action="{{ route('clients.store') }}" id="clientForm" novalidate>
     @csrf
     @include('clients._form')
     <div class="mt-3">
@@ -18,3 +18,17 @@
     </div>
 </form>
 @endsection
+
+@push('scripts')
+<script>
+document.getElementById('clientForm').addEventListener('submit', function (e) {
+    if (!this.checkValidity()) {
+        e.preventDefault();
+        this.classList.add('was-validated');
+        var first = this.querySelector(':invalid');
+        if (first) { first.scrollIntoView({ behavior: 'smooth', block: 'center' }); first.focus(); }
+    }
+    this.classList.add('was-validated');
+});
+</script>
+@endpush

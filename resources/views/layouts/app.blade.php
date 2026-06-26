@@ -202,9 +202,6 @@
                 <a href="{{ route('jobs.index') }}" class="nav-link {{ request()->routeIs('jobs.*') ? 'active' : '' }}">
                     <i class="bi bi-briefcase me-2"></i>Jobs
                 </a>
-                <a href="{{ route('projects.index') }}" class="nav-link {{ request()->routeIs('projects.*') ? 'active' : '' }}">
-                    <i class="bi bi-kanban me-2"></i>Projects
-                </a>
                 <a href="{{ route('tasks.index') }}" class="nav-link {{ request()->routeIs('tasks.*') ? 'active' : '' }}">
                     <i class="bi bi-check2-square me-2"></i>Tasks
                 </a>
@@ -212,9 +209,6 @@
                 <div class="nav-section">Services & Billing</div>
                 <a href="{{ route('services.index') }}" class="nav-link {{ request()->routeIs('services.*') ? 'active' : '' }}">
                     <i class="bi bi-grid me-2"></i>Services
-                </a>
-                <a href="{{ route('products.index') }}" class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}">
-                    <i class="bi bi-box-seam me-2"></i>Products
                 </a>
                 <a href="{{ route('renewals.index') }}" class="nav-link {{ request()->routeIs('renewals.*') ? 'active' : '' }}">
                     <i class="bi bi-arrow-repeat me-2"></i>Renewals
@@ -241,6 +235,9 @@
                 </a>
                 <a href="{{ route('changelog.index') }}" class="nav-link {{ request()->routeIs('changelog.*') ? 'active' : '' }}">
                     <i class="bi bi-clock-history me-2"></i>Version Log
+                </a>
+                <a href="{{ route('backup.index') }}" class="nav-link {{ request()->routeIs('backup.*') ? 'active' : '' }}">
+                    <i class="bi bi-database-down me-2"></i>Backup & Import
                 </a>
                 @endcan
             </div>
@@ -283,9 +280,6 @@
                 <a href="{{ route('jobs.index') }}" class="nav-link {{ request()->routeIs('jobs.*') ? 'active' : '' }}">
                     <i class="bi bi-briefcase me-2"></i>Jobs
                 </a>
-                <a href="{{ route('projects.index') }}" class="nav-link {{ request()->routeIs('projects.*') ? 'active' : '' }}">
-                    <i class="bi bi-kanban me-2"></i>Projects
-                </a>
                 <a href="{{ route('tasks.index') }}" class="nav-link {{ request()->routeIs('tasks.*') ? 'active' : '' }}">
                     <i class="bi bi-check2-square me-2"></i>Tasks
                 </a>
@@ -293,9 +287,6 @@
                 <div class="nav-section">Services & Billing</div>
                 <a href="{{ route('services.index') }}" class="nav-link {{ request()->routeIs('services.*') ? 'active' : '' }}">
                     <i class="bi bi-grid me-2"></i>Services
-                </a>
-                <a href="{{ route('products.index') }}" class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}">
-                    <i class="bi bi-box-seam me-2"></i>Products
                 </a>
                 <a href="{{ route('renewals.index') }}" class="nav-link {{ request()->routeIs('renewals.*') ? 'active' : '' }}">
                     <i class="bi bi-arrow-repeat me-2"></i>Renewals
@@ -322,6 +313,9 @@
                 </a>
                 <a href="{{ route('changelog.index') }}" class="nav-link {{ request()->routeIs('changelog.*') ? 'active' : '' }}">
                     <i class="bi bi-clock-history me-2"></i>Version Log
+                </a>
+                <a href="{{ route('backup.index') }}" class="nav-link {{ request()->routeIs('backup.*') ? 'active' : '' }}">
+                    <i class="bi bi-database-down me-2"></i>Backup & Import
                 </a>
                 @endcan
             </div>

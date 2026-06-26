@@ -67,7 +67,6 @@ class LogUserActivity
             'tasks.create'       => 'Opened new Task form',
             'tasks.edit'         => 'Opened edit Task form',
             'services.index'     => 'Viewed Services list',
-            'products.index'     => 'Viewed Products list',
             'renewals.index'     => 'Viewed Renewals list',
             'jobs.index'         => 'Viewed Jobs list',
             'reports.index'      => 'Viewed Reports',

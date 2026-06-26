@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Project;
 use App\Models\Task;
 use Illuminate\Http\Request;
 
@@ -10,11 +9,10 @@ class TaskController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Task::with('project.client');
+        $query = Task::query();
 
         if ($request->filled('search')) {
-            $s = $request->search;
-            $query->where('name', 'like', "%$s%");
+            $query->where('name', 'like', '%' . $request->search . '%');
         }
 
         if ($request->filled('status')) {
@@ -25,37 +23,27 @@ class TaskController extends Controller
             $query->where('priority', $request->priority);
         }
 
-        if ($request->filled('project_id')) {
-            $query->where('project_id', $request->project_id);
-        }
-
         if ($request->filled('urgent')) {
             $query->where('is_urgent', true);
         }
 
-        $tasks    = $query->orderByRaw("is_urgent DESC")
+        $tasks = $query->orderByRaw("is_urgent DESC")
             ->orderByRaw("CASE status WHEN 'in_progress' THEN 0 WHEN 'pending' THEN 1 ELSE 2 END")
             ->orderBy('due_date')
             ->paginate(25)
             ->withQueryString();
 
-        $projects = Project::with('client')->orderBy('name')->pluck('name', 'id');
-
-        return view('tasks.index', compact('tasks', 'projects'));
+        return view('tasks.index', compact('tasks'));
     }
 
-    public function create(Request $request)
+    public function create()
     {
-        $projects = Project::with('client')->where('status', 'active')->orderBy('name')->get();
-        $selected = $request->project_id;
-
-        return view('tasks.create', compact('projects', 'selected'));
+        return view('tasks.create');
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'project_id'  => 'required|exists:projects,id',
             'name'        => 'required|string|max:255',
             'description' => 'nullable|string',
             'status'      => 'required|in:pending,in_progress,completed,cancelled',
@@ -69,29 +57,24 @@ class TaskController extends Controller
             $data['completed_at'] = now();
         }
 
-        $task = Task::create($data);
+        Task::create($data);
 
-        return redirect()->route('projects.show', $task->project_id)->with('success', 'Task created.');
+        return redirect()->route('tasks.index')->with('success', 'Task created.');
     }
 
     public function show(Task $task)
     {
-        $task->load('project.client');
-
         return view('tasks.show', compact('task'));
     }
 
     public function edit(Task $task)
     {
-        $projects = Project::with('client')->where('status', 'active')->orderBy('name')->get();
-
-        return view('tasks.edit', compact('task', 'projects'));
+        return view('tasks.edit', compact('task'));
     }
 
     public function update(Request $request, Task $task)
     {
         $data = $request->validate([
-            'project_id'  => 'required|exists:projects,id',
             'name'        => 'required|string|max:255',
             'description' => 'nullable|string',
             'status'      => 'required|in:pending,in_progress,completed,cancelled',
@@ -125,9 +108,8 @@ class TaskController extends Controller
     public function destroy(Task $task)
     {
         abort_unless(auth()->user()->isManager(), 403);
-        $projectId = $task->project_id;
         $task->delete();
 
-        return redirect()->route('projects.show', $projectId)->with('success', 'Task deleted.');
+        return redirect()->route('tasks.index')->with('success', 'Task deleted.');
     }
 }

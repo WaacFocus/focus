@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\Job;
-use App\Models\Project;
 use App\Models\Renewal;
 use App\Models\Task;
 use Illuminate\Http\Request;
@@ -15,9 +14,8 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $stats = [
-            'clients'         => Client::where('status', 'active')->count(),
-            'active_projects' => Project::where('status', 'active')->count(),
-            'pending_tasks'   => Task::whereIn('status', ['pending', 'in_progress'])->count(),
+            'clients'           => Client::where('status', 'active')->count(),
+            'pending_tasks'     => Task::whereIn('status', ['pending', 'in_progress'])->count(),
             'upcoming_renewals' => Renewal::where('status', 'pending')
                 ->where('renewal_date', '<=', now()->addDays(30))
                 ->count(),
@@ -30,16 +28,9 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        $recent_tasks = Task::with('project.client')
-            ->whereIn('status', ['pending', 'in_progress'])
+        $recent_tasks = Task::whereIn('status', ['pending', 'in_progress'])
             ->orderByRaw('is_urgent DESC')
             ->orderBy('due_date')
-            ->take(5)
-            ->get();
-
-        $recent_projects = Project::with('client')
-            ->where('status', 'active')
-            ->latest()
             ->take(5)
             ->get();
 
@@ -68,6 +59,6 @@ class DashboardController extends Controller
         $my_job_clients = Client::whereHas('jobs', fn($q) => $q->where('assigned_to', Auth::id()))
             ->orderBy('company_name')->get(['id', 'company_name']);
 
-        return view('dashboard.index', compact('stats', 'upcoming_renewals', 'recent_tasks', 'recent_projects', 'my_jobs', 'my_job_clients'));
+        return view('dashboard.index', compact('stats', 'upcoming_renewals', 'recent_tasks', 'my_jobs', 'my_job_clients'));
     }
 }

@@ -30,8 +30,6 @@
                 <tr>
                     <th>Service Name</th>
                     <th>Description</th>
-                    <th class="text-end">Default Price</th>
-                    <th>Billing Cycle</th>
                     <th class="text-center">Clients</th>
                     <th class="text-center">Active</th>
                     <th></th>
@@ -42,8 +40,6 @@
                 <tr>
                     <td class="fw-semibold">{{ $service->name }}</td>
                     <td class="text-muted small">{{ Str::limit($service->description, 60) }}</td>
-                    <td class="text-end">£{{ number_format($service->default_price, 2) }}</td>
-                    <td>{{ $service->billing_cycle_label }}</td>
                     <td class="text-center"><span class="badge bg-light text-dark">{{ $service->clients_count }}</span></td>
                     <td class="text-center">
                         @if($service->is_active)
@@ -63,7 +59,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="7" class="text-center text-muted py-4">No services found.</td></tr>
+                <tr><td colspan="5" class="text-center text-muted py-4">No services found.</td></tr>
                 @endforelse
             </tbody>
         </table>

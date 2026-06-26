@@ -13,7 +13,6 @@
     <div class="col-md-4">
         <div class="card shadow-sm">
             <div class="card-body">
-                <div class="mb-2"><small class="text-muted">Price:</small> <strong>£{{ number_format($service->default_price, 2) }}</strong> / {{ $service->billing_cycle_label }}</div>
                 <div class="mb-2"><small class="text-muted">Status:</small> {{ $service->is_active ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-secondary">Inactive</span>' }}</div>
                 @if($service->description)<p class="text-muted mt-2">{{ $service->description }}</p>@endif
             </div>
@@ -25,12 +24,11 @@
             @if($service->clients->isNotEmpty())
             <div class="table-responsive">
                 <table class="table mb-0 align-middle">
-                    <thead class="table-light"><tr><th>Client</th><th class="text-end">Price</th><th>Since</th></tr></thead>
+                    <thead class="table-light"><tr><th>Client</th><th>Since</th></tr></thead>
                     <tbody>
                         @foreach($service->clients as $client)
                         <tr>
                             <td><a href="{{ route('clients.show', $client) }}" class="text-decoration-none">{{ $client->company_name }}</a></td>
-                            <td class="text-end">£{{ number_format($client->pivot->price_override ?? $service->default_price, 2) }}</td>
                             <td>{{ $client->pivot->start_date ? \Carbon\Carbon::parse($client->pivot->start_date)->format('d M Y') : '—' }}</td>
                         </tr>
                         @endforeach

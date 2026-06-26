@@ -12,7 +12,7 @@ class ClientController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Client::withCount('projects')->with('clientType');
+        $query = Client::with('clientType');
 
         if ($request->filled('search')) {
             $s = $request->search;
@@ -33,15 +33,17 @@ class ClientController extends Controller
 
     public function create()
     {
-        return view('clients.create');
+        $client      = new Client();
+        $clientTypes = ClientType::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
+        return view('clients.create', compact('client', 'clientTypes'));
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'client_code'                => 'nullable|string|max:50',
+            'client_code'                => 'required|string|max:50',
             'company_name'               => 'required|string|max:255',
-            'client_type_id'             => 'nullable|exists:client_types,id',
+            'client_type_id'             => 'required|exists:client_types,id',
             'contact_name'               => 'nullable|string|max:255',
             'email'                      => 'nullable|email|max:255',
             'phone'                      => 'nullable|string|max:50',
@@ -84,7 +86,7 @@ class ClientController extends Controller
             return response()->json($client);
         }
 
-        $client->load(['clientType', 'projects.tasks', 'services', 'renewals.service', 'jobs.assignedTo']);
+        $client->load(['clientType', 'services', 'renewals.service', 'jobs.assignedTo']);
 
         $availableServices = Service::where('is_active', true)
             ->whereNotIn('id', $client->services->pluck('id'))
@@ -99,17 +101,18 @@ class ClientController extends Controller
 
     public function edit(Client $client)
     {
-        $services = Service::where('is_active', true)->orderBy('name')->get();
+        $services    = Service::where('is_active', true)->orderBy('name')->get();
+        $clientTypes = ClientType::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
 
-        return view('clients.edit', compact('client', 'services'));
+        return view('clients.edit', compact('client', 'services', 'clientTypes'));
     }
 
     public function update(Request $request, Client $client)
     {
         $data = $request->validate([
-            'client_code'                => 'nullable|string|max:50',
+            'client_code'                => 'required|string|max:50',
             'company_name'               => 'required|string|max:255',
-            'client_type_id'             => 'nullable|exists:client_types,id',
+            'client_type_id'             => 'required|exists:client_types,id',
             'contact_name'               => 'nullable|string|max:255',
             'email'                      => 'nullable|email|max:255',
             'phone'                      => 'nullable|string|max:50',

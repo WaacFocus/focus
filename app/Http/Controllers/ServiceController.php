@@ -28,11 +28,9 @@ class ServiceController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'          => 'required|string|max:255',
-            'description'   => 'nullable|string',
-            'default_price' => 'required|numeric|min:0',
-            'billing_cycle' => 'required|in:monthly,quarterly,annually,one_off',
-            'is_active'     => 'boolean',
+            'name'        => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'is_active'   => 'boolean',
         ]);
 
         $data['is_active'] = $request->boolean('is_active', true);
@@ -57,11 +55,9 @@ class ServiceController extends Controller
     public function update(Request $request, Service $service)
     {
         $data = $request->validate([
-            'name'          => 'required|string|max:255',
-            'description'   => 'nullable|string',
-            'default_price' => 'required|numeric|min:0',
-            'billing_cycle' => 'required|in:monthly,quarterly,annually,one_off',
-            'is_active'     => 'boolean',
+            'name'        => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'is_active'   => 'boolean',
         ]);
 
         $data['is_active'] = $request->boolean('is_active', true);

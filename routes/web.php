@@ -6,9 +6,8 @@ use App\Http\Controllers\ClientServiceController;
 use App\Http\Controllers\ClientTypeController;
 use App\Http\Controllers\CompaniesHouseController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\RenewalController;
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\ChangelogController;
 use App\Http\Controllers\ReportBuilderController;
 use App\Http\Controllers\ReportController;
@@ -60,11 +59,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('clients', ClientController::class);
     Route::post('clients/{client}/services', [ClientServiceController::class, 'store'])->name('clients.services.store');
     Route::delete('clients/{client}/services/{service}', [ClientServiceController::class, 'destroy'])->name('clients.services.destroy');
-    Route::resource('projects', ProjectController::class);
     Route::resource('tasks', TaskController::class);
     Route::post('tasks/{task}/urgent', [TaskController::class, 'toggleUrgent'])->name('tasks.urgent');
     Route::resource('services', ServiceController::class);
-    Route::resource('products', ProductController::class);
     Route::resource('renewals', RenewalController::class);
 
     Route::resource('jobs', JobController::class);
@@ -87,6 +84,10 @@ Route::middleware('auth')->group(function () {
         Route::resource('client-types', ClientTypeController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
         Route::get('activity', [ActivityController::class, 'index'])->name('activity.index');
         Route::get('changelog', [ChangelogController::class, 'index'])->name('changelog.index');
+        Route::get('admin/backup', [BackupController::class, 'index'])->name('backup.index');
+        Route::get('admin/backup/export/{type}', [BackupController::class, 'export'])->name('backup.export');
+        Route::get('admin/backup/template/{type}', [BackupController::class, 'template'])->name('backup.template');
+        Route::post('admin/backup/import', [BackupController::class, 'import'])->name('backup.import');
         Route::get('changelog/pdf', [ChangelogController::class, 'pdf'])->name('changelog.pdf');
         Route::get('changelog/download', [ChangelogController::class, 'download'])->name('changelog.download');
         Route::post('reports/email', [ReportController::class, 'email'])->name('reports.email');

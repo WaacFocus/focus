@@ -4,11 +4,8 @@
 @section('page-title', 'Jobs')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="mb-4">
     <h4 class="mb-0">Jobs</h4>
-    <button class="btn btn-primary" type="button" onclick="openJobPanel()">
-        <i class="bi bi-plus-lg me-1"></i>New Job
-    </button>
 </div>
 
 <div class="card shadow-sm mb-4">

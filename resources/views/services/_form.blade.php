@@ -15,21 +15,5 @@
             <label class="form-label">Description</label>
             <textarea name="description" rows="3" class="form-control">{{ old('description', $service->description ?? '') }}</textarea>
         </div>
-        <div class="col-md-6">
-            <label class="form-label">Default Price (£) <span class="text-danger">*</span></label>
-            <div class="input-group">
-                <span class="input-group-text">£</span>
-                <input type="number" name="default_price" value="{{ old('default_price', $service->default_price ?? '0') }}" class="form-control @error('default_price') is-invalid @enderror" step="0.01" min="0" required>
-                @error('default_price')<div class="invalid-feedback">{{ $message }}</div>@enderror
-            </div>
-        </div>
-        <div class="col-md-6">
-            <label class="form-label">Billing Cycle</label>
-            <select name="billing_cycle" class="form-select">
-                @foreach(['monthly' => 'Monthly','quarterly' => 'Quarterly','annually' => 'Annually','one_off' => 'One-off'] as $val => $label)
-                    <option value="{{ $val }}" @selected(old('billing_cycle', $service->billing_cycle ?? 'annually') === $val)>{{ $label }}</option>
-                @endforeach
-            </select>
-        </div>
     </div>
 </div>

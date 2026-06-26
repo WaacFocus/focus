@@ -37,16 +37,9 @@
                     <option value="1" @selected(request('urgent') === '1')>Urgent only</option>
                 </select>
             </div>
-            <div class="col-md-2">
-                <select name="project_id" class="form-select">
-                    <option value="">All Projects</option>
-                    @foreach($projects as $id => $name)
-                        <option value="{{ $id }}" @selected(request('project_id') == $id)>{{ $name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="col-md-1 d-flex gap-2">
-                <a href="{{ route('tasks.index') }}" class="btn btn-outline-secondary w-100">Clear</a>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-outline-secondary flex-grow-1">Filter</button>
+                <a href="{{ route('tasks.index') }}" class="btn btn-outline-secondary">Clear</a>
             </div>
         </form>
     </div>
@@ -59,7 +52,6 @@
                 <tr>
                     <th style="width:36px;"></th>
                     <th>Task</th>
-                    <th>Project / Client</th>
                     <th class="text-center">Priority</th>
                     <th class="text-center">Status</th>
                     <th>Due Date</th>
@@ -88,10 +80,6 @@
                         </div>
                         @if($task->description)<small class="text-muted">{{ Str::limit($task->description, 60) }}</small>@endif
                     </td>
-                    <td>
-                        <a href="{{ route('projects.show', $task->project) }}" class="text-decoration-none fw-medium">{{ $task->project->name }}</a>
-                        <div class="small text-muted">{{ $task->project->client->company_name }}</div>
-                    </td>
                     <td class="text-center"><span class="badge bg-{{ $task->priority_badge }}">{{ $task->priority }}</span></td>
                     <td class="text-center"><span class="badge bg-{{ $task->status_badge }}">{{ ucfirst(str_replace('_',' ',$task->status)) }}</span></td>
                     <td class="{{ $task->due_date && $task->due_date->isPast() && $task->status !== 'completed' ? 'text-danger fw-semibold' : '' }}">
@@ -108,7 +96,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="7" class="text-center text-muted py-4">No tasks found.</td></tr>
+                <tr><td colspan="6" class="text-center text-muted py-4">No tasks found.</td></tr>
                 @endforelse
             </tbody>
         </table>

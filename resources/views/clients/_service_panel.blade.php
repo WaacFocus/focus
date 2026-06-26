@@ -28,24 +28,10 @@
                     <select name="service_id" id="svcSelect" class="form-select form-select-sm" required>
                         <option value="">— Select a service —</option>
                         @foreach($availableServices as $svc)
-                            <option value="{{ $svc->id }}"
-                                    data-price="{{ $svc->default_price }}"
-                                    data-billing="{{ $svc->billing_cycle_label }}">
-                                {{ $svc->name }}
-                            </option>
+                            <option value="{{ $svc->id }}">{{ $svc->name }}</option>
                         @endforeach
                     </select>
-                    <div class="form-text text-muted" id="svcDefaultDisplay"></div>
                     <div class="invalid-feedback" data-field="service_id"></div>
-                </div>
-                <div class="col-12">
-                    <label class="form-label small fw-semibold">Price Override <span class="text-muted fw-normal">(leave blank to use default)</span></label>
-                    <div class="input-group input-group-sm">
-                        <span class="input-group-text">£</span>
-                        <input type="number" name="price_override" class="form-control form-control-sm"
-                               step="0.01" min="0" placeholder="0.00">
-                    </div>
-                    <div class="invalid-feedback" data-field="price_override"></div>
                 </div>
                 <div class="col-6">
                     <label class="form-label small fw-semibold">Start Date</label>
@@ -116,22 +102,9 @@
 @push('scripts')
 <script>
 (function () {
-    const form      = document.getElementById('serviceForm');
-    const saveBtn   = document.getElementById('saveServiceBtn');
-    const svcSelect = document.getElementById('svcSelect');
-    const display   = document.getElementById('svcDefaultDisplay');
-    const csrf      = document.querySelector('meta[name="csrf-token"]').content;
-
-    svcSelect.addEventListener('change', function () {
-        const opt = this.options[this.selectedIndex];
-        if (opt.value) {
-            const price   = parseFloat(opt.dataset.price).toFixed(2);
-            const billing = opt.dataset.billing;
-            display.textContent = 'Default price: £' + price + ' / ' + billing;
-        } else {
-            display.textContent = '';
-        }
-    });
+    const form    = document.getElementById('serviceForm');
+    const saveBtn = document.getElementById('saveServiceBtn');
+    const csrf    = document.querySelector('meta[name="csrf-token"]').content;
 
     function setLoading(on) {
         saveBtn.disabled = on;
