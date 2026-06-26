@@ -4,6 +4,13 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.14 — 2026-06-26
+
+### Added
+- Tasks `project_id` migration included in version control (drops FK constraint, makes column nullable so tasks are fully standalone)
+
+---
+
 ## v1.13 — 2026-06-26
 
 ### Added
