@@ -44,8 +44,11 @@ class ChangelogController extends Controller
 
     public function download()
     {
-        return response()->download(base_path('CHANGELOG.md'), 'focus-changelog.md', [
-            'Content-Type' => 'text/markdown',
+        $content = $this->markdown();
+
+        return response($content, 200, [
+            'Content-Type'        => 'text/markdown',
+            'Content-Disposition' => 'attachment; filename="focus-changelog.md"',
         ]);
     }
 }
