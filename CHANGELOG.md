@@ -7,17 +7,25 @@ All notable changes to this project are documented here, grouped by version.
 ## v1.13 — 2026-06-26
 
 ### Added
-- **Backup & Import** — admin page under Admin section for data portability
-  - CSV export for Clients, Jobs, Renewals, and Tasks
-  - Download blank example/template CSV for each data type
-  - CSV import with validation for all four data types
-- **Clients index** — Client Code column now visible in the table
-- **Column visibility toggle** — show/hide columns on the clients index (saved to localStorage)
+- **Backup & Import** — new admin page under Admin section
+  - Export any data set (Clients, Jobs, Renewals, Tasks) as a CSV file
+  - Download an example/template CSV for each data set showing the required columns and accepted values
+  - Import from CSV: clients matched on `client_code` (update existing or create new); jobs, renewals, and tasks always inserted as new records
+  - Import summary flash message shows created / updated / skipped counts and row-level errors
+- **Client Code column** — added to the Clients index table (first column, before Company)
+- **Column visibility toggle** — Columns dropdown on Clients index lets you show/hide individual columns; preference saved in `localStorage`
 
 ### Changed
-- **Projects and Products removed** — both sections (models, controllers, views, routes, nav links) have been removed from the application
-- `client_code` and `client_type` are now mandatory fields when creating or editing a client
-- Client edit offcanvas panel now shows red asterisk on required fields with client-side validation before submit
+- **Client Code** — now a required field (red asterisk, validated client-side and server-side in both the offcanvas panel and the full create/edit forms)
+- **Client Type** — now required; red asterisk added to offcanvas panel label; client-side validation fires immediately on submit before AJAX call
+
+### Removed
+- **Projects** — removed entirely: model, controller, all views, routes, and nav link; tasks are now standalone
+- **Products** — removed entirely: model, controller, all views, routes, and nav link
+
+### Fixed
+- **Client edit offcanvas panel** — client type and client code fields now show red border and error message immediately on submit if left empty (previously no validation feedback appeared in the slide-out panel)
+- Stale "Projects" column removed from Clients index table
 
 ---
 
