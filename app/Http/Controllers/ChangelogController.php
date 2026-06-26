@@ -9,6 +9,13 @@ class ChangelogController extends Controller
 {
     private function markdown(): string
     {
+        $url      = 'https://raw.githubusercontent.com/WaacFocus/focus/master/CHANGELOG.md';
+        $response = \Illuminate\Support\Facades\Http::timeout(5)->get($url);
+
+        if ($response->successful()) {
+            return $response->body();
+        }
+
         return file_get_contents(base_path('CHANGELOG.md'));
     }
 
