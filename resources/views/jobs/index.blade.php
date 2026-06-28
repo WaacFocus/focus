@@ -45,6 +45,18 @@
                     <span class="spinner-border spinner-border-sm me-1"></span>Updating…
                 </span>
                 <a href="{{ route('jobs.index') }}" class="btn btn-outline-secondary ms-auto">Clear</a>
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                        <i class="bi bi-layout-three-columns me-1"></i>Columns
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end p-2" style="min-width:160px;" id="jobColMenu">
+                        <li><label class="dropdown-item rounded d-flex align-items-center gap-2 py-1 px-2"><input type="checkbox" class="job-col-check" data-col="1" checked> Client</label></li>
+                        <li><label class="dropdown-item rounded d-flex align-items-center gap-2 py-1 px-2"><input type="checkbox" class="job-col-check" data-col="2" checked> Assigned To</label></li>
+                        <li><label class="dropdown-item rounded d-flex align-items-center gap-2 py-1 px-2"><input type="checkbox" class="job-col-check" data-col="3" checked> Frequency</label></li>
+                        <li><label class="dropdown-item rounded d-flex align-items-center gap-2 py-1 px-2"><input type="checkbox" class="job-col-check" data-col="4" checked> Due Date</label></li>
+                        <li><label class="dropdown-item rounded d-flex align-items-center gap-2 py-1 px-2"><input type="checkbox" class="job-col-check" data-col="5" checked> Status</label></li>
+                    </ul>
+                </div>
             </div>
         </form>
     </div>
@@ -125,6 +137,20 @@
 
 @push('styles')
 <style>
+.job-col-check {
+    width: 1em; height: 1em; margin-top: 0;
+    appearance: none; -webkit-appearance: none;
+    border: 1.5px solid #adb5bd; border-radius: .2em;
+    background: #fff; cursor: pointer; flex-shrink: 0;
+    transition: background .12s, border-color .12s;
+}
+.job-col-check:checked {
+    background-color: var(--brand-dark);
+    border-color: var(--brand-dark);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-width='3' d='m6 10 3 3 5-5'/%3e%3c/svg%3e");
+    background-repeat: no-repeat; background-size: cover;
+}
+.job-col-check:focus { outline: none; box-shadow: 0 0 0 .2rem rgba(12,61,56,.25); }
 .status-select { border: 0; font-size: .75rem; font-weight: 600; border-radius: .375rem; padding: .2rem .5rem; cursor: pointer; }
 .status-select.status-pending     { background: #e2e3e5; color: #41464b; }
 .status-select.status-in_progress { background: #cfe2ff; color: #084298; }
@@ -136,6 +162,44 @@
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script>
+// ── Column visibility toggle ─────────────────────────────────────────────────
+(function () {
+    const STORAGE_KEY = 'jobs_col_visibility';
+    const checkboxes  = document.querySelectorAll('.job-col-check');
+
+    function applyVisibility(col, visible) {
+        document.querySelectorAll(`#jobsTable [data-col="${col}"]`).forEach(function (el) {
+            el.style.display = visible ? '' : 'none';
+        });
+    }
+
+    function savePrefs() {
+        const prefs = {};
+        checkboxes.forEach(function (cb) { prefs[cb.dataset.col] = cb.checked; });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(prefs));
+    }
+
+    function loadPrefs() {
+        try {
+            const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+            checkboxes.forEach(function (cb) {
+                if (cb.dataset.col in saved) cb.checked = saved[cb.dataset.col];
+                applyVisibility(cb.dataset.col, cb.checked);
+            });
+        } catch (e) {}
+    }
+
+    checkboxes.forEach(function (cb) {
+        cb.addEventListener('change', function () {
+            applyVisibility(cb.dataset.col, cb.checked);
+            savePrefs();
+        });
+    });
+
+    loadPrefs();
+})();
+</script>
 <script>
 (function () {
     const PREF_KEY  = 'jobs_col_order';

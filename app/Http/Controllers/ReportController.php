@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Models\ClientBillingLine;
 use App\Models\Job;
 use App\Models\User;
 use App\Services\Smtp2goService;
@@ -86,16 +87,41 @@ class ReportController extends Controller
             ->get(['id', 'company_name', 'client_code', 'status', 'fpa_amount', 'billing_interval', 'payroll_fpa', 'payroll_billing_interval']);
     }
 
+    private function fixedPricesMetrics(\Illuminate\Database\Eloquent\Collection $clients): array
+    {
+        // FPA + payroll FPA per billing interval
+        $intervalTotal = function (string $interval) use ($clients): float {
+            return (float) $clients->where('billing_interval', $interval)->sum('fpa_amount')
+                 + (float) $clients->where('payroll_billing_interval', $interval)->sum('payroll_fpa');
+        };
+
+        $monthly   = $intervalTotal('monthly');
+        $quarterly = $intervalTotal('quarterly');
+        $annual    = $intervalTotal('annually');
+
+        // Additional billing lines
+        $lines = ClientBillingLine::all();
+        $monthly   += (float) $lines->where('interval', 'monthly')->sum('amount');
+        $quarterly += (float) $lines->where('interval', 'quarterly')->sum('amount');
+        $annual    += (float) $lines->where('interval', 'annually')->sum('amount');
+
+        // GRF (Gross Recurring Fee): annualised — monthly × 12, quarterly × 4, annual × 1
+        $grf = ($monthly * 12) + ($quarterly * 4) + $annual;
+
+        return compact('monthly', 'quarterly', 'annual', 'grf');
+    }
+
     public function fixedPrices()
     {
-        $clients           = $this->fixedPricesData();
-        $totalFpa          = $clients->sum('fpa_amount');
-        $totalPayrollFpa   = $clients->sum('payroll_fpa');
-        $grandTotal        = $totalFpa + $totalPayrollFpa;
-        $byInterval        = $clients->groupBy(fn ($c) => $c->billing_interval ?: 'Unspecified');
-        $users             = User::orderBy('name')->get();
+        $clients         = $this->fixedPricesData();
+        $totalFpa        = $clients->sum('fpa_amount');
+        $totalPayrollFpa = $clients->sum('payroll_fpa');
+        $grandTotal      = $totalFpa + $totalPayrollFpa;
+        $byInterval      = $clients->groupBy(fn ($c) => $c->billing_interval ?: 'Unspecified');
+        $users           = User::orderBy('name')->get();
+        $metrics         = $this->fixedPricesMetrics($clients);
 
-        return view('reports.fixed-prices', compact('clients', 'totalFpa', 'totalPayrollFpa', 'grandTotal', 'byInterval', 'users'));
+        return view('reports.fixed-prices', compact('clients', 'totalFpa', 'totalPayrollFpa', 'grandTotal', 'byInterval', 'users', 'metrics'));
     }
 
     public function fixedPricesPdf(string $orientation = 'portrait')
@@ -104,11 +130,12 @@ class ReportController extends Controller
         $totalFpa        = $clients->sum('fpa_amount');
         $totalPayrollFpa = $clients->sum('payroll_fpa');
         $grandTotal      = $totalFpa + $totalPayrollFpa;
+        $metrics         = $this->fixedPricesMetrics($clients);
 
-        $pdf = Pdf::loadView('reports.pdf.fixed-prices', compact('clients', 'totalFpa', 'totalPayrollFpa', 'grandTotal'))
+        $pdf = Pdf::loadView('reports.pdf.fixed-prices', compact('clients', 'totalFpa', 'totalPayrollFpa', 'grandTotal', 'metrics'))
             ->setPaper('A4', $orientation);
 
-        return $pdf->download('fixed-prices-' . now()->format('Y-m-d') . '-' . $orientation . '.pdf');
+        return $pdf->download('billing-' . now()->format('Y-m-d') . '-' . $orientation . '.pdf');
     }
 
     public function fixedPricesCsv(): StreamedResponse
@@ -162,8 +189,9 @@ class ReportController extends Controller
             $totalFpa        = $clients->sum('fpa_amount');
             $totalPayrollFpa = $clients->sum('payroll_fpa');
             $grandTotal      = $totalFpa + $totalPayrollFpa;
-            $subject         = 'Fixed Price Summary — ' . now()->format('d F Y');
-            $html            = view('emails.fixed-prices', compact('clients', 'totalFpa', 'totalPayrollFpa', 'grandTotal'))->render();
+            $metrics         = $this->fixedPricesMetrics($clients);
+            $subject         = 'Billing Report — ' . now()->format('d F Y');
+            $html            = view('emails.fixed-prices', compact('clients', 'totalFpa', 'totalPayrollFpa', 'grandTotal', 'metrics'))->render();
         }
 
         $sent   = 0;

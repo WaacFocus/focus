@@ -40,6 +40,11 @@ class Client extends Model
             ->withTimestamps();
     }
 
+    public function billingLines(): HasMany
+    {
+        return $this->hasMany(ClientBillingLine::class)->orderBy('id');
+    }
+
     public function jobs(): HasMany
     {
         return $this->hasMany(Job::class);

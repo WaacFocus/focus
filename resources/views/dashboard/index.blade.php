@@ -52,7 +52,7 @@
                 </div>
                 <div>
                     <div class="fs-2 fw-bold">{{ $stats['upcoming_renewals'] }}</div>
-                    <div class="text-muted small">Renewals Due (30d)</div>
+                    <div class="text-muted small">Letters Due (30d)</div>
                 </div>
             </div>
             <div class="card-footer bg-transparent border-0 pt-0">
@@ -66,7 +66,7 @@
     <div class="col-lg-6">
         <div class="card shadow-sm h-100">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <span class="fw-semibold"><i class="bi bi-arrow-repeat me-2 text-danger"></i>Upcoming Renewals</span>
+                <span class="fw-semibold"><i class="bi bi-arrow-repeat me-2 text-danger"></i>Engagement Letters Due</span>
                 <a href="{{ route('renewals.create') }}" class="btn btn-sm btn-outline-primary">Add</a>
             </div>
             <div class="list-group list-group-flush">
@@ -78,17 +78,14 @@
                                 <small class="text-muted">{{ $renewal->description }}</small>
                             </div>
                             <div class="text-end">
-                                <div class="small fw-semibold {{ $renewal->renewal_date->isPast() ? 'text-danger' : 'text-muted' }}">
-                                    {{ $renewal->renewal_date->format('d M Y') }}
+                                <div class="small fw-semibold {{ $renewal->due_date?->isPast() ? 'text-danger' : 'text-muted' }}">
+                                    {{ $renewal->due_date ? $renewal->due_date->format('d M Y') : '—' }}
                                 </div>
-                                @if($renewal->amount)
-                                    <small class="text-success">£{{ number_format($renewal->amount, 2) }}</small>
-                                @endif
                             </div>
                         </div>
                     </a>
                 @empty
-                    <div class="list-group-item text-muted small">No upcoming renewals in the next 60 days.</div>
+                    <div class="list-group-item text-muted small">No engagement letters due in the next 60 days.</div>
                 @endforelse
             </div>
         </div>

@@ -19,7 +19,7 @@
                             <i class="bi bi-currency-pound fs-4 text-primary"></i>
                         </div>
                         <div>
-                            <h6 class="fw-semibold mb-0">Fixed Price Summary</h6>
+                            <h6 class="fw-semibold mb-0">Billing</h6>
                             <small class="text-muted">Total FPA & payroll FPA by client</small>
                         </div>
                     </div>

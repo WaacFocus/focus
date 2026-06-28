@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Models\ClientBillingLine;
 use App\Models\ClientType;
 use App\Models\Service;
 use App\Models\User;
@@ -66,12 +67,20 @@ class ClientController extends Controller
             'payroll_fpa'                => 'nullable|numeric|min:0',
             'payroll_billing_interval'   => 'nullable|in:monthly,quarterly,annually,one-off',
             'payment_method'             => 'nullable|string|max:100',
+            'billing_lines'              => 'nullable|array',
+            'billing_lines.*.description'=> 'nullable|string|max:255',
+            'billing_lines.*.amount'     => 'nullable|numeric|min:0',
+            'billing_lines.*.interval'   => 'nullable|in:monthly,quarterly,annually,one-off',
         ]);
 
         $data['sa_billed_separately']       = $request->boolean('sa_billed_separately');
         $data['payroll_invoiced_separately'] = $request->boolean('payroll_invoiced_separately');
 
+        $lines = $data['billing_lines'] ?? [];
+        unset($data['billing_lines']);
+
         $client = Client::create($data);
+        $this->saveBillingLines($client, $lines);
 
         if ($request->expectsJson()) {
             return response()->json(['message' => 'Client created successfully.', 'id' => $client->id]);
@@ -83,10 +92,11 @@ class ClientController extends Controller
     public function show(Request $request, Client $client)
     {
         if ($request->expectsJson()) {
+            $client->load('billingLines');
             return response()->json($client);
         }
 
-        $client->load(['clientType', 'services', 'renewals.service', 'jobs.assignedTo']);
+        $client->load(['clientType', 'billingLines', 'services', 'renewals.service', 'jobs.assignedTo']);
 
         $availableServices = Service::where('is_active', true)
             ->whereNotIn('id', $client->services->pluck('id'))
@@ -101,6 +111,7 @@ class ClientController extends Controller
 
     public function edit(Client $client)
     {
+        $client->load('billingLines');
         $services    = Service::where('is_active', true)->orderBy('name')->get();
         $clientTypes = ClientType::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
 
@@ -135,12 +146,20 @@ class ClientController extends Controller
             'payroll_fpa'                => 'nullable|numeric|min:0',
             'payroll_billing_interval'   => 'nullable|in:monthly,quarterly,annually,one-off',
             'payment_method'             => 'nullable|string|max:100',
+            'billing_lines'              => 'nullable|array',
+            'billing_lines.*.description'=> 'nullable|string|max:255',
+            'billing_lines.*.amount'     => 'nullable|numeric|min:0',
+            'billing_lines.*.interval'   => 'nullable|in:monthly,quarterly,annually,one-off',
         ]);
 
         $data['sa_billed_separately']       = $request->boolean('sa_billed_separately');
         $data['payroll_invoiced_separately'] = $request->boolean('payroll_invoiced_separately');
 
+        $lines = $data['billing_lines'] ?? [];
+        unset($data['billing_lines']);
+
         $client->update($data);
+        $this->saveBillingLines($client, $lines);
 
         if ($request->expectsJson()) {
             return response()->json(['message' => 'Client updated successfully.', 'id' => $client->id]);
@@ -155,5 +174,20 @@ class ClientController extends Controller
         $client->delete();
 
         return redirect()->route('clients.index')->with('success', 'Client deleted.');
+    }
+
+    private function saveBillingLines(Client $client, array $lines): void
+    {
+        $client->billingLines()->delete();
+        foreach ($lines as $line) {
+            $amount = $line['amount'] ?? null;
+            if ($amount !== null && $amount !== '') {
+                $client->billingLines()->create([
+                    'description' => $line['description'] ?? null,
+                    'amount'      => $amount,
+                    'interval'    => $line['interval'] ?? 'monthly',
+                ]);
+            }
+        }
     }
 }

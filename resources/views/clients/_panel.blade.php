@@ -122,16 +122,33 @@
                     <input type="date" name="fpa_year_end" class="form-control form-control-sm">
                     <div class="invalid-feedback" data-field="fpa_year_end"></div>
                 </div>
+            </div>
+
+            {{-- Additional billing lines — live within FPA section --}}
+            <div class="row g-1 mb-1 d-none d-billing-header">
+                <div class="col-5"><label class="form-label small fw-semibold mb-0">Description</label></div>
+                <div class="col-3"><label class="form-label small fw-semibold mb-0">Amount (£)</label></div>
+                <div class="col-3"><label class="form-label small fw-semibold mb-0">Interval</label></div>
+                <div class="col-1"></div>
+            </div>
+            <div id="billingLinesContainer"></div>
+            <button type="button" class="btn btn-sm btn-outline-secondary mt-1 mb-3" onclick="addBillingLine()">
+                <i class="bi bi-plus-lg me-1"></i>Add Line
+            </button>
+
+            <div class="row g-3 mb-3">
                 <div class="col-6">
                     <label class="form-label small fw-semibold">Payment Method</label>
-                    <input type="text" name="payment_method" class="form-control form-control-sm" placeholder="e.g. Direct Debit">
+                    <select name="payment_method" class="form-select form-select-sm">
+                        <option value="">— None —</option>
+                        <option value="Direct Debit">Direct Debit</option>
+                        <option value="BACS">BACS</option>
+                        <option value="Standing Order">Standing Order</option>
+                        <option value="Credit/Debit Card">Credit/Debit Card</option>
+                        <option value="Cash">Cash</option>
+                        <option value="Cheque">Cheque</option>
+                    </select>
                     <div class="invalid-feedback" data-field="payment_method"></div>
-                </div>
-                <div class="col-6 d-flex align-items-end pb-1">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" name="sa_billed_separately" id="nc_sa" value="1">
-                        <label class="form-check-label small" for="nc_sa">SA billed separately</label>
-                    </div>
                 </div>
             </div>
 
@@ -154,12 +171,6 @@
                         <option value="annually">Annually</option>
                         <option value="one-off">One-off</option>
                     </select>
-                </div>
-                <div class="col-4 d-flex align-items-end pb-1">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" name="payroll_invoiced_separately" id="nc_payroll" value="1">
-                        <label class="form-check-label small" for="nc_payroll">Invoiced separately</label>
-                    </div>
                 </div>
             </div>
 
@@ -418,6 +429,7 @@
             form.querySelector('[name="_method"]').value = '';
             document.getElementById('saveBtnText').textContent = 'Create Client';
             chLookup.style.display = '';
+            clearBillingLines();
             bsPanel.show();
             return;
         }
@@ -446,6 +458,11 @@
             setField('fpa_year_end', data.fpa_year_end ? data.fpa_year_end.substring(0, 10) : '');
             setField('sa_billed_separately',       data.sa_billed_separately);
             setField('payroll_invoiced_separately', data.payroll_invoiced_separately);
+
+            clearBillingLines();
+            if (data.billing_lines && data.billing_lines.length) {
+                data.billing_lines.forEach(function (line) { addBillingLine(line); });
+            }
 
             panelEl.querySelector('#panelIcon').className = 'bi bi-pencil me-2';
             panelEl.querySelector('#panelTitle').textContent = data.company_name;
@@ -507,10 +524,62 @@
     panelEl.addEventListener('hidden.bs.offcanvas', function () {
         form.reset();
         clearErrors();
+        clearBillingLines();
         chHideResults();
         chSelected.classList.add('d-none');
         chLookup.style.display = '';
     });
+
+    // ── Billing lines ─────────────────────────────────────────────────────────
+    const billingContainer = document.getElementById('billingLinesContainer');
+    const billingHeader    = document.querySelector('.d-billing-header');
+
+    function updateBillingHeader() {
+        const hasLines = billingContainer.querySelectorAll('.billing-line').length > 0;
+        billingHeader.classList.toggle('d-none', !hasLines);
+    }
+
+    window.clearBillingLines = function () {
+        billingContainer.innerHTML = '';
+        updateBillingHeader();
+    };
+
+    window.addBillingLine = function (data) {
+        const idx = billingContainer.querySelectorAll('.billing-line').length;
+        const row = document.createElement('div');
+        row.className = 'billing-line row g-1 mb-1 align-items-center';
+        row.innerHTML =
+            '<div class="col-5">' +
+                '<input type="text" name="billing_lines[' + idx + '][description]" class="form-control form-control-sm" placeholder="e.g. Monthly bookkeeping" value="' + (data ? (data.description || '') : '') + '">' +
+            '</div>' +
+            '<div class="col-3">' +
+                '<input type="number" name="billing_lines[' + idx + '][amount]" class="form-control form-control-sm" placeholder="0.00" step="0.01" min="0" value="' + (data ? (data.amount || '') : '') + '">' +
+            '</div>' +
+            '<div class="col-3">' +
+                '<select name="billing_lines[' + idx + '][interval]" class="form-select form-select-sm">' +
+                    '<option value="monthly"'   + (data && data.interval === 'monthly'   ? ' selected' : '') + '>Monthly</option>' +
+                    '<option value="quarterly"' + (data && data.interval === 'quarterly' ? ' selected' : '') + '>Quarterly</option>' +
+                    '<option value="annually"'  + (data && data.interval === 'annually'  ? ' selected' : '') + '>Annually</option>' +
+                    '<option value="one-off"'   + (data && data.interval === 'one-off'   ? ' selected' : '') + '>One-off</option>' +
+                '</select>' +
+            '</div>' +
+            '<div class="col-1 text-end">' +
+                '<button type="button" class="btn btn-sm btn-outline-danger px-1" onclick="removeBillingLine(this)" title="Remove"><i class="bi bi-x-lg" style="font-size:.7rem;"></i></button>' +
+            '</div>';
+        billingContainer.appendChild(row);
+        updateBillingHeader();
+    };
+
+    window.removeBillingLine = function (btn) {
+        btn.closest('.billing-line').remove();
+        // Renumber remaining lines
+        billingContainer.querySelectorAll('.billing-line').forEach(function (row, idx) {
+            row.querySelectorAll('[name]').forEach(function (el) {
+                el.name = el.name.replace(/billing_lines\[\d+\]/, 'billing_lines[' + idx + ']');
+            });
+        });
+        updateBillingHeader();
+    };
 })();
 </script>
 @endpush

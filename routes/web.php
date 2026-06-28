@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\EngagementLetterController;
+use App\Http\Controllers\SigningController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ClientServiceController;
 use App\Http\Controllers\ClientTypeController;
@@ -23,6 +25,10 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserTwoFactorController;
 use App\Http\Controllers\WebAuthn\WebAuthnRegisterController;
 use Illuminate\Support\Facades\Route;
+
+// Public signing routes (no auth required)
+Route::get('/sign/{token}', [SigningController::class, 'show'])->name('sign.show');
+Route::post('/sign/{token}', [SigningController::class, 'sign'])->name('sign.sign');
 
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login')->middleware('guest');
 Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
@@ -63,6 +69,8 @@ Route::middleware('auth')->group(function () {
     Route::post('tasks/{task}/urgent', [TaskController::class, 'toggleUrgent'])->name('tasks.urgent');
     Route::resource('services', ServiceController::class);
     Route::resource('renewals', RenewalController::class);
+    Route::resource('engagement-letters', EngagementLetterController::class);
+    Route::post('engagement-letters/{engagementLetter}/send', [EngagementLetterController::class, 'send'])->name('engagement-letters.send');
 
     Route::resource('jobs', JobController::class);
     Route::post('jobs/{job}/complete', [JobController::class, 'complete'])->name('jobs.complete');

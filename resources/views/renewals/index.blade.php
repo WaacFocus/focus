@@ -1,19 +1,19 @@
 @extends('layouts.app')
 
-@section('title', 'Renewals')
-@section('page-title', 'Renewals')
+@section('title', 'Engagement Letters')
+@section('page-title', 'Engagement Letters')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h4 class="mb-0">Renewals</h4>
-    <a href="{{ route('renewals.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>New Renewal</a>
+    <h4 class="mb-0">Engagement Letters</h4>
+    <a href="{{ route('renewals.create') }}" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i>New Letter</a>
 </div>
 
 <div class="mb-3">
     <div class="btn-group">
         <a href="{{ route('renewals.index', array_merge(request()->except('filter'), ['filter' => 'upcoming'])) }}"
             class="btn btn-sm {{ $filter === 'upcoming' ? 'btn-primary' : 'btn-outline-secondary' }}">
-            Upcoming (90 days)
+            Due (90 days)
         </a>
         <a href="{{ route('renewals.index', array_merge(request()->except('filter'), ['filter' => 'overdue'])) }}"
             class="btn btn-sm {{ $filter === 'overdue' ? 'btn-danger' : 'btn-outline-secondary' }}">
@@ -31,13 +31,13 @@
         <form method="GET" class="row g-2">
             <input type="hidden" name="filter" value="{{ $filter }}">
             <div class="col-md-4">
-                <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="Search description or client...">
+                <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="Search letter type or client...">
             </div>
             <div class="col-md-3">
                 <select name="status" class="form-select">
                     <option value="">All Statuses</option>
-                    @foreach(['pending','renewed','cancelled','overdue'] as $s)
-                        <option value="{{ $s }}" @selected(request('status') === $s)>{{ ucfirst($s) }}</option>
+                    @foreach(['pending' => 'Pending','sent' => 'Sent','signed' => 'Signed','overdue' => 'Overdue'] as $val => $label)
+                        <option value="{{ $val }}" @selected(request('status') === $val)>{{ $label }}</option>
                     @endforeach
                 </select>
             </div>
@@ -63,11 +63,9 @@
             <thead class="table-light">
                 <tr>
                     <th>Client</th>
-                    <th>Description</th>
-                    <th>Service</th>
-                    <th>Due Date</th>
-                    <th class="text-end">Amount</th>
-                    <th>Cycle</th>
+                    <th>Letter Type</th>
+                    <th>Last Completed</th>
+                    <th>Next Due</th>
                     <th class="text-center">Status</th>
                     <th></th>
                 </tr>
@@ -77,18 +75,16 @@
                 <tr>
                     <td><a href="{{ route('clients.show', $renewal->client) }}" class="text-decoration-none fw-medium">{{ $renewal->client->company_name }}</a></td>
                     <td>{{ $renewal->description }}</td>
-                    <td class="text-muted small">{{ $renewal->service?->name ?? '—' }}</td>
+                    <td class="text-muted small">{{ $renewal->completed_date ? $renewal->completed_date->format('d M Y') : '—' }}</td>
                     <td class="{{ $renewal->is_overdue ? 'text-danger fw-semibold' : '' }}">
-                        {{ $renewal->renewal_date->format('d M Y') }}
+                        {{ $renewal->due_date ? $renewal->due_date->format('d M Y') : '—' }}
                         @if($renewal->is_overdue) <span class="badge bg-danger ms-1">Overdue</span>@endif
                     </td>
-                    <td class="text-end">{{ $renewal->amount ? '£'.number_format($renewal->amount, 2) : '—' }}</td>
-                    <td>{{ ucfirst(str_replace('_',' ',$renewal->billing_cycle)) }}</td>
                     <td class="text-center"><span class="badge bg-{{ $renewal->status_badge }}">{{ ucfirst($renewal->status) }}</span></td>
                     <td class="text-end">
                         <a href="{{ route('renewals.edit', $renewal) }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-pencil"></i></a>
                         @can('manager')
-                        <form method="POST" action="{{ route('renewals.destroy', $renewal) }}" class="d-inline" onsubmit="return confirm('Delete this renewal?')">
+                        <form method="POST" action="{{ route('renewals.destroy', $renewal) }}" class="d-inline" onsubmit="return confirm('Delete this engagement letter?')">
                             @csrf @method('DELETE')
                             <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
                         </form>
@@ -96,7 +92,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="8" class="text-center text-muted py-4">No renewals found.</td></tr>
+                <tr><td colspan="6" class="text-center text-muted py-4">No engagement letters found.</td></tr>
                 @endforelse
             </tbody>
         </table>

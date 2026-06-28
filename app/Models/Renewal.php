@@ -8,14 +8,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Renewal extends Model
 {
     protected $fillable = [
-        'client_id', 'service_id', 'description', 'renewal_date',
-        'amount', 'status', 'billing_cycle', 'next_renewal_date', 'notes',
+        'client_id', 'description', 'completed_date', 'due_date', 'status', 'notes',
     ];
 
     protected $casts = [
-        'renewal_date' => 'date',
-        'next_renewal_date' => 'date',
-        'amount' => 'decimal:2',
+        'completed_date' => 'date',
+        'due_date'       => 'date',
     ];
 
     public function client(): BelongsTo
@@ -23,24 +21,18 @@ class Renewal extends Model
         return $this->belongsTo(Client::class);
     }
 
-    public function service(): BelongsTo
-    {
-        return $this->belongsTo(Service::class);
-    }
-
     public function getStatusBadgeAttribute(): string
     {
         return match ($this->status) {
-            'pending'   => 'warning',
-            'renewed'   => 'success',
-            'cancelled' => 'secondary',
-            'overdue'   => 'danger',
-            default     => 'secondary',
+            'sent'    => 'info',
+            'signed'  => 'success',
+            'overdue' => 'danger',
+            default   => 'warning',
         };
     }
 
     public function getIsOverdueAttribute(): bool
     {
-        return $this->status === 'pending' && $this->renewal_date->isPast();
+        return in_array($this->status, ['pending', 'sent']) && $this->due_date?->isPast();
     }
 }

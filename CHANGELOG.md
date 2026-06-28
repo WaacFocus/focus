@@ -4,6 +4,38 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.15 — 2026-06-28
+
+### Added
+- **Engagement Letter Builder** — compose professional engagement letters from selectable template sections
+  - 13 pre-written sections (Introduction, Annual Accounts, Corporation Tax, Self Assessment, VAT, Payroll, Bookkeeping, Company Secretarial, Fees, Client Responsibilities, Confidentiality, Acceptance, and more)
+  - Drag-to-reorder sections using SortableJS; tick to include/exclude
+  - Inline content editing per section
+  - Save as draft or send directly to client
+- **Client signing portal** — public `/sign/{token}` page (no login required)
+  - Displays the full letter; client enters full name and confirms agreement
+  - Records IP address, timestamp, and signer name
+- **Post-signing automation**
+  - Signed PDF generated (DomPDF) with digital signature block
+  - Client emailed a copy of the signed letter as a PDF attachment
+  - Staff notification email sent with signer details and link to view in Focus
+  - Linked renewal automatically updated to Signed with `completed_date` and next `due_date` set 12 months ahead
+- **Renewals → Engagement Letters** — repurposed renewals feature for engagement letter tracking
+  - Fields simplified: `completed_date`, `due_date` (always 12 months), status: pending / sent / signed / overdue
+  - Removed: service link, billing cycle, amount, next renewal date
+  - "Build Engagement Letter" button on renewal edit page
+- **Additional billing lines** per client (monthly / quarterly / annually / one-off)
+  - Managed within the client edit panel under the Fixed Price Agreement section
+  - Included in GRF (Gross Recurring Fee) calculation on the Billing report
+  - Annual total fee shown on the client detail page
+- **GRF metric** (Gross Recurring Fee) renamed from GRR across Billing report, PDF, and email
+- **Client panel improvements** — payment method changed to dropdown; SA billed separately and payroll invoiced separately toggles removed
+
+### Changed
+- Billing report card renamed from "Fixed Price Summary" to "Billing"
+
+---
+
 ## v1.14 — 2026-06-26
 
 ### Added

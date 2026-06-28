@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Fixed Price Summary</title>
+<title>Billing</title>
 </head>
 <body style="margin:0;padding:0;background:#f0f4f4;font-family:Arial,Helvetica,sans-serif;color:#1a1a1a;">
 
@@ -16,7 +16,7 @@
         <tr>
           <td style="background:#0C3D38;padding:28px 32px;">
             <p style="margin:0;font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.06em;text-transform:uppercase;">Focus — Accounting Practice</p>
-            <h1 style="margin:6px 0 4px;font-size:22px;color:#ffffff;font-weight:700;">Fixed Price Summary</h1>
+            <h1 style="margin:6px 0 4px;font-size:22px;color:#ffffff;font-weight:700;">Billing</h1>
             <p style="margin:0;font-size:13px;color:rgba(255,255,255,.65);">All client FPA and payroll FPA amounts &nbsp;·&nbsp; Generated {{ now()->format('d F Y') }}</p>
           </td>
         </tr>
@@ -26,22 +26,22 @@
           <td style="padding:20px 32px;">
             <table width="100%" cellpadding="0" cellspacing="0">
               <tr>
-                <td width="32%" style="text-align:center;background:#f0fdfa;border-radius:6px;padding:14px 8px;">
-                  <div style="font-size:22px;font-weight:700;color:#0C3D38;line-height:1;">£{{ number_format($totalFpa, 2) }}</div>
-                  <div style="font-size:11px;color:#666;margin-top:4px;">Total FPA</div>
-                  <div style="font-size:10px;color:#999;">{{ $clients->whereNotNull('fpa_amount')->count() }} clients</div>
+                <td width="30%" style="text-align:center;background:#f0fdfa;border-radius:6px;padding:14px 8px;">
+                  <div style="font-size:20px;font-weight:700;color:#17B4A7;line-height:1;">£{{ number_format($metrics['monthly'], 2) }}</div>
+                  <div style="font-size:11px;color:#666;margin-top:4px;">Monthly Revenue</div>
+                  <div style="font-size:10px;color:#999;">per month</div>
                 </td>
-                <td width="4%"></td>
-                <td width="32%" style="text-align:center;background:#f0fdf4;border-radius:6px;padding:14px 8px;">
-                  <div style="font-size:22px;font-weight:700;color:#16a34a;line-height:1;">£{{ number_format($totalPayrollFpa, 2) }}</div>
-                  <div style="font-size:11px;color:#666;margin-top:4px;">Total Payroll FPA</div>
-                  <div style="font-size:10px;color:#999;">{{ $clients->whereNotNull('payroll_fpa')->count() }} clients</div>
+                <td width="3%"></td>
+                <td width="30%" style="text-align:center;background:#f0fdf4;border-radius:6px;padding:14px 8px;">
+                  <div style="font-size:20px;font-weight:700;color:#16a34a;line-height:1;">£{{ number_format($metrics['annual'], 2) }}</div>
+                  <div style="font-size:11px;color:#666;margin-top:4px;">Annual Revenue</div>
+                  <div style="font-size:10px;color:#999;">per year</div>
                 </td>
-                <td width="4%"></td>
-                <td width="32%" style="text-align:center;background:#0C3D38;border-radius:6px;padding:14px 8px;">
-                  <div style="font-size:22px;font-weight:700;color:#ffffff;line-height:1;">£{{ number_format($grandTotal, 2) }}</div>
-                  <div style="font-size:11px;color:rgba(255,255,255,.65);margin-top:4px;">Grand Total</div>
-                  <div style="font-size:10px;color:rgba(255,255,255,.45);">{{ $clients->count() }} clients</div>
+                <td width="3%"></td>
+                <td width="34%" style="text-align:center;background:#0C3D38;border-radius:6px;padding:14px 8px;">
+                  <div style="font-size:20px;font-weight:700;color:#ffffff;line-height:1;">£{{ number_format($metrics['grr'], 2) }}</div>
+                  <div style="font-size:11px;color:rgba(255,255,255,.75);margin-top:4px;">GRF</div>
+                  <div style="font-size:10px;color:rgba(255,255,255,.5);">Gross Recurring Revenue</div>
                 </td>
               </tr>
             </table>

@@ -16,15 +16,15 @@ class DashboardController extends Controller
         $stats = [
             'clients'           => Client::where('status', 'active')->count(),
             'pending_tasks'     => Task::whereIn('status', ['pending', 'in_progress'])->count(),
-            'upcoming_renewals' => Renewal::where('status', 'pending')
-                ->where('renewal_date', '<=', now()->addDays(30))
+            'upcoming_renewals' => Renewal::whereIn('status', ['pending', 'sent'])
+                ->where('due_date', '<=', now()->addDays(30))
                 ->count(),
         ];
 
-        $upcoming_renewals = Renewal::with('client', 'service')
-            ->where('status', 'pending')
-            ->where('renewal_date', '<=', now()->addDays(60))
-            ->orderBy('renewal_date')
+        $upcoming_renewals = Renewal::with('client')
+            ->whereIn('status', ['pending', 'sent'])
+            ->where('due_date', '<=', now()->addDays(60))
+            ->orderBy('due_date')
             ->take(5)
             ->get();
 

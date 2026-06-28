@@ -32,25 +32,32 @@
 </head>
 <body>
 
-<h1>Fixed Price Summary</h1>
+<h1>Billing</h1>
 <div class="meta">Generated {{ now()->format('d F Y, H:i') }}</div>
 
 <table class="summary-table">
     <tr>
         <td>
-            <div class="lbl">Total FPA</div>
-            <div class="val">£{{ number_format($totalFpa, 2) }}</div>
-            <div class="sub">{{ $clients->whereNotNull('fpa_amount')->count() }} clients</div>
+            <div class="lbl">Monthly Revenue</div>
+            <div class="val" style="color:#17B4A7;">£{{ number_format($metrics['monthly'], 2) }}</div>
+            <div class="sub">Per month (billed monthly)</div>
         </td>
         <td>
-            <div class="lbl">Total Payroll FPA</div>
-            <div class="val">£{{ number_format($totalPayrollFpa, 2) }}</div>
-            <div class="sub">{{ $clients->whereNotNull('payroll_fpa')->count() }} clients</div>
+            <div class="lbl">Annual Revenue</div>
+            <div class="val" style="color:#16a34a;">£{{ number_format($metrics['annual'], 2) }}</div>
+            <div class="sub">Per year (billed annually)</div>
         </td>
+        @if($metrics['quarterly'] > 0)
+        <td>
+            <div class="lbl">Quarterly Revenue</div>
+            <div class="val" style="color:#F7941D;">£{{ number_format($metrics['quarterly'], 2) }}</div>
+            <div class="sub">Per quarter (billed quarterly)</div>
+        </td>
+        @endif
         <td class="dark-cell">
-            <div class="lbl">Combined Total</div>
-            <div class="val">£{{ number_format($grandTotal, 2) }}</div>
-            <div class="sub">All fixed prices</div>
+            <div class="lbl">GRF — Gross Recurring Revenue</div>
+            <div class="val">£{{ number_format($metrics['grf'], 2) }}</div>
+            <div class="sub">Annualised (monthly ×12{{ $metrics['quarterly'] > 0 ? ' + quarterly ×4' : '' }} + annual)</div>
         </td>
     </tr>
 </table>

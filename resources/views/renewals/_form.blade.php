@@ -11,50 +11,40 @@
             @error('client_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
         <div class="col-md-6">
-            <label class="form-label">Service (optional)</label>
-            <select name="service_id" class="form-select">
-                <option value="">— None —</option>
-                @foreach($services as $service)
-                    <option value="{{ $service->id }}" @selected(old('service_id', $renewal->service_id ?? null) == $service->id)>{{ $service->name }}</option>
-                @endforeach
-            </select>
-        </div>
-        <div class="col-12">
-            <label class="form-label">Description <span class="text-danger">*</span></label>
-            <input type="text" name="description" value="{{ old('description', $renewal->description ?? '') }}" class="form-control @error('description') is-invalid @enderror" required placeholder="e.g. Annual Accounts, Self Assessment, Payroll">
+            <label class="form-label">Letter Type <span class="text-danger">*</span></label>
+            <input type="text" name="description" value="{{ old('description', $renewal->description ?? '') }}"
+                   class="form-control @error('description') is-invalid @enderror"
+                   required list="engagementLetterTypes" placeholder="e.g. Accounts & Tax">
+            <datalist id="engagementLetterTypes">
+                <option value="Accounts &amp; Tax">
+                <option value="Self Assessment">
+                <option value="Payroll">
+                <option value="VAT Returns">
+                <option value="Bookkeeping">
+                <option value="Company Secretarial">
+                <option value="All Services">
+            </datalist>
             @error('description')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
-        <div class="col-md-4">
-            <label class="form-label">Renewal Date <span class="text-danger">*</span></label>
-            <input type="date" name="renewal_date" value="{{ old('renewal_date', isset($renewal->renewal_date) ? $renewal->renewal_date->format('Y-m-d') : '') }}" class="form-control @error('renewal_date') is-invalid @enderror" required>
-            @error('renewal_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
+        <div class="col-md-6">
+            <label class="form-label">Last Completed</label>
+            <input type="date" name="completed_date" value="{{ old('completed_date', isset($renewal->completed_date) ? $renewal->completed_date->format('Y-m-d') : '') }}" class="form-control @error('completed_date') is-invalid @enderror">
+            <div class="form-text">Setting this date will mark status as Signed and auto-set next due date.</div>
+            @error('completed_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
-        <div class="col-md-4">
-            <label class="form-label">Amount (£)</label>
-            <div class="input-group">
-                <span class="input-group-text">£</span>
-                <input type="number" name="amount" value="{{ old('amount', $renewal->amount ?? '') }}" class="form-control" step="0.01" min="0">
-            </div>
-        </div>
-        <div class="col-md-4">
-            <label class="form-label">Billing Cycle</label>
-            <select name="billing_cycle" class="form-select">
-                @foreach(['monthly' => 'Monthly','quarterly' => 'Quarterly','annually' => 'Annually','one_off' => 'One-off'] as $val => $label)
-                    <option value="{{ $val }}" @selected(old('billing_cycle', $renewal->billing_cycle ?? 'annually') === $val)>{{ $label }}</option>
-                @endforeach
-            </select>
+        <div class="col-md-6">
+            <label class="form-label">Next Due Date</label>
+            <input type="date" name="due_date" value="{{ old('due_date', isset($renewal->due_date) ? $renewal->due_date->format('Y-m-d') : '') }}" class="form-control @error('due_date') is-invalid @enderror">
+            <div class="form-text">Auto-filled as 12 months from last completed date.</div>
+            @error('due_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
         <div class="col-md-6">
             <label class="form-label">Status</label>
             <select name="status" class="form-select">
-                @foreach(['pending' => 'Pending','renewed' => 'Renewed','cancelled' => 'Cancelled','overdue' => 'Overdue'] as $val => $label)
+                @foreach(['pending' => 'Pending','sent' => 'Sent (awaiting signature)','signed' => 'Signed','overdue' => 'Overdue'] as $val => $label)
                     <option value="{{ $val }}" @selected(old('status', $renewal->status ?? 'pending') === $val)>{{ $label }}</option>
                 @endforeach
             </select>
-        </div>
-        <div class="col-md-6">
-            <label class="form-label">Next Renewal Date</label>
-            <input type="date" name="next_renewal_date" value="{{ old('next_renewal_date', isset($renewal->next_renewal_date) ? $renewal->next_renewal_date->format('Y-m-d') : '') }}" class="form-control">
         </div>
         <div class="col-12">
             <label class="form-label">Notes</label>

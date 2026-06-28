@@ -64,7 +64,20 @@
             </div>
         </div>
 
-        @if($client->fpa_amount || $client->payroll_fpa)
+        @if($client->fpa_amount || $client->payroll_fpa || $client->billingLines->isNotEmpty())
+        @php
+            $annualFee = 0;
+            $toAnnual  = fn($amt, $interval) => match($interval) {
+                'monthly'  => $amt * 12,
+                'quarterly'=> $amt * 4,
+                default    => $amt,
+            };
+            if ($client->fpa_amount)   $annualFee += $toAnnual((float)$client->fpa_amount,   $client->billing_interval   ?? 'annually');
+            if ($client->payroll_fpa)  $annualFee += $toAnnual((float)$client->payroll_fpa,  $client->payroll_billing_interval ?? 'annually');
+            foreach ($client->billingLines as $bl) {
+                $annualFee += $toAnnual((float)$bl->amount, $bl->interval);
+            }
+        @endphp
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-white fw-semibold">Fixed Price Agreement</div>
             <div class="card-body">
@@ -99,6 +112,19 @@
                 <div class="mb-2"><i class="bi bi-check-circle text-success me-1"></i><small>Payroll invoiced separately</small></div>
                 @endif
 
+                @foreach($client->billingLines as $line)
+                <div class="mb-2">
+                    <small class="text-muted">{{ $line->description ?: 'Additional line' }}:</small>
+                    <strong>£{{ number_format($line->amount, 2) }}</strong>
+                    <span class="badge bg-light text-dark ms-1">{{ ucfirst($line->interval) }}</span>
+                </div>
+                @endforeach
+
+                <hr class="my-2">
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted fw-semibold text-uppercase" style="letter-spacing:.04em;">Annual Total Fee</small>
+                    <span class="fw-bold fs-6">£{{ number_format($annualFee, 2) }}</span>
+                </div>
             </div>
         </div>
         @endif
@@ -194,21 +220,24 @@
 
         <div class="card shadow-sm">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <span class="fw-semibold">Renewals ({{ $client->renewals->count() }})</span>
-                <a href="{{ route('renewals.create', ['client_id' => $client->id]) }}" class="btn btn-sm btn-outline-primary">Add Renewal</a>
+                <span class="fw-semibold">Engagement Letters ({{ $client->renewals->count() }})</span>
+                <a href="{{ route('renewals.create', ['client_id' => $client->id]) }}" class="btn btn-sm btn-outline-primary">Add Letter</a>
             </div>
             @if($client->renewals->isNotEmpty())
             <div class="table-responsive">
                 <table class="table mb-0 align-middle">
                     <thead class="table-light">
-                        <tr><th>Description</th><th>Due</th><th>Amount</th><th>Status</th><th></th></tr>
+                        <tr><th>Letter Type</th><th>Last Completed</th><th>Next Due</th><th>Status</th><th></th></tr>
                     </thead>
                     <tbody>
                         @foreach($client->renewals as $renewal)
                         <tr>
                             <td>{{ $renewal->description }}</td>
-                            <td class="{{ $renewal->is_overdue ? 'text-danger fw-semibold' : '' }}">{{ $renewal->renewal_date->format('d M Y') }}</td>
-                            <td>{{ $renewal->amount ? '£'.number_format($renewal->amount, 2) : '—' }}</td>
+                            <td class="text-muted small">{{ $renewal->completed_date ? $renewal->completed_date->format('d M Y') : '—' }}</td>
+                            <td class="{{ $renewal->is_overdue ? 'text-danger fw-semibold' : '' }}">
+                                {{ $renewal->due_date ? $renewal->due_date->format('d M Y') : '—' }}
+                                @if($renewal->is_overdue)<span class="badge bg-danger ms-1">Overdue</span>@endif
+                            </td>
                             <td><span class="badge bg-{{ $renewal->status_badge }}">{{ ucfirst($renewal->status) }}</span></td>
                             <td><a href="{{ route('renewals.edit', $renewal) }}" class="btn btn-sm btn-outline-secondary">Edit</a></td>
                         </tr>
@@ -217,7 +246,7 @@
                 </table>
             </div>
             @else
-            <div class="card-body text-muted small">No renewals yet.</div>
+            <div class="card-body text-muted small">No engagement letters yet.</div>
             @endif
         </div>
     </div>
