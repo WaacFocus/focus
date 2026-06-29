@@ -21,14 +21,20 @@
 
 @push('scripts')
 <script>
-document.getElementById('clientForm').addEventListener('submit', function (e) {
-    if (!this.checkValidity()) {
-        e.preventDefault();
+(function () {
+    var form = document.getElementById('clientForm');
+    form.querySelectorAll('input, select, textarea').forEach(function (el, i) {
+        el.setAttribute('autocomplete', 'focus-off-' + i);
+    });
+    form.addEventListener('submit', function (e) {
+        if (!this.checkValidity()) {
+            e.preventDefault();
+            this.classList.add('was-validated');
+            var first = this.querySelector(':invalid');
+            if (first) { first.scrollIntoView({ behavior: 'smooth', block: 'center' }); first.focus(); }
+        }
         this.classList.add('was-validated');
-        var first = this.querySelector(':invalid');
-        if (first) { first.scrollIntoView({ behavior: 'smooth', block: 'center' }); first.focus(); }
-    }
-    this.classList.add('was-validated');
-});
+    });
+})();
 </script>
 @endpush

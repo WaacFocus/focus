@@ -831,6 +831,16 @@
         else input.value = '';
     };
 
+    // Chromium (Edge/Chrome) ignores autocomplete="off" on address-like fields.
+    // Setting an unrecognised token prevents their autofill heuristics.
+    function disableAutofill() {
+        form.querySelectorAll('input, select, textarea').forEach((el, i) => {
+            el.setAttribute('autocomplete', 'focus-off-' + i);
+        });
+    }
+    disableAutofill();
+    panelEl.addEventListener('shown.bs.offcanvas', disableAutofill);
+
     panelEl.addEventListener('hidden.bs.offcanvas', function () {
         form.reset();
         clearErrors();
