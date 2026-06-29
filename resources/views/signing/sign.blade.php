@@ -37,7 +37,7 @@
             <div class="mt-1" style="font-size:.85rem;opacity:.8;">Please read carefully and sign below</div>
         </div>
         <div class="letter-body">
-            <p><strong>Dear {{ $letter->client->contact_formal }},</strong></p>
+            <p><strong>Dear {{ $letter->client->contact_first_name_greeting }},</strong></p>
             @foreach($letter->sections as $section)
             <div class="letter-section">
                 <h3>{{ $section['title'] }}</h3>

@@ -101,6 +101,11 @@
                     <div class="invalid-feedback" data-field="contact_first_name"></div>
                 </div>
                 <div class="col-5">
+                    <label class="form-label small fw-semibold">Middle Name</label>
+                    <input type="text" name="contact_middle_name" class="form-control form-control-sm" placeholder="Middle name">
+                    <div class="invalid-feedback" data-field="contact_middle_name"></div>
+                </div>
+                <div class="col-5">
                     <label class="form-label small fw-semibold">Surname</label>
                     <input type="text" name="contact_last_name" class="form-control form-control-sm" placeholder="Surname">
                     <div class="invalid-feedback" data-field="contact_last_name"></div>
@@ -637,11 +642,13 @@
         // Populate contact fields from selected main contact
         if (selectedContactIdx >= 0 && chPendingOfficers[selectedContactIdx]) {
             const contact    = chPendingOfficers[selectedContactIdx];
-            const nameParts  = contact.name.trim().split(' ');
+            const nameParts  = contact.name.trim().split(/\s+/).filter(Boolean);
             const lastName   = nameParts.length > 1 ? nameParts.pop() : '';
-            const firstName  = nameParts.join(' ');
-            setField('contact_first_name', firstName);
-            setField('contact_last_name',  lastName);
+            const firstName  = nameParts.shift() ?? '';
+            const middleName = nameParts.join(' ');
+            setField('contact_first_name',  firstName);
+            setField('contact_middle_name', middleName);
+            setField('contact_last_name',   lastName);
         }
 
         // Populate form fields
@@ -746,7 +753,7 @@
             const data = await res.json();
 
             ['client_code','company_name','client_type_id','status','account_manager',
-             'contact_title','contact_first_name','contact_last_name',
+             'contact_title','contact_first_name','contact_middle_name','contact_last_name',
              'email','phone','address','town','county','postcode',
              'fpa_amount','billing_interval','payment_method',
              'vat_number','company_number','utr_number','paye_ref','notes',

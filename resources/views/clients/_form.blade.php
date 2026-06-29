@@ -67,6 +67,12 @@
                     @error('contact_first_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <div class="col-md-2">
+                    <label class="form-label">Middle Name</label>
+                    <input type="text" name="contact_middle_name" value="{{ old('contact_middle_name', $client->contact_middle_name ?? '') }}"
+                           class="form-control @error('contact_middle_name') is-invalid @enderror" placeholder="Middle name">
+                    @error('contact_middle_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+                <div class="col-md-2">
                     <label class="form-label">Surname</label>
                     <input type="text" name="contact_last_name" value="{{ old('contact_last_name', $client->contact_last_name ?? '') }}"
                            class="form-control @error('contact_last_name') is-invalid @enderror" placeholder="Surname">

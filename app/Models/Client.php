@@ -11,7 +11,7 @@ class Client extends Model
 {
     protected $fillable = [
         'client_code', 'company_name', 'client_type_id',
-        'contact_title', 'contact_first_name', 'contact_last_name',
+        'contact_title', 'contact_first_name', 'contact_middle_name', 'contact_last_name',
         'email', 'phone',
         'address', 'town', 'county', 'postcode',
         'vat_number', 'company_number', 'utr_number', 'paye_ref',
@@ -71,6 +71,7 @@ class Client extends Model
         $parts = array_filter([
             $this->contact_title,
             $this->contact_first_name,
+            $this->contact_middle_name,
             $this->contact_last_name,
         ]);
         return $parts ? implode(' ', $parts) : null;

@@ -4,6 +4,17 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.24 — 2026-06-29
+
+### Added
+- **Middle name field** — clients now have a separate Contact Middle Name field (full edit form, offcanvas panel, and CH officer import all populate it correctly)
+- When importing a CH officer as a client, names like "David John Woods" now split into first = "David", middle = "John", last = "Woods" instead of cramming middle names into the first name field
+
+### Changed
+- **Engagement letter sign page** — greeting now uses first name only ("Dear David,") instead of formal salutation ("Dear Mr Woods,")
+
+---
+
 ## v1.23 — 2026-06-29
 
 ### Added

@@ -48,6 +48,7 @@ class ClientController extends Controller
             'client_type_id'             => 'required|exists:client_types,id',
             'contact_title'              => 'nullable|string|max:20',
             'contact_first_name'         => 'nullable|string|max:100',
+            'contact_middle_name'        => 'nullable|string|max:100',
             'contact_last_name'          => 'nullable|string|max:100',
             'email'                      => 'nullable|email|max:255',
             'phone'                      => 'nullable|string|max:50',
@@ -137,6 +138,7 @@ class ClientController extends Controller
             'client_type_id'             => 'required|exists:client_types,id',
             'contact_title'              => 'nullable|string|max:20',
             'contact_first_name'         => 'nullable|string|max:100',
+            'contact_middle_name'        => 'nullable|string|max:100',
             'contact_last_name'          => 'nullable|string|max:100',
             'email'                      => 'nullable|email|max:255',
             'phone'                      => 'nullable|string|max:50',
@@ -242,21 +244,23 @@ class ClientController extends Controller
 
     private function createClientFromOfficer(array $d): void
     {
-        $fullName  = trim($d['name'] ?? '');
-        $parts     = explode(' ', $fullName);
-        $lastName  = count($parts) > 1 ? array_pop($parts) : '';
-        $firstName = implode(' ', $parts);
+        $fullName   = trim($d['name'] ?? '');
+        $parts      = array_values(array_filter(explode(' ', $fullName)));
+        $lastName   = count($parts) > 1 ? array_pop($parts) : '';
+        $firstName  = array_shift($parts) ?? $fullName;
+        $middleName = implode(' ', $parts);
 
         try {
             $individualType = \App\Models\ClientType::whereRaw('LOWER(name) = ?', ['individual'])->first();
 
             $newClient = Client::create([
-                'client_code'        => $d['client_code'],
-                'company_name'       => $fullName,
-                'contact_first_name' => $firstName,
-                'contact_last_name'  => $lastName,
-                'status'             => 'active',
-                'client_type_id'     => $individualType?->id,
+                'client_code'          => $d['client_code'],
+                'company_name'         => $fullName,
+                'contact_first_name'   => $firstName,
+                'contact_middle_name'  => $middleName ?: null,
+                'contact_last_name'    => $lastName,
+                'status'               => 'active',
+                'client_type_id'       => $individualType?->id,
             ]);
 
             if (! empty($d['sa_required'])) {
