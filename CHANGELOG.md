@@ -4,6 +4,14 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.23 — 2026-06-29
+
+### Added
+- **Main contact selection** — radio button per officer in the confirmation modal; selecting one populates the company's contact first/last name fields automatically
+- **Self Assessment flag** — SA checkbox per officer; stored on the director record (shown as "SA" badge on client detail page); if the officer is also created as a client, the "Self Assessment" service is automatically attached if it exists in the services list
+
+---
+
 ## v1.22 — 2026-06-29
 
 ### Added

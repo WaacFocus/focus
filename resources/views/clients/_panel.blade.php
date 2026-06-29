@@ -514,13 +514,29 @@
                     <p class="small text-muted mb-2">Tick any officer to also create them as an individual client record.</p>
                     <div class="table-responsive">
                     <table class="table table-sm mb-0 align-middle" style="font-size:.85rem;">
-                        <thead class="table-light"><tr><th>Name</th><th>Role</th><th>Appointed</th><th>Create as client?</th></tr></thead>
+                        <thead class="table-light">
+                            <tr>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Appointed</th>
+                                <th class="text-center" title="Set as main contact for the company">Contact?</th>
+                                <th class="text-center" title="Self Assessment required">SA?</th>
+                                <th>Create as client?</th>
+                            </tr>
+                        </thead>
                         <tbody>
                         ${chPendingOfficers.map((o, i) => `
                             <tr data-officer="${i}">
                                 <td class="fw-semibold">${o.name}</td>
                                 <td class="text-muted">${chRoleLabel(o.role)}</td>
                                 <td class="text-muted">${o.appointed_on ? new Date(o.appointed_on).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—'}</td>
+                                <td class="text-center">
+                                    <input type="radio" class="form-check-input officer-contact-rb"
+                                           name="chMainContact" value="${i}">
+                                </td>
+                                <td class="text-center">
+                                    <input type="checkbox" class="form-check-input officer-sa-cb" value="${i}">
+                                </td>
                                 <td>
                                     <div class="form-check mb-1">
                                         <input class="form-check-input officer-create-cb" type="checkbox"
@@ -579,13 +595,20 @@
         if (!chPendingData) return;
         const data = chPendingData;
 
-        // Collect create-as-client selections before closing the modal
+        // Collect all per-officer selections before closing the modal
+        const selectedContactIdx = (() => {
+            const rb = document.querySelector('#chModalBody input[name="chMainContact"]:checked');
+            return rb ? parseInt(rb.value) : -1;
+        })();
+
         const officersWithFlags = chPendingOfficers.map((o, i) => {
             const row       = document.querySelector(`#chModalBody tr[data-officer="${i}"]`);
             const cb        = row ? row.querySelector('.officer-create-cb') : null;
+            const saCb      = row ? row.querySelector('.officer-sa-cb') : null;
             const codeInput = row ? row.querySelector('.officer-client-code input') : null;
             return Object.assign({}, o, {
                 create_as_client: cb ? cb.checked : false,
+                sa_required:      saCb ? saCb.checked : false,
                 client_code:      codeInput ? codeInput.value.trim() : '',
             });
         });
@@ -609,6 +632,16 @@
                 if (input) { input.classList.add('is-invalid'); input.focus(); }
             });
             return;
+        }
+
+        // Populate contact fields from selected main contact
+        if (selectedContactIdx >= 0 && chPendingOfficers[selectedContactIdx]) {
+            const contact    = chPendingOfficers[selectedContactIdx];
+            const nameParts  = contact.name.trim().split(' ');
+            const lastName   = nameParts.length > 1 ? nameParts.pop() : '';
+            const firstName  = nameParts.join(' ');
+            setField('contact_first_name', firstName);
+            setField('contact_last_name',  lastName);
         }
 
         // Populate form fields

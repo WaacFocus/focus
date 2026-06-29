@@ -212,6 +212,7 @@ class ClientController extends Controller
                 'nationality'          => $d['nationality'] ?? null,
                 'occupation'           => $d['occupation'] ?? null,
                 'country_of_residence' => $d['country_of_residence'] ?? null,
+                'sa_required'          => ! empty($d['sa_required']),
             ]);
 
             if (! empty($d['create_as_client']) && ! empty($d['client_code'])) {
@@ -228,13 +229,24 @@ class ClientController extends Controller
         $firstName = implode(' ', $parts);
 
         try {
-            Client::create([
+            $newClient = Client::create([
                 'client_code'        => $d['client_code'],
                 'company_name'       => $fullName,
                 'contact_first_name' => $firstName,
                 'contact_last_name'  => $lastName,
                 'status'             => 'active',
             ]);
+
+            if (! empty($d['sa_required'])) {
+                $saService = \App\Models\Service::whereRaw('LOWER(name) LIKE ?', ['%self assessment%'])
+                    ->where('is_active', true)
+                    ->first();
+                if ($saService) {
+                    $newClient->services()->attach($saService->id, [
+                        'start_date' => now()->format('Y-m-d'),
+                    ]);
+                }
+            }
         } catch (\Throwable) {
             // Duplicate client_code or other DB constraint — skip silently
         }

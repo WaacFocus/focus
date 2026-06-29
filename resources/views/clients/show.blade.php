@@ -163,7 +163,12 @@
                 <div class="list-group-item px-3 py-2">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
-                            <div class="fw-semibold">{{ $director->name }}</div>
+                            <div class="fw-semibold">
+                                {{ $director->name }}
+                                @if($director->sa_required)
+                                    <span class="badge bg-info text-dark ms-1" style="font-size:.7rem;">SA</span>
+                                @endif
+                            </div>
                             <small class="text-muted">{{ $director->getRoleLabel() }}</small>
                             @if($director->occupation)
                                 <small class="text-muted"> · {{ $director->occupation }}</small>
