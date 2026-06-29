@@ -7,12 +7,13 @@ use Illuminate\Support\Facades\Log;
 
 class Smtp2goService
 {
-    public function send(string $toAddress, string $toName, string $subject, string $htmlBody): bool
+    public function send(string $toAddress, string $toName, string $subject, string $htmlBody, ?string $fromName = null): bool
     {
+        $senderName = $fromName ?? config('services.smtp2go.from_name');
         $response = Http::asJson()->post('https://api.smtp2go.com/v3/email/send', [
             'api_key' => config('services.smtp2go.key'),
             'to'      => ["{$toName} <{$toAddress}>"],
-            'sender'  => config('services.smtp2go.from_name') . ' <' . config('services.smtp2go.from_address') . '>',
+            'sender'  => $senderName . ' <' . config('services.smtp2go.from_address') . '>',
             'subject' => $subject,
             'html_body' => $htmlBody,
         ]);
@@ -31,12 +32,14 @@ class Smtp2goService
 
     public function sendWithAttachment(
         string $toAddress, string $toName, string $subject, string $htmlBody,
-        string $filename, string $fileContent, string $mimeType = 'application/pdf'
+        string $filename, string $fileContent, string $mimeType = 'application/pdf',
+        ?string $fromName = null
     ): bool {
+        $senderName = $fromName ?? config('services.smtp2go.from_name');
         $response = Http::asJson()->post('https://api.smtp2go.com/v3/email/send', [
             'api_key'   => config('services.smtp2go.key'),
             'to'        => ["{$toName} <{$toAddress}>"],
-            'sender'    => config('services.smtp2go.from_name') . ' <' . config('services.smtp2go.from_address') . '>',
+            'sender'    => $senderName . ' <' . config('services.smtp2go.from_address') . '>',
             'subject'   => $subject,
             'html_body' => $htmlBody,
             'attachments' => [

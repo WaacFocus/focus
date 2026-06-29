@@ -51,11 +51,26 @@
                         @error('client_type_id'){{ $message }}@else Please select a client type.@enderror
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label">Contact Name</label>
-                    <input type="text" name="contact_name" value="{{ old('contact_name', $client->contact_name ?? '') }}"
-                           class="form-control @error('contact_name') is-invalid @enderror">
-                    @error('contact_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                <div class="col-md-2">
+                    <label class="form-label">Title</label>
+                    <select name="contact_title" class="form-select @error('contact_title') is-invalid @enderror">
+                        <option value=""></option>
+                        @foreach(['Mr','Mrs','Miss','Ms','Dr','Prof','Sir','Rev'] as $t)
+                            <option value="{{ $t }}" @selected(old('contact_title', $client->contact_title ?? '') === $t)>{{ $t }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">First Name</label>
+                    <input type="text" name="contact_first_name" value="{{ old('contact_first_name', $client->contact_first_name ?? '') }}"
+                           class="form-control @error('contact_first_name') is-invalid @enderror" placeholder="First name">
+                    @error('contact_first_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label">Surname</label>
+                    <input type="text" name="contact_last_name" value="{{ old('contact_last_name', $client->contact_last_name ?? '') }}"
+                           class="form-control @error('contact_last_name') is-invalid @enderror" placeholder="Surname">
+                    @error('contact_last_name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <div class="col-md-6">
                     <label class="form-label">Account Manager</label>
@@ -140,45 +155,6 @@
                         class="form-control @error('payment_method') is-invalid @enderror"
                         placeholder="e.g. Direct Debit, BACS">
                     @error('payment_method')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                </div>
-                <div class="col-md-6 d-flex align-items-center">
-                    <div class="form-check form-switch mt-2">
-                        <input class="form-check-input" type="checkbox" name="sa_billed_separately" id="sa_billed_separately" value="1"
-                            @checked(old('sa_billed_separately', $client->sa_billed_separately ?? false))>
-                        <label class="form-check-label" for="sa_billed_separately">SA's billed separately to FPA</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card shadow-sm mt-4">
-            <div class="card-header bg-white fw-semibold">Payroll FPA</div>
-            <div class="card-body row g-3">
-                <div class="col-md-4">
-                    <label class="form-label">Payroll FPA Amount (£)</label>
-                    <input type="number" name="payroll_fpa" step="0.01" min="0"
-                        value="{{ old('payroll_fpa', $client->payroll_fpa ?? '') }}"
-                        class="form-control @error('payroll_fpa') is-invalid @enderror"
-                        placeholder="0.00">
-                    @error('payroll_fpa')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Payroll Billing Interval</label>
-                    <select name="payroll_billing_interval" class="form-select @error('payroll_billing_interval') is-invalid @enderror">
-                        <option value="">— Select —</option>
-                        <option value="monthly"   @selected(old('payroll_billing_interval', $client->payroll_billing_interval ?? '') === 'monthly')>Monthly</option>
-                        <option value="quarterly" @selected(old('payroll_billing_interval', $client->payroll_billing_interval ?? '') === 'quarterly')>Quarterly</option>
-                        <option value="annually"  @selected(old('payroll_billing_interval', $client->payroll_billing_interval ?? '') === 'annually')>Annually</option>
-                        <option value="one-off"   @selected(old('payroll_billing_interval', $client->payroll_billing_interval ?? '') === 'one-off')>One-off</option>
-                    </select>
-                    @error('payroll_billing_interval')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                </div>
-                <div class="col-md-4 d-flex align-items-center">
-                    <div class="form-check form-switch mt-2">
-                        <input class="form-check-input" type="checkbox" name="payroll_invoiced_separately" id="payroll_invoiced_separately" value="1"
-                            @checked(old('payroll_invoiced_separately', $client->payroll_invoiced_separately ?? false))>
-                        <label class="form-check-label" for="payroll_invoiced_separately">Payroll invoiced separately</label>
-                    </div>
                 </div>
             </div>
         </div>

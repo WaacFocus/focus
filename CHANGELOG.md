@@ -4,6 +4,13 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.18 — 2026-06-29
+
+### Removed
+- **Payroll section removed from clients** — `payroll_fpa`, `payroll_billing_interval`, `sa_billed_separately`, and `payroll_invoiced_separately` fields dropped from database, client forms, client detail view, reports, PDF export, CSV export, email report, and backup import/export
+
+---
+
 ## v1.17 — 2026-06-29
 
 ### Changed

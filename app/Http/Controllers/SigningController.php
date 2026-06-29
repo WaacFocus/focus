@@ -68,18 +68,22 @@ class SigningController extends Controller
                 'Your Signed Engagement Letter',
                 view('emails.engagement-letter-signed-client', compact('letter'))->render(),
                 $filename,
-                $pdfContent
+                $pdfContent,
+                'application/pdf',
+                'Woods Accounting & Consulting'
             );
         }
 
-        // Notify staff member who sent it
+        // Notify staff member who sent it — include signed PDF attachment
         $staffUser = $letter->sentBy ?? User::where('role', 'manager')->orderBy('id')->first();
         if ($staffUser?->email) {
-            $smtp->send(
+            $smtp->sendWithAttachment(
                 $staffUser->email,
                 $staffUser->name,
                 'Engagement Letter Signed — ' . $client->company_name,
-                view('emails.engagement-letter-signed-staff', compact('letter'))->render()
+                view('emails.engagement-letter-signed-staff', compact('letter'))->render(),
+                $filename,
+                $pdfContent
             );
         }
 

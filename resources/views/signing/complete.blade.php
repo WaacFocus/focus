@@ -6,27 +6,44 @@
     <title>Engagement Letter Signed</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <style>body { background: #f4f7f6; }</style>
+    <style>
+        body { background: #f0fafa; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        .brand-header { background: #fff; border-bottom: 3px solid #3DBFB8; padding: 1rem 2rem; margin-bottom: 2.5rem; text-align: center; }
+        .brand-header img { height: 42px; }
+    </style>
 </head>
 <body>
-<div class="container py-5" style="max-width:560px;">
+
+<div class="brand-header">
+    <img src="{{ asset('images/woods-logo.png') }}" alt="Woods Accounting & Consulting">
+</div>
+
+<div class="container pb-5" style="max-width:520px;">
     <div class="card shadow-sm text-center p-5">
         <div class="mb-4">
             <div class="rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
-                 style="width:80px;height:80px;background:#0C3D38;">
+                 style="width:80px;height:80px;background:#3DBFB8;">
                 <i class="bi bi-check-lg text-white" style="font-size:2.2rem;"></i>
             </div>
-            <h2 class="fw-bold">Letter Signed</h2>
+            <h2 class="fw-bold" style="color:#3DBFB8;">Letter Signed</h2>
             <p class="text-muted">Thank you, <strong>{{ $letter->signed_name }}</strong>. Your engagement letter has been signed successfully.</p>
         </div>
-        <div class="bg-light rounded p-3 text-start mb-4">
-            <div class="small text-muted mb-1">Signed on</div>
-            <div class="fw-semibold">{{ $letter->signed_at->format('d F Y \a\t H:i') }}</div>
-            <div class="small text-muted mt-2 mb-1">IP Address</div>
-            <code>{{ $letter->signed_ip }}</code>
+        <div class="rounded p-3 text-start mb-4" style="background:#f0fafa;border:1px solid #c8eeec;">
+            <div class="small text-muted mb-1" style="text-transform:uppercase;letter-spacing:.05em;font-size:.7rem;">Signing Details</div>
+            <table class="w-100" style="font-size:.9rem;">
+                <tr>
+                    <td class="text-muted py-1" style="width:110px;">Signed on</td>
+                    <td class="fw-semibold">{{ $letter->signed_at->format('d F Y \a\t H:i') }}</td>
+                </tr>
+                <tr>
+                    <td class="text-muted py-1">IP Address</td>
+                    <td><code>{{ $letter->signed_ip }}</code></td>
+                </tr>
+            </table>
         </div>
-        <p class="text-muted small">A copy of the signed engagement letter has been emailed to you for your records.</p>
+        <p class="text-muted small mb-0">A copy of the signed engagement letter has been emailed to you for your records.</p>
     </div>
 </div>
+
 </body>
 </html>

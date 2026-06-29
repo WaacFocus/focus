@@ -117,9 +117,6 @@
                     <th>Code</th>
                     <th class="text-end">FPA Amount</th>
                     <th>Interval</th>
-                    <th class="text-end">Payroll FPA</th>
-                    <th>Payroll Interval</th>
-                    <th class="text-end fw-semibold">Client Total</th>
                 </tr>
             </thead>
             <tbody>
@@ -139,20 +136,9 @@
                             <span class="text-muted">—</span>
                         @endif
                     </td>
-                    <td class="text-end">{{ $client->payroll_fpa ? '£'.number_format($client->payroll_fpa, 2) : '—' }}</td>
-                    <td>
-                        @if($client->payroll_billing_interval)
-                            <span class="badge bg-light text-dark">{{ ucfirst($client->payroll_billing_interval) }}</span>
-                        @else
-                            <span class="text-muted">—</span>
-                        @endif
-                    </td>
-                    <td class="text-end fw-semibold">
-                        £{{ number_format(($client->fpa_amount ?? 0) + ($client->payroll_fpa ?? 0), 2) }}
-                    </td>
                 </tr>
                 @empty
-                <tr><td colspan="7" class="text-center text-muted py-4">No clients have fixed price amounts set.</td></tr>
+                <tr><td colspan="4" class="text-center text-muted py-4">No clients have fixed price amounts set.</td></tr>
                 @endforelse
             </tbody>
             @if($clients->isNotEmpty())
@@ -161,9 +147,6 @@
                     <td colspan="2">Totals</td>
                     <td class="text-end">£{{ number_format($totalFpa, 2) }}</td>
                     <td></td>
-                    <td class="text-end">£{{ number_format($totalPayrollFpa, 2) }}</td>
-                    <td></td>
-                    <td class="text-end">£{{ number_format($grandTotal, 2) }}</td>
                 </tr>
             </tfoot>
             @endif
@@ -180,18 +163,14 @@
             <thead class="table-light">
                 <tr>
                     <th>Billing Interval</th>
-                    <th class="text-end">FPA Total</th>
-                    <th class="text-end">Payroll FPA Total</th>
-                    <th class="text-end fw-semibold">Combined</th>
+                    <th class="text-end fw-semibold">FPA Total</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach($byInterval as $interval => $group)
                 <tr>
                     <td><span class="badge bg-secondary">{{ ucfirst($interval) }}</span></td>
-                    <td class="text-end">£{{ number_format($group->sum('fpa_amount'), 2) }}</td>
-                    <td class="text-end">£{{ number_format($group->sum('payroll_fpa'), 2) }}</td>
-                    <td class="text-end fw-semibold">£{{ number_format($group->sum('fpa_amount') + $group->sum('payroll_fpa'), 2) }}</td>
+                    <td class="text-end fw-semibold">£{{ number_format($group->sum('fpa_amount'), 2) }}</td>
                 </tr>
                 @endforeach
             </tbody>

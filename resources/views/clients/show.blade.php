@@ -64,7 +64,7 @@
             </div>
         </div>
 
-        @if($client->fpa_amount || $client->payroll_fpa || $client->billingLines->isNotEmpty())
+        @if($client->fpa_amount || $client->billingLines->isNotEmpty())
         @php
             $annualFee = 0;
             $toAnnual  = fn($amt, $interval) => match($interval) {
@@ -72,8 +72,7 @@
                 'quarterly'=> $amt * 4,
                 default    => $amt,
             };
-            if ($client->fpa_amount)   $annualFee += $toAnnual((float)$client->fpa_amount,   $client->billing_interval   ?? 'annually');
-            if ($client->payroll_fpa)  $annualFee += $toAnnual((float)$client->payroll_fpa,  $client->payroll_billing_interval ?? 'annually');
+            if ($client->fpa_amount) $annualFee += $toAnnual((float)$client->fpa_amount, $client->billing_interval ?? 'annually');
             foreach ($client->billingLines as $bl) {
                 $annualFee += $toAnnual((float)$bl->amount, $bl->interval);
             }
@@ -93,23 +92,8 @@
                 @if($client->fpa_year_end)
                 <div class="mb-2"><small class="text-muted">Year End:</small> {{ $client->fpa_year_end->format('d M Y') }}</div>
                 @endif
-                @if($client->payroll_fpa)
-                <div class="mb-2">
-                    <small class="text-muted">Payroll FPA:</small>
-                    <strong>£{{ number_format($client->payroll_fpa, 2) }}</strong>
-                    @if($client->payroll_billing_interval)
-                        <span class="badge bg-light text-dark ms-1">{{ ucfirst($client->payroll_billing_interval) }}</span>
-                    @endif
-                </div>
-                @endif
                 @if($client->payment_method)
                 <div class="mb-2"><small class="text-muted">Payment:</small> {{ $client->payment_method }}</div>
-                @endif
-                @if($client->sa_billed_separately)
-                <div class="mb-2"><i class="bi bi-check-circle text-success me-1"></i><small>SA billed separately</small></div>
-                @endif
-                @if($client->payroll_invoiced_separately)
-                <div class="mb-2"><i class="bi bi-check-circle text-success me-1"></i><small>Payroll invoiced separately</small></div>
                 @endif
 
                 @foreach($client->billingLines as $line)

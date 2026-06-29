@@ -8,6 +8,7 @@ use App\Models\EngagementLetterTemplate;
 use App\Models\Renewal;
 use App\Models\User;
 use App\Services\Smtp2goService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -114,6 +115,14 @@ class EngagementLetterController extends Controller
         return $this->doSend($engagementLetter, $client);
     }
 
+    public function pdf(EngagementLetter $engagementLetter)
+    {
+        $engagementLetter->load('client');
+        $pdf      = Pdf::loadView('pdf.engagement-letter', ['letter' => $engagementLetter])->setPaper('A4', 'portrait');
+        $filename = 'engagement-letter-' . $engagementLetter->client->company_name . '-' . now()->format('Y-m-d') . '.pdf';
+        return $pdf->download($filename);
+    }
+
     public function destroy(EngagementLetter $engagementLetter)
     {
         abort_unless(auth()->user()->isManager(), 403);
@@ -150,7 +159,8 @@ class EngagementLetterController extends Controller
             $client->email,
             $client->contact_name ?: $client->company_name,
             $letter->subject,
-            $emailHtml
+            $emailHtml,
+            'Woods Accounting & Consulting'
         );
 
         return redirect()->route('engagement-letters.show', $letter)

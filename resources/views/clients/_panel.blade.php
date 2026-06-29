@@ -80,10 +80,29 @@
                     <input type="text" name="account_manager" class="form-control form-control-sm" placeholder="Name">
                     <div class="invalid-feedback" data-field="account_manager"></div>
                 </div>
-                <div class="col-6">
-                    <label class="form-label small fw-semibold">Contact Name</label>
-                    <input type="text" name="contact_name" class="form-control form-control-sm" placeholder="Name">
-                    <div class="invalid-feedback" data-field="contact_name"></div>
+                <div class="col-2">
+                    <label class="form-label small fw-semibold">Title</label>
+                    <select name="contact_title" class="form-select form-select-sm">
+                        <option value=""></option>
+                        <option value="Mr">Mr</option>
+                        <option value="Mrs">Mrs</option>
+                        <option value="Miss">Miss</option>
+                        <option value="Ms">Ms</option>
+                        <option value="Dr">Dr</option>
+                        <option value="Prof">Prof</option>
+                        <option value="Sir">Sir</option>
+                        <option value="Rev">Rev</option>
+                    </select>
+                </div>
+                <div class="col-5">
+                    <label class="form-label small fw-semibold">First Name</label>
+                    <input type="text" name="contact_first_name" class="form-control form-control-sm" placeholder="First name">
+                    <div class="invalid-feedback" data-field="contact_first_name"></div>
+                </div>
+                <div class="col-5">
+                    <label class="form-label small fw-semibold">Surname</label>
+                    <input type="text" name="contact_last_name" class="form-control form-control-sm" placeholder="Surname">
+                    <div class="invalid-feedback" data-field="contact_last_name"></div>
                 </div>
                 <div class="col-6">
                     <label class="form-label small fw-semibold">Email</label>
@@ -149,28 +168,6 @@
                         <option value="Cheque">Cheque</option>
                     </select>
                     <div class="invalid-feedback" data-field="payment_method"></div>
-                </div>
-            </div>
-
-            <hr class="my-3">
-
-            {{-- Payroll --}}
-            <p class="text-muted small fw-semibold text-uppercase mb-2" style="letter-spacing:.05em;">Payroll</p>
-            <div class="row g-3 mb-3">
-                <div class="col-4">
-                    <label class="form-label small fw-semibold">Payroll FPA (£)</label>
-                    <input type="number" name="payroll_fpa" step="0.01" min="0" class="form-control form-control-sm" placeholder="0.00">
-                    <div class="invalid-feedback" data-field="payroll_fpa"></div>
-                </div>
-                <div class="col-4">
-                    <label class="form-label small fw-semibold">Payroll Interval</label>
-                    <select name="payroll_billing_interval" class="form-select form-select-sm">
-                        <option value="">— None —</option>
-                        <option value="monthly">Monthly</option>
-                        <option value="quarterly">Quarterly</option>
-                        <option value="annually">Annually</option>
-                        <option value="one-off">One-off</option>
-                    </select>
                 </div>
             </div>
 
@@ -448,16 +445,14 @@
             });
             const data = await res.json();
 
-            ['client_code','company_name','client_type_id','status','account_manager','contact_name',
+            ['client_code','company_name','client_type_id','status','account_manager',
+             'contact_title','contact_first_name','contact_last_name',
              'email','phone','address','town','county','postcode',
              'fpa_amount','billing_interval','payment_method',
-             'payroll_fpa','payroll_billing_interval',
              'vat_number','company_number','utr_number','paye_ref','notes']
                 .forEach(f => setField(f, data[f]));
 
             setField('fpa_year_end', data.fpa_year_end ? data.fpa_year_end.substring(0, 10) : '');
-            setField('sa_billed_separately',       data.sa_billed_separately);
-            setField('payroll_invoiced_separately', data.payroll_invoiced_separately);
 
             clearBillingLines();
             if (data.billing_lines && data.billing_lines.length) {

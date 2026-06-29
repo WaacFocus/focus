@@ -18,7 +18,8 @@ class ClientController extends Controller
         if ($request->filled('search')) {
             $s = $request->search;
             $query->where(fn ($q) => $q->where('company_name', 'like', "%$s%")
-                ->orWhere('contact_name', 'like', "%$s%")
+                ->orWhere('contact_first_name', 'like', "%$s%")
+                ->orWhere('contact_last_name', 'like', "%$s%")
                 ->orWhere('email', 'like', "%$s%"));
         }
 
@@ -45,7 +46,9 @@ class ClientController extends Controller
             'client_code'                => 'required|string|max:50',
             'company_name'               => 'required|string|max:255',
             'client_type_id'             => 'required|exists:client_types,id',
-            'contact_name'               => 'nullable|string|max:255',
+            'contact_title'              => 'nullable|string|max:20',
+            'contact_first_name'         => 'nullable|string|max:100',
+            'contact_last_name'          => 'nullable|string|max:100',
             'email'                      => 'nullable|email|max:255',
             'phone'                      => 'nullable|string|max:50',
             'address'                    => 'nullable|string|max:255',
@@ -62,10 +65,6 @@ class ClientController extends Controller
             'fpa_year_end'               => 'nullable|date',
             'fpa_amount'                 => 'nullable|numeric|min:0',
             'billing_interval'           => 'nullable|in:monthly,quarterly,annually,one-off',
-            'sa_billed_separately'       => 'nullable|boolean',
-            'payroll_invoiced_separately' => 'nullable|boolean',
-            'payroll_fpa'                => 'nullable|numeric|min:0',
-            'payroll_billing_interval'   => 'nullable|in:monthly,quarterly,annually,one-off',
             'payment_method'             => 'nullable|string|max:100',
             'billing_lines'              => 'nullable|array',
             'billing_lines.*.description'=> 'nullable|string|max:255',
@@ -73,8 +72,6 @@ class ClientController extends Controller
             'billing_lines.*.interval'   => 'nullable|in:monthly,quarterly,annually,one-off',
         ]);
 
-        $data['sa_billed_separately']       = $request->boolean('sa_billed_separately');
-        $data['payroll_invoiced_separately'] = $request->boolean('payroll_invoiced_separately');
 
         $lines = $data['billing_lines'] ?? [];
         unset($data['billing_lines']);
@@ -124,7 +121,9 @@ class ClientController extends Controller
             'client_code'                => 'required|string|max:50',
             'company_name'               => 'required|string|max:255',
             'client_type_id'             => 'required|exists:client_types,id',
-            'contact_name'               => 'nullable|string|max:255',
+            'contact_title'              => 'nullable|string|max:20',
+            'contact_first_name'         => 'nullable|string|max:100',
+            'contact_last_name'          => 'nullable|string|max:100',
             'email'                      => 'nullable|email|max:255',
             'phone'                      => 'nullable|string|max:50',
             'address'                    => 'nullable|string|max:255',
@@ -141,10 +140,6 @@ class ClientController extends Controller
             'fpa_year_end'               => 'nullable|date',
             'fpa_amount'                 => 'nullable|numeric|min:0',
             'billing_interval'           => 'nullable|in:monthly,quarterly,annually,one-off',
-            'sa_billed_separately'       => 'nullable|boolean',
-            'payroll_invoiced_separately' => 'nullable|boolean',
-            'payroll_fpa'                => 'nullable|numeric|min:0',
-            'payroll_billing_interval'   => 'nullable|in:monthly,quarterly,annually,one-off',
             'payment_method'             => 'nullable|string|max:100',
             'billing_lines'              => 'nullable|array',
             'billing_lines.*.description'=> 'nullable|string|max:255',
@@ -152,8 +147,6 @@ class ClientController extends Controller
             'billing_lines.*.interval'   => 'nullable|in:monthly,quarterly,annually,one-off',
         ]);
 
-        $data['sa_billed_separately']       = $request->boolean('sa_billed_separately');
-        $data['payroll_invoiced_separately'] = $request->boolean('payroll_invoiced_separately');
 
         $lines = $data['billing_lines'] ?? [];
         unset($data['billing_lines']);

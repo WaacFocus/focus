@@ -82,17 +82,14 @@ class ReportController extends Controller
     private function fixedPricesData(): \Illuminate\Database\Eloquent\Collection
     {
         return Client::whereNotNull('fpa_amount')
-            ->orWhereNotNull('payroll_fpa')
             ->orderBy('company_name')
-            ->get(['id', 'company_name', 'client_code', 'status', 'fpa_amount', 'billing_interval', 'payroll_fpa', 'payroll_billing_interval']);
+            ->get(['id', 'company_name', 'client_code', 'status', 'fpa_amount', 'billing_interval']);
     }
 
     private function fixedPricesMetrics(\Illuminate\Database\Eloquent\Collection $clients): array
     {
-        // FPA + payroll FPA per billing interval
         $intervalTotal = function (string $interval) use ($clients): float {
-            return (float) $clients->where('billing_interval', $interval)->sum('fpa_amount')
-                 + (float) $clients->where('payroll_billing_interval', $interval)->sum('payroll_fpa');
+            return (float) $clients->where('billing_interval', $interval)->sum('fpa_amount');
         };
 
         $monthly   = $intervalTotal('monthly');
@@ -114,25 +111,21 @@ class ReportController extends Controller
     public function fixedPrices()
     {
         $clients         = $this->fixedPricesData();
-        $totalFpa        = $clients->sum('fpa_amount');
-        $totalPayrollFpa = $clients->sum('payroll_fpa');
-        $grandTotal      = $totalFpa + $totalPayrollFpa;
-        $byInterval      = $clients->groupBy(fn ($c) => $c->billing_interval ?: 'Unspecified');
-        $users           = User::orderBy('name')->get();
-        $metrics         = $this->fixedPricesMetrics($clients);
+        $totalFpa   = $clients->sum('fpa_amount');
+        $byInterval = $clients->groupBy(fn ($c) => $c->billing_interval ?: 'Unspecified');
+        $users      = User::orderBy('name')->get();
+        $metrics    = $this->fixedPricesMetrics($clients);
 
-        return view('reports.fixed-prices', compact('clients', 'totalFpa', 'totalPayrollFpa', 'grandTotal', 'byInterval', 'users', 'metrics'));
+        return view('reports.fixed-prices', compact('clients', 'totalFpa', 'byInterval', 'users', 'metrics'));
     }
 
     public function fixedPricesPdf(string $orientation = 'portrait')
     {
-        $clients         = $this->fixedPricesData();
-        $totalFpa        = $clients->sum('fpa_amount');
-        $totalPayrollFpa = $clients->sum('payroll_fpa');
-        $grandTotal      = $totalFpa + $totalPayrollFpa;
-        $metrics         = $this->fixedPricesMetrics($clients);
+        $clients  = $this->fixedPricesData();
+        $totalFpa = $clients->sum('fpa_amount');
+        $metrics  = $this->fixedPricesMetrics($clients);
 
-        $pdf = Pdf::loadView('reports.pdf.fixed-prices', compact('clients', 'totalFpa', 'totalPayrollFpa', 'grandTotal', 'metrics'))
+        $pdf = Pdf::loadView('reports.pdf.fixed-prices', compact('clients', 'totalFpa', 'metrics'))
             ->setPaper('A4', $orientation);
 
         return $pdf->download('billing-' . now()->format('Y-m-d') . '-' . $orientation . '.pdf');
@@ -146,7 +139,7 @@ class ReportController extends Controller
         return response()->streamDownload(function () use ($clients) {
             $out = fopen('php://output', 'w');
 
-            fputcsv($out, ['Client Code', 'Company Name', 'Status', 'FPA Amount', 'Billing Interval', 'Payroll FPA', 'Payroll Interval', 'Client Total']);
+            fputcsv($out, ['Client Code', 'Company Name', 'Status', 'FPA Amount', 'Billing Interval']);
 
             foreach ($clients as $c) {
                 fputcsv($out, [
@@ -155,9 +148,6 @@ class ReportController extends Controller
                     ucfirst($c->status),
                     $c->fpa_amount,
                     $c->billing_interval ? ucfirst($c->billing_interval) : '',
-                    $c->payroll_fpa,
-                    $c->payroll_billing_interval ? ucfirst($c->payroll_billing_interval) : '',
-                    ($c->fpa_amount ?? 0) + ($c->payroll_fpa ?? 0),
                 ]);
             }
 
@@ -185,13 +175,11 @@ class ReportController extends Controller
             $subject      = 'Upcoming Jobs Report — ' . now()->format('d F Y');
             $html         = view('emails.upcoming-jobs', compact('jobs', 'overdueCount', 'todayCount', 'byUser'))->render();
         } else {
-            $clients         = $this->fixedPricesData();
-            $totalFpa        = $clients->sum('fpa_amount');
-            $totalPayrollFpa = $clients->sum('payroll_fpa');
-            $grandTotal      = $totalFpa + $totalPayrollFpa;
-            $metrics         = $this->fixedPricesMetrics($clients);
-            $subject         = 'Billing Report — ' . now()->format('d F Y');
-            $html            = view('emails.fixed-prices', compact('clients', 'totalFpa', 'totalPayrollFpa', 'grandTotal', 'metrics'))->render();
+            $clients  = $this->fixedPricesData();
+            $totalFpa = $clients->sum('fpa_amount');
+            $metrics  = $this->fixedPricesMetrics($clients);
+            $subject  = 'Billing Report — ' . now()->format('d F Y');
+            $html     = view('emails.fixed-prices', compact('clients', 'totalFpa', 'metrics'))->render();
         }
 
         $sent   = 0;

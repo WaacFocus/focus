@@ -10,22 +10,20 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Client extends Model
 {
     protected $fillable = [
-        'client_code', 'company_name', 'client_type_id', 'contact_name', 'email', 'phone',
+        'client_code', 'company_name', 'client_type_id',
+        'contact_title', 'contact_first_name', 'contact_last_name',
+        'email', 'phone',
         'address', 'town', 'county', 'postcode',
         'vat_number', 'company_number', 'utr_number', 'paye_ref',
         'status', 'account_manager', 'notes',
         'fpa_year_end', 'fpa_amount', 'billing_interval',
-        'sa_billed_separately', 'payroll_invoiced_separately',
-        'payroll_fpa', 'payroll_billing_interval',
         'payment_method',
     ];
 
     protected $casts = [
         'fpa_year_end'              => 'date',
-        'sa_billed_separately'      => 'boolean',
-        'payroll_invoiced_separately' => 'boolean',
+
         'fpa_amount'                => 'decimal:2',
-        'payroll_fpa'               => 'decimal:2',
     ];
 
     public function clientType(): BelongsTo
@@ -53,6 +51,33 @@ class Client extends Model
     public function renewals(): HasMany
     {
         return $this->hasMany(Renewal::class);
+    }
+
+    // Virtual accessor so all existing $client->contact_name reads keep working
+    public function getContactNameAttribute(): ?string
+    {
+        $parts = array_filter([
+            $this->contact_title,
+            $this->contact_first_name,
+            $this->contact_last_name,
+        ]);
+        return $parts ? implode(' ', $parts) : null;
+    }
+
+    // "Dear David," — first name only, falls back to company name
+    public function getContactFirstNameGreetingAttribute(): string
+    {
+        return $this->contact_first_name ?: $this->company_name;
+    }
+
+    // Formal salutation: "Mr Smith" — falls back to full contact_name then company
+    public function getContactFormalAttribute(): string
+    {
+        if ($this->contact_last_name) {
+            $parts = array_filter([$this->contact_title, $this->contact_last_name]);
+            return implode(' ', $parts);
+        }
+        return $this->contact_name ?: $this->company_name;
     }
 
     public function getStatusBadgeAttribute(): string

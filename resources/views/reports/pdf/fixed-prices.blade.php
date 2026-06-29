@@ -70,9 +70,6 @@
             <th>Code</th>
             <th class="text-right">FPA Amount</th>
             <th>Interval</th>
-            <th class="text-right">Payroll FPA</th>
-            <th>Payroll Interval</th>
-            <th class="text-right">Total</th>
         </tr>
     </thead>
     <tbody>
@@ -82,12 +79,9 @@
             <td>{{ $client->client_code ?: '—' }}</td>
             <td class="text-right">{{ $client->fpa_amount ? '£'.number_format($client->fpa_amount, 2) : '—' }}</td>
             <td>{{ $client->billing_interval ? ucfirst($client->billing_interval) : '—' }}</td>
-            <td class="text-right">{{ $client->payroll_fpa ? '£'.number_format($client->payroll_fpa, 2) : '—' }}</td>
-            <td>{{ $client->payroll_billing_interval ? ucfirst($client->payroll_billing_interval) : '—' }}</td>
-            <td class="text-right">£{{ number_format(($client->fpa_amount ?? 0) + ($client->payroll_fpa ?? 0), 2) }}</td>
         </tr>
         @empty
-        <tr><td colspan="7" style="text-align:center;color:#888;">No clients with fixed prices.</td></tr>
+        <tr><td colspan="4" style="text-align:center;color:#888;">No clients with fixed prices.</td></tr>
         @endforelse
     </tbody>
     @if($clients->isNotEmpty())
@@ -96,9 +90,6 @@
             <td colspan="2">Totals</td>
             <td class="text-right">£{{ number_format($totalFpa, 2) }}</td>
             <td></td>
-            <td class="text-right">£{{ number_format($totalPayrollFpa, 2) }}</td>
-            <td></td>
-            <td class="text-right">£{{ number_format($grandTotal, 2) }}</td>
         </tr>
     </tfoot>
     @endif

@@ -21,13 +21,12 @@ class BackupController extends Controller
             'label'   => 'Clients',
             'icon'    => 'bi-people',
             'headers' => [
-                'client_code','company_name','client_type','contact_name','email','phone',
+                'client_code','company_name','client_type','contact_title','contact_first_name','contact_last_name','email','phone',
                 'address','town','county','postcode','status','account_manager','notes',
                 'vat_number','company_number','utr_number','paye_ref',
                 'fpa_amount','billing_interval','fpa_year_end','payment_method',
-                'payroll_fpa','payroll_billing_interval','sa_billed_separately','payroll_invoiced_separately',
             ],
-            'notes' => 'client_type must match an existing Client Type name. status: active|inactive|prospect. billing_interval / payroll_billing_interval: monthly|quarterly|annually|one-off. sa_billed_separately / payroll_invoiced_separately: 1 or 0. Rows are matched on client_code — existing records will be updated.',
+            'notes' => 'client_type must match an existing Client Type name. status: active|inactive|prospect. billing_interval: monthly|quarterly|annually|one-off. Rows are matched on client_code — existing records will be updated.',
         ],
         'jobs' => [
             'label'   => 'Jobs',
@@ -91,15 +90,13 @@ class BackupController extends Controller
             foreach ($rows as $c) {
                 fputcsv($out, [
                     $c->client_code, $c->company_name, $c->clientType?->name ?? '',
-                    $c->contact_name, $c->email, $c->phone,
+                    $c->contact_title, $c->contact_first_name, $c->contact_last_name, $c->email, $c->phone,
                     $c->address, $c->town, $c->county, $c->postcode,
                     $c->status, $c->account_manager, $c->notes,
                     $c->vat_number, $c->company_number, $c->utr_number, $c->paye_ref,
                     $c->fpa_amount, $c->billing_interval,
                     $c->fpa_year_end?->format('Y-m-d') ?? '',
-                    $c->payment_method, $c->payroll_fpa, $c->payroll_billing_interval,
-                    $c->sa_billed_separately ? '1' : '0',
-                    $c->payroll_invoiced_separately ? '1' : '0',
+                    $c->payment_method,
                 ]);
             }
         });
@@ -263,7 +260,9 @@ class BackupController extends Controller
         $data = [
             'company_name'               => $get($row, 'company_name') ?: throw new \Exception('company_name is required'),
             'client_type_id'             => $typeId,
-            'contact_name'               => $get($row, 'contact_name') ?: null,
+            'contact_title'              => $get($row, 'contact_title') ?: null,
+            'contact_first_name'         => $get($row, 'contact_first_name') ?: null,
+            'contact_last_name'          => $get($row, 'contact_last_name') ?: null,
             'email'                      => $get($row, 'email') ?: null,
             'phone'                      => $get($row, 'phone') ?: null,
             'address'                    => $get($row, 'address') ?: null,
@@ -281,10 +280,6 @@ class BackupController extends Controller
             'billing_interval'           => $get($row, 'billing_interval') ?: null,
             'fpa_year_end'               => $get($row, 'fpa_year_end') ?: null,
             'payment_method'             => $get($row, 'payment_method') ?: null,
-            'payroll_fpa'                => $get($row, 'payroll_fpa') ?: null,
-            'payroll_billing_interval'   => $get($row, 'payroll_billing_interval') ?: null,
-            'sa_billed_separately'       => (bool) $get($row, 'sa_billed_separately'),
-            'payroll_invoiced_separately' => (bool) $get($row, 'payroll_invoiced_separately'),
         ];
 
         $existing = Client::where('client_code', $code)->first();
