@@ -391,19 +391,15 @@
 
 @push('scripts')
 <script>
-function openPanelAndSyncCH(clientId, companyName) {
-    openClientPanel(clientId);
-    var panelEl = document.getElementById('clientOffcanvas');
-    function onShown() {
-        panelEl.removeEventListener('shown.bs.offcanvas', onShown);
-        var inp = document.getElementById('chSearchInput');
-        if (!inp) return;
+async function openPanelAndSyncCH(clientId, companyName) {
+    await openClientPanel(clientId);
+    var inp = document.getElementById('chSearchInput');
+    if (inp) {
         inp.value = companyName;
         inp.focus();
         var chSection = document.getElementById('chLookup');
         if (chSection) chSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
-    panelEl.addEventListener('shown.bs.offcanvas', onShown);
 }
 </script>
 @endpush
