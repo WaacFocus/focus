@@ -85,6 +85,7 @@ class ClientController extends Controller
 
         $client = Client::create($data);
         $this->saveBillingLines($client, $lines);
+        $this->saveDirectors($client, $request->input('directors_json'));
 
         if ($request->expectsJson()) {
             return response()->json(['message' => 'Client created successfully.', 'id' => $client->id]);
@@ -100,7 +101,7 @@ class ClientController extends Controller
             return response()->json($client);
         }
 
-        $client->load(['clientType', 'billingLines', 'services', 'renewals.service', 'jobs.assignedTo']);
+        $client->load(['clientType', 'billingLines', 'services', 'renewals.service', 'jobs.assignedTo', 'directors']);
 
         $availableServices = Service::where('is_active', true)
             ->whereNotIn('id', $client->services->pluck('id'))
@@ -181,6 +182,26 @@ class ClientController extends Controller
         $client->delete();
 
         return redirect()->route('clients.index')->with('success', 'Client deleted.');
+    }
+
+    private function saveDirectors(Client $client, ?string $json): void
+    {
+        if (! $json) return;
+        $directors = json_decode($json, true);
+        if (! is_array($directors)) return;
+
+        foreach ($directors as $d) {
+            $client->directors()->create([
+                'name'                 => $d['name'] ?? '',
+                'role'                 => $d['role'] ?? 'director',
+                'appointed_on'         => $d['appointed_on'] ?: null,
+                'dob_month'            => $d['dob_month'] ?? null,
+                'dob_year'             => $d['dob_year'] ?? null,
+                'nationality'          => $d['nationality'] ?? null,
+                'occupation'           => $d['occupation'] ?? null,
+                'country_of_residence' => $d['country_of_residence'] ?? null,
+            ]);
+        }
     }
 
     private function saveBillingLines(Client $client, array $lines): void

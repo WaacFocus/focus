@@ -14,6 +14,7 @@
           style="display:flex;flex-direction:column;flex:1 1 auto;min-height:0;">
         @csrf
         <input type="hidden" name="_method" value="">
+        <input type="hidden" name="directors_json" value="">
 
         <div class="offcanvas-body">
 
@@ -247,6 +248,31 @@
     </form>
 </div>
 
+{{-- Companies House confirmation modal --}}
+<div class="modal fade" id="chConfirmModal" tabindex="-1" style="z-index:1100;">
+    <div class="modal-backdrop-fix"></div>
+    <div class="modal-dialog modal-dialog-scrollable" style="max-width:600px;">
+        <div class="modal-content">
+            <div class="modal-header text-white" style="background:var(--brand-dark,#0C3D38);">
+                <div>
+                    <h5 class="modal-title mb-0"><i class="bi bi-building-check me-2"></i><span id="chModalCompanyName">Set up new client?</span></h5>
+                    <small class="opacity-75">Review the details below, then confirm to populate the form</small>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body py-3 px-4" id="chModalBody">
+                {{-- filled dynamically --}}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="chConfirmSetupBtn">
+                    <i class="bi bi-person-plus me-1"></i>Set up client
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
 (function () {
@@ -386,56 +412,167 @@
         }
     }
 
+    // Pending data from CH — stored here until user confirms modal
+    let chPendingData      = null;
+    let chPendingOfficers  = [];
+    const chModal          = new bootstrap.Modal(document.getElementById('chConfirmModal'), { backdrop: true });
+    const chConfirmBtn     = document.getElementById('chConfirmSetupBtn');
+
+    function chTypeLabel(type) {
+        const map = {
+            'private-limited-company': 'Private Limited Company',
+            'private-limited-guarant-nsc': 'Private Limited by Guarantee',
+            'public-limited-company': 'Public Limited Company (PLC)',
+            'limited-liability-partnership': 'Limited Liability Partnership',
+            'limited-partnership': 'Limited Partnership',
+            'scottish-partnership': 'Scottish Partnership',
+            'plc': 'PLC',
+            'ltd': 'Ltd',
+        };
+        return map[type] || (type ? type.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()) : '');
+    }
+
+    function chJurisdictionLabel(j) {
+        const map = {
+            'england-wales': 'England & Wales',
+            'scotland': 'Scotland',
+            'northern-ireland': 'Northern Ireland',
+            'england': 'England',
+            'wales': 'Wales',
+            'united-kingdom': 'United Kingdom',
+        };
+        return map[j] || (j ? j.replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase()) : '');
+    }
+
+    function chRoleLabel(role) {
+        return (role||'').replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+    }
+
     window.chSelectCompany = async function (number, btn) {
         chHideResults();
         btn.disabled = true;
+        chError.classList.add('d-none');
 
+        // Fetch profile and officers in parallel
         try {
-            const res  = await fetch(`/api/companies-house/${encodeURIComponent(number)}`, {
-                headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
-            });
-            const data = await res.json();
+            const [profileRes, officersRes] = await Promise.all([
+                fetch(`/api/companies-house/${encodeURIComponent(number)}`, {
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                }),
+                fetch(`/api/companies-house/${encodeURIComponent(number)}/officers`, {
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrf },
+                }),
+            ]);
 
-            if (!res.ok) {
-                chError.textContent = data.error ?? 'Could not load company profile.';
+            const profile  = await profileRes.json();
+            const officers = await officersRes.json();
+
+            if (!profileRes.ok) {
+                chError.textContent = profile.error ?? 'Could not load company profile.';
                 chError.classList.remove('d-none');
+                btn.disabled = false;
                 return;
             }
 
-            // Populate form fields
-            setField('company_name',   data.company_name);
-            setField('company_number', data.company_number);
-            if (data.address)  setField('address',  data.address);
-            if (data.town)     setField('town',     data.town);
-            if (data.county)   setField('county',   data.county);
-            if (data.postcode) setField('postcode', data.postcode);
+            chPendingData     = profile;
+            chPendingOfficers = officers.officers ?? [];
 
-            // Companies House data fields
-            if (data.ch_status)                          setField('ch_status',                          data.ch_status);
-            if (data.ch_incorporated_on)                 setField('ch_incorporated_on',                 data.ch_incorporated_on);
-            if (data.ch_jurisdiction)                    setField('ch_jurisdiction',                    data.ch_jurisdiction);
-            if (data.ch_sic_codes)                       setField('ch_sic_codes',                       data.ch_sic_codes);
-            if (data.ch_accounts_year_end)               setField('ch_accounts_year_end',               data.ch_accounts_year_end);
-            if (data.ch_accounts_next_due)               setField('ch_accounts_next_due',               data.ch_accounts_next_due);
-            if (data.ch_confirmation_statement_next_due) setField('ch_confirmation_statement_next_due', data.ch_confirmation_statement_next_due);
+            // Build modal body
+            const addressParts = [profile.address, profile.town, profile.county, profile.postcode].filter(Boolean);
+            const statusBadge  = profile.company_status === 'active'
+                ? `<span class="badge bg-success">${profile.company_status}</span>`
+                : `<span class="badge bg-secondary">${(profile.company_status||'').replace(/-/g,' ')}</span>`;
 
-            // Auto-select client type
-            const chTypeName = chTypeMap[(data.company_type ?? '').toLowerCase()];
-            if (chTypeName && clientTypeMap[chTypeName]) {
-                setField('client_type_id', clientTypeMap[chTypeName]);
+            let officersHtml = '';
+            if (chPendingOfficers.length) {
+                officersHtml = `
+                    <h6 class="fw-semibold mb-2 mt-3"><i class="bi bi-people me-1"></i>Current Officers (${chPendingOfficers.length})</h6>
+                    <div class="table-responsive">
+                    <table class="table table-sm mb-0" style="font-size:.85rem;">
+                        <thead class="table-light"><tr><th>Name</th><th>Role</th><th>Appointed</th></tr></thead>
+                        <tbody>
+                        ${chPendingOfficers.map(o => `
+                            <tr>
+                                <td class="fw-semibold">${o.name}</td>
+                                <td class="text-muted">${chRoleLabel(o.role)}</td>
+                                <td class="text-muted">${o.appointed_on ? new Date(o.appointed_on).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—'}</td>
+                            </tr>
+                        `).join('')}
+                        </tbody>
+                    </table>
+                    </div>`;
+            } else {
+                officersHtml = `<p class="text-muted small mt-3 mb-0"><i class="bi bi-info-circle me-1"></i>No active officers found.</p>`;
             }
 
-            // Show selected confirmation
-            document.getElementById('chSelectedText').textContent =
-                `${data.company_name} (${data.company_number}) populated into form`;
-            chSelected.classList.remove('d-none');
-            chInput.value = '';
+            document.getElementById('chModalCompanyName').textContent = profile.company_name;
+            document.getElementById('chModalBody').innerHTML = `
+                <div class="row g-0">
+                    <div class="col-12">
+                        <table class="table table-sm mb-0" style="font-size:.85rem;">
+                            <tbody>
+                                <tr><td class="text-muted" style="width:38%;">Company Number</td><td><strong>${profile.company_number}</strong></td></tr>
+                                <tr><td class="text-muted">Type</td><td>${chTypeLabel(profile.company_type)}</td></tr>
+                                <tr><td class="text-muted">Status</td><td>${statusBadge}</td></tr>
+                                ${addressParts.length ? `<tr><td class="text-muted">Address</td><td>${addressParts.join(', ')}</td></tr>` : ''}
+                                ${profile.ch_incorporated_on ? `<tr><td class="text-muted">Incorporated</td><td>${new Date(profile.ch_incorporated_on).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</td></tr>` : ''}
+                                ${profile.ch_jurisdiction ? `<tr><td class="text-muted">Jurisdiction</td><td>${chJurisdictionLabel(profile.ch_jurisdiction)}</td></tr>` : ''}
+                                ${profile.ch_sic_codes ? `<tr><td class="text-muted">SIC Codes</td><td>${profile.ch_sic_codes}</td></tr>` : ''}
+                            </tbody>
+                        </table>
+                        ${officersHtml}
+                    </div>
+                </div>`;
+
+            chModal.show();
 
         } catch (err) {
             chError.textContent = 'Failed to load company details.';
             chError.classList.remove('d-none');
+            btn.disabled = false;
         }
     };
+
+    chConfirmBtn.addEventListener('click', function () {
+        if (!chPendingData) return;
+        const data = chPendingData;
+
+        // Populate form fields
+        setField('company_name',   data.company_name);
+        setField('company_number', data.company_number);
+        if (data.address)  setField('address',  data.address);
+        if (data.town)     setField('town',     data.town);
+        if (data.county)   setField('county',   data.county);
+        if (data.postcode) setField('postcode', data.postcode);
+
+        // CH data fields
+        if (data.ch_status)                          setField('ch_status',                          data.ch_status);
+        if (data.ch_incorporated_on)                 setField('ch_incorporated_on',                 data.ch_incorporated_on);
+        if (data.ch_jurisdiction)                    setField('ch_jurisdiction',                    data.ch_jurisdiction);
+        if (data.ch_sic_codes)                       setField('ch_sic_codes',                       data.ch_sic_codes);
+        if (data.ch_accounts_year_end)               setField('ch_accounts_year_end',               data.ch_accounts_year_end);
+        if (data.ch_accounts_next_due)               setField('ch_accounts_next_due',               data.ch_accounts_next_due);
+        if (data.ch_confirmation_statement_next_due) setField('ch_confirmation_statement_next_due', data.ch_confirmation_statement_next_due);
+
+        // Auto-select client type
+        const chTypeName = chTypeMap[(data.company_type ?? '').toLowerCase()];
+        if (chTypeName && clientTypeMap[chTypeName]) {
+            setField('client_type_id', clientTypeMap[chTypeName]);
+        }
+
+        // Store directors as JSON for form submission
+        const dirJson = form.querySelector('[name="directors_json"]');
+        if (dirJson) dirJson.value = JSON.stringify(chPendingOfficers);
+
+        // Show confirmation banner
+        document.getElementById('chSelectedText').textContent =
+            `${data.company_name} (${data.company_number}) populated — ${chPendingOfficers.length} officer(s) will be saved`;
+        chSelected.classList.remove('d-none');
+        chInput.value = '';
+        chPendingData     = null;
+        chPendingOfficers = [];
+        chModal.hide();
+    });
 
     chInput.addEventListener('input', function () {
         clearTimeout(chTimer);

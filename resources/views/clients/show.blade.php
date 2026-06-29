@@ -138,6 +138,40 @@
         </div>
         @endif
 
+        @if($client->directors->isNotEmpty())
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white fw-semibold">
+                <i class="bi bi-people me-2 text-muted"></i>Officers / Directors ({{ $client->directors->count() }})
+            </div>
+            <div class="list-group list-group-flush">
+                @foreach($client->directors as $director)
+                <div class="list-group-item px-3 py-2">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="fw-semibold">{{ $director->name }}</div>
+                            <small class="text-muted">{{ $director->getRoleLabel() }}</small>
+                            @if($director->occupation)
+                                <small class="text-muted"> · {{ $director->occupation }}</small>
+                            @endif
+                        </div>
+                        <div class="text-end small text-muted">
+                            @if($director->appointed_on)
+                                <div>Appointed {{ $director->appointed_on->format('d M Y') }}</div>
+                            @endif
+                            @if($director->nationality)
+                                <div>{{ $director->nationality }}</div>
+                            @endif
+                            @if($director->dob_month && $director->dob_year)
+                                <div>DOB: {{ \Carbon\Carbon::createFromDate($director->dob_year, $director->dob_month, 1)->format('M Y') }}</div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
         @if($client->fpa_amount || $client->billingLines->isNotEmpty())
         @php
             $annualFee = 0;

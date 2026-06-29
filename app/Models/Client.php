@@ -48,6 +48,11 @@ class Client extends Model
         return $this->hasMany(ClientBillingLine::class)->orderBy('id');
     }
 
+    public function directors(): HasMany
+    {
+        return $this->hasMany(ClientDirector::class)->orderBy('appointed_on');
+    }
+
     public function jobs(): HasMany
     {
         return $this->hasMany(Job::class);

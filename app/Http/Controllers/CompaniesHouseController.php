@@ -62,6 +62,49 @@ class CompaniesHouseController extends Controller
         return response()->json(['items' => $items]);
     }
 
+    public function officers(string $number)
+    {
+        $number = strtoupper(preg_replace('/[^a-zA-Z0-9]/', '', $number));
+
+        $res = $this->ch()->get("/company/{$number}/officers", ['items_per_page' => 50]);
+
+        if (! $res->successful()) {
+            return response()->json(['officers' => []]);
+        }
+
+        $officers = collect($res->json('items', []))
+            ->filter(fn ($o) => empty($o['resigned_on']))
+            ->map(fn ($o) => [
+                'name'                 => $this->formatOfficerName($o['name'] ?? ''),
+                'role'                 => $o['officer_role'] ?? 'director',
+                'appointed_on'         => $o['appointed_on'] ?? null,
+                'dob_month'            => $o['date_of_birth']['month'] ?? null,
+                'dob_year'             => $o['date_of_birth']['year'] ?? null,
+                'nationality'          => $o['nationality'] ?? null,
+                'occupation'           => $o['occupation'] ?? null,
+                'country_of_residence' => $o['country_of_residence'] ?? null,
+            ])
+            ->values();
+
+        return response()->json(['officers' => $officers]);
+    }
+
+    private function formatOfficerName(string $raw): string
+    {
+        // CH format: "SURNAME, Firstname" or "SURNAME SURNAME, Firstname Middlename"
+        $commaPos = strpos($raw, ',');
+        if ($commaPos === false) {
+            return ucwords(strtolower($raw));
+        }
+        $surname   = trim(substr($raw, 0, $commaPos));
+        $forenames = trim(substr($raw, $commaPos + 1));
+        $surname   = implode(' ', array_map(
+            fn ($w) => strtoupper($w[0] ?? '') . strtolower(substr($w, 1)),
+            explode(' ', $surname)
+        ));
+        return $forenames . ' ' . $surname;
+    }
+
     public function profile(string $number)
     {
         $number = strtoupper(preg_replace('/[^a-zA-Z0-9]/', '', $number));

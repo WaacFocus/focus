@@ -4,6 +4,15 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.20 — 2026-06-29
+
+### Added
+- **Director / officer import from Companies House** — selecting a company now fetches active officers in parallel and shows a confirmation modal (company summary + officers table) before populating the form
+- Officers are saved to a new `client_directors` table on client creation
+- Client detail page shows an Officers / Directors card with name, role, appointed date, nationality, and DOB (month/year)
+
+---
+
 ## v1.19 — 2026-06-29
 
 ### Added
