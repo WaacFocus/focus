@@ -81,15 +81,24 @@ class CompaniesHouseController extends Controller
             $address['address_line_2'] ?? '',
         ]));
 
+        $accounts = $data['accounts'] ?? [];
+
         return response()->json([
-            'company_name'   => $data['company_name'] ?? '',
-            'company_number' => $data['company_number'] ?? '',
-            'company_type'   => $data['type'] ?? '',
-            'company_status' => $data['company_status'] ?? '',
-            'address'        => $addressLine,
-            'town'           => $address['locality'] ?? '',
-            'county'         => $address['region'] ?? '',
-            'postcode'       => $address['postal_code'] ?? '',
+            'company_name'                       => $data['company_name'] ?? '',
+            'company_number'                     => $data['company_number'] ?? '',
+            'company_type'                       => $data['type'] ?? '',
+            'company_status'                     => $data['company_status'] ?? '',
+            'address'                            => $addressLine,
+            'town'                               => $address['locality'] ?? '',
+            'county'                             => $address['region'] ?? '',
+            'postcode'                           => $address['postal_code'] ?? '',
+            'ch_status'                          => $data['company_status'] ?? '',
+            'ch_incorporated_on'                 => $data['date_of_creation'] ?? '',
+            'ch_jurisdiction'                    => $data['jurisdiction'] ?? '',
+            'ch_sic_codes'                       => implode(', ', $data['sic_codes'] ?? []),
+            'ch_accounts_year_end'               => $accounts['next_made_up_to'] ?? '',
+            'ch_accounts_next_due'               => $accounts['next_due'] ?? '',
+            'ch_confirmation_statement_next_due' => ($data['confirmation_statement']['next_due'] ?? ''),
         ]);
     }
 }

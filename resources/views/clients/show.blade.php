@@ -64,6 +64,80 @@
             </div>
         </div>
 
+        @if($client->ch_status || $client->ch_incorporated_on || $client->ch_sic_codes || $client->ch_accounts_year_end)
+        @php
+            $jurisdictionMap = [
+                'england-wales'          => 'England & Wales',
+                'scotland'               => 'Scotland',
+                'northern-ireland'       => 'Northern Ireland',
+                'england'                => 'England',
+                'wales'                  => 'Wales',
+                'united-kingdom'         => 'United Kingdom',
+                'european-union'         => 'European Union',
+            ];
+        @endphp
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-white fw-semibold">
+                <i class="bi bi-building me-2 text-muted"></i>Companies House
+            </div>
+            <div class="card-body">
+                @if($client->ch_status)
+                <div class="mb-2">
+                    <small class="text-muted">Status:</small>
+                    <span class="badge {{ $client->ch_status === 'active' ? 'bg-success' : 'bg-secondary' }} ms-1">
+                        {{ ucfirst(str_replace('-', ' ', $client->ch_status)) }}
+                    </span>
+                </div>
+                @endif
+                @if($client->ch_incorporated_on)
+                <div class="mb-2"><small class="text-muted">Incorporated:</small> {{ $client->ch_incorporated_on->format('d M Y') }}</div>
+                @endif
+                @if($client->ch_jurisdiction)
+                <div class="mb-2"><small class="text-muted">Jurisdiction:</small>
+                    {{ $jurisdictionMap[$client->ch_jurisdiction] ?? ucwords(str_replace('-', ' ', $client->ch_jurisdiction)) }}
+                </div>
+                @endif
+                @if($client->ch_sic_codes)
+                <div class="mb-2"><small class="text-muted">SIC Codes:</small> {{ $client->ch_sic_codes }}</div>
+                @endif
+                @if($client->ch_accounts_year_end || $client->ch_accounts_next_due)
+                <hr class="my-2">
+                @endif
+                @if($client->ch_accounts_year_end)
+                <div class="mb-2">
+                    <small class="text-muted">Accounts Year End:</small> {{ $client->ch_accounts_year_end->format('d M Y') }}
+                </div>
+                @endif
+                @if($client->ch_accounts_next_due)
+                <div class="mb-2">
+                    <small class="text-muted">Accounts Due:</small>
+                    <span class="{{ $client->ch_accounts_next_due->isPast() ? 'text-danger fw-semibold' : '' }}">
+                        {{ $client->ch_accounts_next_due->format('d M Y') }}
+                    </span>
+                    @if($client->ch_accounts_next_due->isPast())
+                        <span class="badge bg-danger ms-1">Overdue</span>
+                    @elseif($client->ch_accounts_next_due->diffInDays(now()) > -30)
+                        <span class="badge bg-warning text-dark ms-1">Due soon</span>
+                    @endif
+                </div>
+                @endif
+                @if($client->ch_confirmation_statement_next_due)
+                <div class="mb-2">
+                    <small class="text-muted">Conf. Statement Due:</small>
+                    <span class="{{ $client->ch_confirmation_statement_next_due->isPast() ? 'text-danger fw-semibold' : '' }}">
+                        {{ $client->ch_confirmation_statement_next_due->format('d M Y') }}
+                    </span>
+                    @if($client->ch_confirmation_statement_next_due->isPast())
+                        <span class="badge bg-danger ms-1">Overdue</span>
+                    @elseif($client->ch_confirmation_statement_next_due->diffInDays(now()) > -30)
+                        <span class="badge bg-warning text-dark ms-1">Due soon</span>
+                    @endif
+                </div>
+                @endif
+            </div>
+        </div>
+        @endif
+
         @if($client->fpa_amount || $client->billingLines->isNotEmpty())
         @php
             $annualFee = 0;

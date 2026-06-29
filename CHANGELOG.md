@@ -4,6 +4,15 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.19 — 2026-06-29
+
+### Added
+- **Companies House data section on clients** — incorporated date, CH status, jurisdiction, SIC codes, accounts year end, accounts due, confirmation statement due
+- Companies House lookup now auto-populates all CH fields on company select; re-sync available in edit mode
+- Client detail page shows Companies House card with overdue/due-soon alerts on key dates
+
+---
+
 ## v1.18 — 2026-06-29
 
 ### Removed

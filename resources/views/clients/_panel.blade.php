@@ -196,6 +196,41 @@
 
             <hr class="my-3">
 
+            {{-- Companies House Data --}}
+            <p class="text-muted small fw-semibold text-uppercase mb-2" style="letter-spacing:.05em;">Companies House Data</p>
+            <div class="row g-3 mb-3">
+                <div class="col-4">
+                    <label class="form-label small fw-semibold">CH Status</label>
+                    <input type="text" name="ch_status" class="form-control form-control-sm" placeholder="active">
+                </div>
+                <div class="col-4">
+                    <label class="form-label small fw-semibold">Incorporated</label>
+                    <input type="date" name="ch_incorporated_on" class="form-control form-control-sm">
+                </div>
+                <div class="col-4">
+                    <label class="form-label small fw-semibold">Jurisdiction</label>
+                    <input type="text" name="ch_jurisdiction" class="form-control form-control-sm" placeholder="england-wales">
+                </div>
+                <div class="col-12">
+                    <label class="form-label small fw-semibold">SIC Codes</label>
+                    <input type="text" name="ch_sic_codes" class="form-control form-control-sm" placeholder="e.g. 69201, 69202">
+                </div>
+                <div class="col-4">
+                    <label class="form-label small fw-semibold">Accounts Year End</label>
+                    <input type="date" name="ch_accounts_year_end" class="form-control form-control-sm">
+                </div>
+                <div class="col-4">
+                    <label class="form-label small fw-semibold">Accounts Due</label>
+                    <input type="date" name="ch_accounts_next_due" class="form-control form-control-sm">
+                </div>
+                <div class="col-4">
+                    <label class="form-label small fw-semibold">Conf. Statement Due</label>
+                    <input type="date" name="ch_confirmation_statement_next_due" class="form-control form-control-sm">
+                </div>
+            </div>
+
+            <hr class="my-3">
+
             {{-- Notes --}}
             <p class="text-muted small fw-semibold text-uppercase mb-2" style="letter-spacing:.05em;">Notes</p>
             <textarea name="notes" rows="4" class="form-control form-control-sm mb-3" placeholder="Any additional notes..."></textarea>
@@ -368,12 +403,21 @@
             }
 
             // Populate form fields
-            setField('company_name', data.company_name);
+            setField('company_name',   data.company_name);
             setField('company_number', data.company_number);
             if (data.address)  setField('address',  data.address);
             if (data.town)     setField('town',     data.town);
             if (data.county)   setField('county',   data.county);
             if (data.postcode) setField('postcode', data.postcode);
+
+            // Companies House data fields
+            if (data.ch_status)                          setField('ch_status',                          data.ch_status);
+            if (data.ch_incorporated_on)                 setField('ch_incorporated_on',                 data.ch_incorporated_on);
+            if (data.ch_jurisdiction)                    setField('ch_jurisdiction',                    data.ch_jurisdiction);
+            if (data.ch_sic_codes)                       setField('ch_sic_codes',                       data.ch_sic_codes);
+            if (data.ch_accounts_year_end)               setField('ch_accounts_year_end',               data.ch_accounts_year_end);
+            if (data.ch_accounts_next_due)               setField('ch_accounts_next_due',               data.ch_accounts_next_due);
+            if (data.ch_confirmation_statement_next_due) setField('ch_confirmation_statement_next_due', data.ch_confirmation_statement_next_due);
 
             // Auto-select client type
             const chTypeName = chTypeMap[(data.company_type ?? '').toLowerCase()];
@@ -431,8 +475,9 @@
             return;
         }
 
-        // Edit mode — hide CH lookup (data already exists)
-        chLookup.style.display = 'none';
+        // Edit mode — show lookup for re-syncing
+        chLookup.style.display = '';
+        panelEl.querySelector('#chLookup p span.fw-normal').textContent = '— re-sync to overwrite with latest data';
 
         panelEl.querySelector('#panelIcon').className = 'bi bi-arrow-clockwise me-2';
         panelEl.querySelector('#panelTitle').textContent = 'Loading…';
@@ -449,8 +494,12 @@
              'contact_title','contact_first_name','contact_last_name',
              'email','phone','address','town','county','postcode',
              'fpa_amount','billing_interval','payment_method',
-             'vat_number','company_number','utr_number','paye_ref','notes']
+             'vat_number','company_number','utr_number','paye_ref','notes',
+             'ch_status','ch_jurisdiction','ch_sic_codes']
                 .forEach(f => setField(f, data[f]));
+
+            ['ch_incorporated_on','ch_accounts_year_end','ch_accounts_next_due','ch_confirmation_statement_next_due']
+                .forEach(f => setField(f, data[f] ? data[f].substring(0, 10) : ''));
 
             setField('fpa_year_end', data.fpa_year_end ? data.fpa_year_end.substring(0, 10) : '');
 

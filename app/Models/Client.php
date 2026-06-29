@@ -18,12 +18,17 @@ class Client extends Model
         'status', 'account_manager', 'notes',
         'fpa_year_end', 'fpa_amount', 'billing_interval',
         'payment_method',
+        'ch_status', 'ch_incorporated_on', 'ch_jurisdiction', 'ch_sic_codes',
+        'ch_accounts_year_end', 'ch_accounts_next_due', 'ch_confirmation_statement_next_due',
     ];
 
     protected $casts = [
-        'fpa_year_end'              => 'date',
-
-        'fpa_amount'                => 'decimal:2',
+        'fpa_year_end'                          => 'date',
+        'fpa_amount'                            => 'decimal:2',
+        'ch_incorporated_on'                    => 'date',
+        'ch_accounts_year_end'                  => 'date',
+        'ch_accounts_next_due'                  => 'date',
+        'ch_confirmation_statement_next_due'    => 'date',
     ];
 
     public function clientType(): BelongsTo
