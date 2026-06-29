@@ -441,6 +441,7 @@
     // Pending data from CH — stored here until user confirms modal
     let chPendingData      = null;
     let chPendingOfficers  = [];
+    let existingDirectors  = [];
     const chModal          = new bootstrap.Modal(document.getElementById('chConfirmModal'), { backdrop: true });
     const chConfirmBtn     = document.getElementById('chConfirmSetupBtn');
 
@@ -534,9 +535,16 @@
                             </tr>
                         </thead>
                         <tbody>
-                        ${chPendingOfficers.map((o, i) => `
+                        ${chPendingOfficers.map((o, i) => {
+                            const normName   = o.name.trim().toLowerCase();
+                            const existing   = existingDirectors.find(d => d.name.trim().toLowerCase() === normName);
+                            const saPrechecked = existing ? existing.sa_required : false;
+                            const alreadyBadge = existing
+                                ? `<span class="badge bg-secondary ms-1" style="font-size:.7rem;">Already added</span>`
+                                : '';
+                            return `
                             <tr data-officer="${i}">
-                                <td class="fw-semibold">${o.name}</td>
+                                <td class="fw-semibold">${o.name}${alreadyBadge}</td>
                                 <td class="text-muted">${chRoleLabel(o.role)}</td>
                                 <td class="text-muted">${o.appointed_on ? new Date(o.appointed_on).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—'}</td>
                                 <td class="text-center">
@@ -544,7 +552,7 @@
                                            name="chMainContact" value="${i}">
                                 </td>
                                 <td class="text-center">
-                                    <input type="checkbox" class="form-check-input officer-sa-cb" value="${i}">
+                                    <input type="checkbox" class="form-check-input officer-sa-cb" value="${i}"${saPrechecked ? ' checked' : ''}>
                                 </td>
                                 <td>
                                     <div class="form-check mb-1">
@@ -557,8 +565,8 @@
                                                placeholder="Client code" maxlength="50">
                                     </div>
                                 </td>
-                            </tr>
-                        `).join('')}
+                            </tr>`;
+                        }).join('')}
                         </tbody>
                     </table>
                     </div>`;
@@ -743,6 +751,7 @@
             document.getElementById('saveBtnText').textContent = 'Create Client';
             chLookup.style.display = '';
             clearBillingLines();
+            existingDirectors = [];
             bsPanel.show();
             return;
         }
@@ -781,6 +790,8 @@
             if (data.billing_lines && data.billing_lines.length) {
                 data.billing_lines.forEach(function (line) { addBillingLine(line); });
             }
+
+            existingDirectors = data.directors || [];
 
             panelEl.querySelector('#panelIcon').className = 'bi bi-pencil me-2';
             panelEl.querySelector('#panelTitle').textContent = data.company_name;

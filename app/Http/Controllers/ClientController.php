@@ -109,7 +109,7 @@ class ClientController extends Controller
     public function show(Request $request, Client $client)
     {
         if ($request->expectsJson()) {
-            $client->load('billingLines');
+            $client->load(['billingLines', 'directors']);
             return response()->json($client);
         }
 
