@@ -4,6 +4,21 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.16 — 2026-06-29
+
+### Added
+- **Admin → Letter Sections** — manage default wording for all engagement letter sections
+  - Add, edit, and delete sections; drag-to-reorder default sequence
+  - Per-section flags: Active (shown in builder), Pre-ticked (auto-selected on new letters), Mandatory (cannot be removed)
+- **Mandatory sections** — Introduction, Our Responsibilities, Client Responsibilities, Confidentiality & Data Protection, and Acceptance of Terms are locked in every new letter; configurable from admin
+- **View button on builder** — chevron button on each section row expands/collapses wording for editing without affecting the tick/include state
+
+### Changed
+- Removed old Renewals nav link; Engagement Letters now a top-level nav item pointing directly to the letter index
+- Builder checkbox and wording preview are now fully independent — ticking a section no longer opens the wording panel
+
+---
+
 ## v1.15 — 2026-06-28
 
 ### Added
