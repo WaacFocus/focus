@@ -233,7 +233,7 @@ class ClientController extends Controller
                 'company_name'       => $fullName,
                 'contact_first_name' => $firstName,
                 'contact_last_name'  => $lastName,
-                'status'             => 'prospect',
+                'status'             => 'active',
             ]);
         } catch (\Throwable) {
             // Duplicate client_code or other DB constraint — skip silently
