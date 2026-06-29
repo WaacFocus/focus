@@ -9,7 +9,12 @@
         @if($client->client_code)
             <div class="text-muted small fw-semibold mb-1" style="letter-spacing:.04em;">{{ $client->client_code }}</div>
         @endif
-        <h4 class="mb-1">{{ $client->company_name }}</h4>
+        <h4 class="mb-1">
+            {{ $client->company_name }}
+            @if($client->ch_status)
+                <img src="{{ asset('images/ch-icon.svg') }}" alt="CH" title="Companies House synced" width="16" height="16" class="ms-1 align-middle" style="opacity:.85;">
+            @endif
+        </h4>
         <span class="badge bg-{{ $client->status_badge }}">{{ ucfirst($client->status) }}</span>
         @if($client->client_type_id)
             <span class="badge bg-light text-dark border ms-1">{{ $client->clientType?->name }}</span>

@@ -4,6 +4,16 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.26 — 2026-06-29
+
+### Added
+- **Companies House icon** — blue CH badge appears next to the company name on the client list and client detail page whenever the client has been synced with Companies House
+
+### Changed
+- **Arial font** — all PDF reports, PDF engagement letters, and the client signing portal now use Arial instead of DejaVu Sans
+
+---
+
 ## v1.25 — 2026-06-29
 
 ### Added

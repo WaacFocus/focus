@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
-        body { background: #f0fafa; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+        body { background: #f0fafa; font-family: Arial, sans-serif; }
         .brand-header { background: #fff; border-bottom: 3px solid #3DBFB8; padding: 1rem 2rem; margin-bottom: 2rem; }
         .brand-header img { height: 42px; }
         .letter-meta { background: #3DBFB8; color: #fff; padding: 1.25rem 2rem; border-radius: .5rem .5rem 0 0; }

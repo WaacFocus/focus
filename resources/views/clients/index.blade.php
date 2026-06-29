@@ -67,7 +67,12 @@
                 @forelse($clients as $client)
                 <tr>
                     <td class="col-code"><span class="text-muted small fw-semibold">{{ $client->client_code ?? '—' }}</span></td>
-                    <td><a href="{{ route('clients.show', $client) }}" class="fw-semibold text-decoration-none">{{ $client->company_name }}</a></td>
+                    <td>
+                        <a href="{{ route('clients.show', $client) }}" class="fw-semibold text-decoration-none">{{ $client->company_name }}</a>
+                        @if($client->ch_status)
+                            <img src="{{ asset('images/ch-icon.svg') }}" alt="CH" title="Companies House synced" width="14" height="14" class="ms-1 align-middle" style="opacity:.85;">
+                        @endif
+                    </td>
                     <td class="col-type"><span class="text-muted small">{{ $client->clientType?->name ?? '—' }}</span></td>
                     <td class="col-contact">{{ $client->contact_name }}</td>
                     <td class="col-email"><a href="mailto:{{ $client->email }}" class="text-decoration-none">{{ $client->email }}</a></td>
