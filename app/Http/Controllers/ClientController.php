@@ -229,6 +229,13 @@ class ClientController extends Controller
         return back()->with('success', 'Self Assessment job created — due ' . $nextJan31->format('d M Y') . '.');
     }
 
+    public function destroyDirector(Client $client, \App\Models\ClientDirector $director)
+    {
+        abort_unless($director->client_id === $client->id, 404);
+        $director->delete();
+        return back()->with('success', $director->name . ' removed from directors.');
+    }
+
     private function saveDirectors(Client $client, ?string $json, bool $replace = false): void
     {
         if (! $json) return;

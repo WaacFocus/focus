@@ -79,6 +79,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('jobs/{job}/status', [JobController::class, 'updateStatus'])->name('jobs.status');
 
     Route::post('clients/{client}/sa-job', [ClientController::class, 'createSaJob'])->name('clients.sa-job');
+    Route::delete('clients/{client}/directors/{director}', [ClientController::class, 'destroyDirector'])->name('clients.directors.destroy');
 
     Route::get('api/companies-house/search', [CompaniesHouseController::class, 'search'])->name('companies-house.search');
     Route::get('api/companies-house/{number}/officers', [CompaniesHouseController::class, 'officers'])->name('companies-house.officers');

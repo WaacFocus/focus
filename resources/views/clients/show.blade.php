@@ -204,6 +204,13 @@
                             @endif
                         </div>
                     </div>
+                    <form method="POST" action="{{ route('clients.directors.destroy', [$client, $director]) }}"
+                          class="mt-1" onsubmit="return confirm('Remove {{ $director->name }} from directors?')">
+                        @csrf @method('DELETE')
+                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i> Remove director
+                        </button>
+                    </form>
                 </div>
                 @endforeach
             </div>
