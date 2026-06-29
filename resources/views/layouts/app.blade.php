@@ -211,7 +211,7 @@
                     <i class="bi bi-grid me-2"></i>Services
                 </a>
                 <a href="{{ route('engagement-letters.index') }}" class="nav-link {{ request()->routeIs('engagement-letters.*') || request()->routeIs('sign.*') ? 'active' : '' }}">
-                    <i class="bi bi-envelope-open me-2"></i>Engagement Letters
+                    <i class="bi bi-arrow-repeat me-2"></i>Engagement Letters
                 </a>
 
                 @can('manager')
@@ -292,7 +292,7 @@
                     <i class="bi bi-grid me-2"></i>Services
                 </a>
                 <a href="{{ route('engagement-letters.index') }}" class="nav-link {{ request()->routeIs('engagement-letters.*') || request()->routeIs('sign.*') ? 'active' : '' }}">
-                    <i class="bi bi-envelope-open me-2"></i>Engagement Letters
+                    <i class="bi bi-arrow-repeat me-2"></i>Engagement Letters
                 </a>
 
                 @can('manager')

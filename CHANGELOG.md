@@ -4,6 +4,13 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.17 — 2026-06-29
+
+### Changed
+- Engagement Letters nav icon updated to renewal/repeat symbol
+
+---
+
 ## v1.16 — 2026-06-29
 
 ### Added
