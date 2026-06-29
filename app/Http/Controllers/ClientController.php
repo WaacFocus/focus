@@ -192,6 +192,7 @@ class ClientController extends Controller
 
         $client->update($data);
         $this->saveBillingLines($client, $lines);
+        $this->saveDirectors($client, $request->input('directors_json'), true);
 
         if ($request->expectsJson()) {
             return response()->json(['message' => 'Client updated successfully.', 'id' => $client->id]);
@@ -227,11 +228,15 @@ class ClientController extends Controller
         return back()->with('success', 'Self Assessment job created — due ' . $nextJan31->format('d M Y') . '.');
     }
 
-    private function saveDirectors(Client $client, ?string $json): void
+    private function saveDirectors(Client $client, ?string $json, bool $replace = false): void
     {
         if (! $json) return;
         $directors = json_decode($json, true);
         if (! is_array($directors)) return;
+
+        if ($replace) {
+            $client->directors()->delete();
+        }
 
         foreach ($directors as $d) {
             $client->directors()->create([
