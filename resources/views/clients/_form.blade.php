@@ -99,28 +99,32 @@
                 </div>
                 <div class="col-12">
                     <label class="form-label">Address</label>
-                    <input type="text" name="address" value="{{ old('address', $client->address ?? '') }}"
-                           class="form-control @error('address') is-invalid @enderror"
+                    <input type="text" name="premises" value="{{ old('premises', $client->address ?? '') }}"
+                           autocomplete="nope"
+                           class="form-control @error('premises') is-invalid @enderror"
                            placeholder="Street address">
-                    @error('address')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    @error('premises')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Town</label>
-                    <input type="text" name="town" value="{{ old('town', $client->town ?? '') }}"
-                           class="form-control @error('town') is-invalid @enderror">
-                    @error('town')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    <input type="text" name="premises_town" value="{{ old('premises_town', $client->town ?? '') }}"
+                           autocomplete="nope"
+                           class="form-control @error('premises_town') is-invalid @enderror">
+                    @error('premises_town')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">County</label>
-                    <input type="text" name="county" value="{{ old('county', $client->county ?? '') }}"
-                           class="form-control @error('county') is-invalid @enderror">
-                    @error('county')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    <input type="text" name="premises_county" value="{{ old('premises_county', $client->county ?? '') }}"
+                           autocomplete="nope"
+                           class="form-control @error('premises_county') is-invalid @enderror">
+                    @error('premises_county')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Postcode</label>
-                    <input type="text" name="postcode" value="{{ old('postcode', $client->postcode ?? '') }}"
-                           class="form-control @error('postcode') is-invalid @enderror">
-                    @error('postcode')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                    <input type="text" name="premises_postcode" value="{{ old('premises_postcode', $client->postcode ?? '') }}"
+                           autocomplete="nope"
+                           class="form-control @error('premises_postcode') is-invalid @enderror">
+                    @error('premises_postcode')<div class="invalid-feedback">{{ $message }}</div>@enderror
                 </div>
             </div>
         </div>

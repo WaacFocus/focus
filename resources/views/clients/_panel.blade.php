@@ -97,27 +97,27 @@
                 </div>
                 <div class="col-5">
                     <label class="form-label small fw-semibold">First Name</label>
-                    <input type="text" name="contact_first_name" class="form-control form-control-sm" placeholder="First name">
+                    <input type="text" name="contact_first_name" autocomplete="nope" class="form-control form-control-sm" placeholder="First name">
                     <div class="invalid-feedback" data-field="contact_first_name"></div>
                 </div>
                 <div class="col-5">
                     <label class="form-label small fw-semibold">Middle Name</label>
-                    <input type="text" name="contact_middle_name" class="form-control form-control-sm" placeholder="Middle name">
+                    <input type="text" name="contact_middle_name" autocomplete="nope" class="form-control form-control-sm" placeholder="Middle name">
                     <div class="invalid-feedback" data-field="contact_middle_name"></div>
                 </div>
                 <div class="col-5">
                     <label class="form-label small fw-semibold">Surname</label>
-                    <input type="text" name="contact_last_name" class="form-control form-control-sm" placeholder="Surname">
+                    <input type="text" name="contact_last_name" autocomplete="nope" class="form-control form-control-sm" placeholder="Surname">
                     <div class="invalid-feedback" data-field="contact_last_name"></div>
                 </div>
                 <div class="col-6">
                     <label class="form-label small fw-semibold">Email</label>
-                    <input type="email" name="email" class="form-control form-control-sm" placeholder="email@example.com">
+                    <input type="email" name="email" autocomplete="nope" class="form-control form-control-sm" placeholder="email@example.com">
                     <div class="invalid-feedback" data-field="email"></div>
                 </div>
                 <div class="col-6">
                     <label class="form-label small fw-semibold">Phone</label>
-                    <input type="text" name="phone" class="form-control form-control-sm" placeholder="01234 567890">
+                    <input type="text" name="phone" autocomplete="nope" class="form-control form-control-sm" placeholder="01234 567890">
                     <div class="invalid-feedback" data-field="phone"></div>
                 </div>
             </div>
@@ -208,6 +208,10 @@
                 <div class="col-4">
                     <label class="form-label small fw-semibold">CH Status</label>
                     <input type="text" name="ch_status" class="form-control form-control-sm" placeholder="active">
+                </div>
+                <div class="col-4">
+                    <label class="form-label small fw-semibold">Company Type</label>
+                    <input type="text" name="ch_company_type" class="form-control form-control-sm" placeholder="ltd">
                 </div>
                 <div class="col-4">
                     <label class="form-label small fw-semibold">Incorporated</label>
@@ -757,7 +761,7 @@
              'email','phone','address','town','county','postcode',
              'fpa_amount','billing_interval','payment_method',
              'vat_number','company_number','utr_number','paye_ref','notes',
-             'ch_status','ch_jurisdiction','ch_sic_codes',
+             'ch_status','ch_company_type','ch_jurisdiction','ch_sic_codes',
              'ch_reg_address_line_1','ch_reg_address_line_2','ch_reg_locality',
              'ch_reg_region','ch_reg_postcode','ch_reg_country']
                 .forEach(f => setField(f, data[f]));

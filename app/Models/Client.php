@@ -18,7 +18,7 @@ class Client extends Model
         'status', 'account_manager', 'notes',
         'fpa_year_end', 'fpa_amount', 'billing_interval',
         'payment_method',
-        'ch_status', 'ch_incorporated_on', 'ch_jurisdiction', 'ch_sic_codes',
+        'ch_status', 'ch_company_type', 'ch_incorporated_on', 'ch_jurisdiction', 'ch_sic_codes',
         'ch_reg_address_line_1', 'ch_reg_address_line_2', 'ch_reg_locality',
         'ch_reg_region', 'ch_reg_postcode', 'ch_reg_country',
         'ch_accounts_year_end', 'ch_accounts_next_due', 'ch_confirmation_statement_next_due',

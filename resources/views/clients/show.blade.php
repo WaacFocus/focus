@@ -87,6 +87,9 @@
                     <span class="badge {{ $client->ch_status === 'active' ? 'bg-success' : 'bg-secondary' }} ms-1">
                         {{ ucfirst(str_replace('-', ' ', $client->ch_status)) }}
                     </span>
+                    @if($client->ch_company_type)
+                    <span class="badge bg-light text-dark border ms-1">{{ strtoupper($client->ch_company_type) }}</span>
+                    @endif
                 </div>
                 @endif
                 @if($client->ch_incorporated_on)

@@ -131,6 +131,8 @@ class CompaniesHouseController extends Controller
             'company_number'                     => $data['company_number'] ?? '',
             'company_type'                       => $data['type'] ?? '',
             'company_status'                     => $data['company_status'] ?? '',
+            // CH data fields — type stored separately
+            'ch_company_type'                    => $data['type'] ?? '',
             // Main address fields (for client record)
             'address'                            => $addressLine,
             'town'                               => $address['locality'] ?? '',

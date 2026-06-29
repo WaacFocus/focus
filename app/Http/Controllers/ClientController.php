@@ -52,10 +52,10 @@ class ClientController extends Controller
             'contact_last_name'          => 'nullable|string|max:100',
             'email'                      => 'nullable|email|max:255',
             'phone'                      => 'nullable|string|max:50',
-            'address'                    => 'nullable|string|max:255',
-            'town'                       => 'nullable|string|max:100',
-            'county'                     => 'nullable|string|max:100',
-            'postcode'                   => 'nullable|string|max:20',
+            'premises'                   => 'nullable|string|max:255',
+            'premises_town'              => 'nullable|string|max:100',
+            'premises_county'            => 'nullable|string|max:100',
+            'premises_postcode'          => 'nullable|string|max:20',
             'vat_number'                 => 'nullable|string|max:50',
             'company_number'             => 'nullable|string|max:50',
             'utr_number'                 => 'nullable|string|max:50',
@@ -68,6 +68,7 @@ class ClientController extends Controller
             'billing_interval'           => 'nullable|in:monthly,quarterly,annually,one-off',
             'payment_method'                          => 'nullable|string|max:100',
             'ch_status'                               => 'nullable|string|max:100',
+            'ch_company_type'                         => 'nullable|string|max:100',
             'ch_incorporated_on'                      => 'nullable|date',
             'ch_jurisdiction'                         => 'nullable|string|max:100',
             'ch_sic_codes'                            => 'nullable|string|max:255',
@@ -89,6 +90,10 @@ class ClientController extends Controller
 
         $lines = $data['billing_lines'] ?? [];
         unset($data['billing_lines']);
+
+        foreach (['premises' => 'address', 'premises_town' => 'town', 'premises_county' => 'county', 'premises_postcode' => 'postcode'] as $from => $to) {
+            if (array_key_exists($from, $data)) { $data[$to] = $data[$from]; unset($data[$from]); }
+        }
 
         $client = Client::create($data);
         $this->saveBillingLines($client, $lines);
@@ -142,10 +147,10 @@ class ClientController extends Controller
             'contact_last_name'          => 'nullable|string|max:100',
             'email'                      => 'nullable|email|max:255',
             'phone'                      => 'nullable|string|max:50',
-            'address'                    => 'nullable|string|max:255',
-            'town'                       => 'nullable|string|max:100',
-            'county'                     => 'nullable|string|max:100',
-            'postcode'                   => 'nullable|string|max:20',
+            'premises'                   => 'nullable|string|max:255',
+            'premises_town'              => 'nullable|string|max:100',
+            'premises_county'            => 'nullable|string|max:100',
+            'premises_postcode'          => 'nullable|string|max:20',
             'vat_number'                 => 'nullable|string|max:50',
             'company_number'             => 'nullable|string|max:50',
             'utr_number'                 => 'nullable|string|max:50',
@@ -158,6 +163,7 @@ class ClientController extends Controller
             'billing_interval'           => 'nullable|in:monthly,quarterly,annually,one-off',
             'payment_method'                          => 'nullable|string|max:100',
             'ch_status'                               => 'nullable|string|max:100',
+            'ch_company_type'                         => 'nullable|string|max:100',
             'ch_incorporated_on'                      => 'nullable|date',
             'ch_jurisdiction'                         => 'nullable|string|max:100',
             'ch_sic_codes'                            => 'nullable|string|max:255',
@@ -179,6 +185,10 @@ class ClientController extends Controller
 
         $lines = $data['billing_lines'] ?? [];
         unset($data['billing_lines']);
+
+        foreach (['premises' => 'address', 'premises_town' => 'town', 'premises_county' => 'county', 'premises_postcode' => 'postcode'] as $from => $to) {
+            if (array_key_exists($from, $data)) { $data[$to] = $data[$from]; unset($data[$from]); }
+        }
 
         $client->update($data);
         $this->saveBillingLines($client, $lines);

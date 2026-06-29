@@ -4,6 +4,17 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.25 — 2026-06-29
+
+### Added
+- **CH Company Type** — new field (`ch_company_type`) stores the company type from Companies House (e.g. LTD, PLC, LLP); shown as a badge next to the status on the client detail page
+- **Middle name** on all client edit forms and offcanvas panel
+
+### Fixed
+- **Browser address-save prompt** — renamed the client address form fields to non-standard input names (`premises`, `premises_town`, `premises_county`, `premises_postcode`) so Edge/Chrome no longer identifies them as address fields and stops offering to save them; values are remapped to the correct DB columns in the controller
+
+---
+
 ## v1.24 — 2026-06-29
 
 ### Added
