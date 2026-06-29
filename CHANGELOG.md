@@ -4,6 +4,13 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.22 — 2026-06-29
+
+### Added
+- **Create officers as clients** — in the Companies House confirmation modal, each officer has a "Create as client?" checkbox; ticking it reveals a client code field; on confirm those officers are also created as individual prospect client records with first/last name split automatically
+
+---
+
 ## v1.21 — 2026-06-29
 
 ### Added

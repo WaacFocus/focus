@@ -511,15 +511,27 @@
             if (chPendingOfficers.length) {
                 officersHtml = `
                     <h6 class="fw-semibold mb-2 mt-3"><i class="bi bi-people me-1"></i>Current Officers (${chPendingOfficers.length})</h6>
+                    <p class="small text-muted mb-2">Tick any officer to also create them as an individual client record.</p>
                     <div class="table-responsive">
-                    <table class="table table-sm mb-0" style="font-size:.85rem;">
-                        <thead class="table-light"><tr><th>Name</th><th>Role</th><th>Appointed</th></tr></thead>
+                    <table class="table table-sm mb-0 align-middle" style="font-size:.85rem;">
+                        <thead class="table-light"><tr><th>Name</th><th>Role</th><th>Appointed</th><th>Create as client?</th></tr></thead>
                         <tbody>
-                        ${chPendingOfficers.map(o => `
-                            <tr>
+                        ${chPendingOfficers.map((o, i) => `
+                            <tr data-officer="${i}">
                                 <td class="fw-semibold">${o.name}</td>
                                 <td class="text-muted">${chRoleLabel(o.role)}</td>
                                 <td class="text-muted">${o.appointed_on ? new Date(o.appointed_on).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—'}</td>
+                                <td>
+                                    <div class="form-check mb-1">
+                                        <input class="form-check-input officer-create-cb" type="checkbox"
+                                               id="occ_${i}" onchange="toggleOfficerCode(this)">
+                                        <label class="form-check-label small text-muted" for="occ_${i}">Yes</label>
+                                    </div>
+                                    <div class="officer-client-code" style="display:none;min-width:110px;">
+                                        <input type="text" class="form-control form-control-sm"
+                                               placeholder="Client code" maxlength="50">
+                                    </div>
+                                </td>
                             </tr>
                         `).join('')}
                         </tbody>
@@ -561,6 +573,29 @@
         if (!chPendingData) return;
         const data = chPendingData;
 
+        // Collect create-as-client selections before closing the modal
+        const officersWithFlags = chPendingOfficers.map((o, i) => {
+            const row       = document.querySelector(`#chModalBody tr[data-officer="${i}"]`);
+            const cb        = row ? row.querySelector('.officer-create-cb') : null;
+            const codeInput = row ? row.querySelector('.officer-client-code input') : null;
+            return Object.assign({}, o, {
+                create_as_client: cb ? cb.checked : false,
+                client_code:      codeInput ? codeInput.value.trim() : '',
+            });
+        });
+
+        // Validate: every checked officer must have a client code
+        const missing = officersWithFlags.filter(o => o.create_as_client && !o.client_code);
+        if (missing.length) {
+            missing.forEach((o, i) => {
+                const idx   = chPendingOfficers.indexOf(chPendingOfficers.find(p => p.name === o.name));
+                const row   = document.querySelector(`#chModalBody tr[data-officer="${idx}"]`);
+                const input = row ? row.querySelector('.officer-client-code input') : null;
+                if (input) { input.classList.add('is-invalid'); input.focus(); }
+            });
+            return;
+        }
+
         // Populate form fields
         setField('company_name',   data.company_name);
         setField('company_number', data.company_number);
@@ -590,13 +625,17 @@
             setField('client_type_id', clientTypeMap[chTypeName]);
         }
 
-        // Store directors as JSON for form submission
+        // Store directors (with create_as_client flags) as JSON for form submission
         const dirJson = form.querySelector('[name="directors_json"]');
-        if (dirJson) dirJson.value = JSON.stringify(chPendingOfficers);
+        if (dirJson) dirJson.value = JSON.stringify(officersWithFlags);
 
         // Show confirmation banner
+        const toCreate = officersWithFlags.filter(o => o.create_as_client && o.client_code).length;
+        const officerNote = officersWithFlags.length
+            ? ` · ${officersWithFlags.length} officer(s) saved as directors${toCreate ? `, ${toCreate} also created as client(s)` : ''}`
+            : '';
         document.getElementById('chSelectedText').textContent =
-            `${data.company_name} (${data.company_number}) populated — ${chPendingOfficers.length} officer(s) will be saved`;
+            `${data.company_name} (${data.company_number}) populated${officerNote}`;
         chSelected.classList.remove('d-none');
         chInput.value = '';
         chPendingData     = null;
@@ -733,6 +772,15 @@
             setLoading(false);
         }
     });
+
+    window.toggleOfficerCode = function (checkbox) {
+        const codeWrap = checkbox.closest('tr').querySelector('.officer-client-code');
+        codeWrap.style.display = checkbox.checked ? '' : 'none';
+        const input = codeWrap.querySelector('input');
+        input.classList.remove('is-invalid');
+        if (checkbox.checked) input.focus();
+        else input.value = '';
+    };
 
     panelEl.addEventListener('hidden.bs.offcanvas', function () {
         form.reset();

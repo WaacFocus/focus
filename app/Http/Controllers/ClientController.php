@@ -213,6 +213,30 @@ class ClientController extends Controller
                 'occupation'           => $d['occupation'] ?? null,
                 'country_of_residence' => $d['country_of_residence'] ?? null,
             ]);
+
+            if (! empty($d['create_as_client']) && ! empty($d['client_code'])) {
+                $this->createClientFromOfficer($d);
+            }
+        }
+    }
+
+    private function createClientFromOfficer(array $d): void
+    {
+        $fullName  = trim($d['name'] ?? '');
+        $parts     = explode(' ', $fullName);
+        $lastName  = count($parts) > 1 ? array_pop($parts) : '';
+        $firstName = implode(' ', $parts);
+
+        try {
+            Client::create([
+                'client_code'        => $d['client_code'],
+                'company_name'       => $fullName,
+                'contact_first_name' => $firstName,
+                'contact_last_name'  => $lastName,
+                'status'             => 'prospect',
+            ]);
+        } catch (\Throwable) {
+            // Duplicate client_code or other DB constraint — skip silently
         }
     }
 
