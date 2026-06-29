@@ -545,6 +545,12 @@
             document.getElementById('chModalBody').innerHTML = `
                 <div class="row g-0">
                     <div class="col-12">
+                        <div class="mb-3 p-3 rounded" style="background:#f0f4ff;border:1px solid #c7d7fb;">
+                            <label class="form-label small fw-semibold mb-1">Client Code for <strong>${profile.company_name}</strong> <span class="text-danger">*</span></label>
+                            <input type="text" id="chCompanyClientCode" class="form-control form-control-sm"
+                                   placeholder="e.g. LTD001" maxlength="50" autocomplete="off">
+                            <div class="invalid-feedback">Please enter a client code.</div>
+                        </div>
                         <table class="table table-sm mb-0" style="font-size:.85rem;">
                             <tbody>
                                 <tr><td class="text-muted" style="width:38%;">Company Number</td><td><strong>${profile.company_number}</strong></td></tr>
@@ -584,6 +590,15 @@
             });
         });
 
+        // Validate: company client code is required
+        const companyCodeInput = document.getElementById('chCompanyClientCode');
+        const companyCode = companyCodeInput ? companyCodeInput.value.trim() : '';
+        if (!companyCode) {
+            if (companyCodeInput) { companyCodeInput.classList.add('is-invalid'); companyCodeInput.focus(); }
+            return;
+        }
+        if (companyCodeInput) companyCodeInput.classList.remove('is-invalid');
+
         // Validate: every checked officer must have a client code
         const missing = officersWithFlags.filter(o => o.create_as_client && !o.client_code);
         if (missing.length) {
@@ -597,6 +612,7 @@
         }
 
         // Populate form fields
+        setField('client_code',    companyCode);
         setField('company_name',   data.company_name);
         setField('company_number', data.company_number);
         if (data.address)  setField('address',  data.address);
