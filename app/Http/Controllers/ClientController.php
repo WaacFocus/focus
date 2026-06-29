@@ -204,6 +204,10 @@ class ClientController extends Controller
     public function destroy(Client $client)
     {
         abort_unless(auth()->user()->isManager(), 403);
+
+        // Remove this person from any company's director list (matched by name)
+        \App\Models\ClientDirector::whereRaw('LOWER(name) = ?', [strtolower(trim($client->company_name))])->delete();
+
         $client->jobs()->delete();
         $client->delete();
 
