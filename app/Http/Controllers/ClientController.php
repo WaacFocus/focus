@@ -196,6 +196,25 @@ class ClientController extends Controller
         return redirect()->route('clients.index')->with('success', 'Client deleted.');
     }
 
+    public function createSaJob(Client $client)
+    {
+        $nextJan31 = \Carbon\Carbon::create(now()->year, 1, 31)->startOfDay();
+        if (! $nextJan31->isFuture()) {
+            $nextJan31->addYear();
+        }
+
+        \App\Models\Job::create([
+            'name'        => 'Self Assessment',
+            'client_id'   => $client->id,
+            'assigned_to' => auth()->id(),
+            'frequency'   => 'yearly',
+            'due_date'    => $nextJan31,
+            'status'      => 'pending',
+        ]);
+
+        return back()->with('success', 'Self Assessment job created — due ' . $nextJan31->format('d M Y') . '.');
+    }
+
     private function saveDirectors(Client $client, ?string $json): void
     {
         if (! $json) return;
@@ -258,11 +277,12 @@ class ClientController extends Controller
                 }
 
                 \App\Models\Job::create([
-                    'name'      => 'Self Assessment',
-                    'client_id' => $newClient->id,
-                    'frequency' => 'yearly',
-                    'due_date'  => $nextJan31,
-                    'status'    => 'pending',
+                    'name'        => 'Self Assessment',
+                    'client_id'   => $newClient->id,
+                    'assigned_to' => auth()->id(),
+                    'frequency'   => 'yearly',
+                    'due_date'    => $nextJan31,
+                    'status'      => 'pending',
                 ]);
             }
         } catch (\Throwable) {
