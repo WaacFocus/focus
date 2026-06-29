@@ -229,12 +229,15 @@ class ClientController extends Controller
         $firstName = implode(' ', $parts);
 
         try {
+            $individualType = \App\Models\ClientType::whereRaw('LOWER(name) = ?', ['individual'])->first();
+
             $newClient = Client::create([
                 'client_code'        => $d['client_code'],
                 'company_name'       => $fullName,
                 'contact_first_name' => $firstName,
                 'contact_last_name'  => $lastName,
                 'status'             => 'active',
+                'client_type_id'     => $individualType?->id,
             ]);
 
             if (! empty($d['sa_required'])) {
