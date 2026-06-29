@@ -4,6 +4,21 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.28 — 2026-06-29
+
+### Added
+- **Re-sync with Companies House** — clients already synced with CH show a "Re-sync with Companies House" button (on both the detail page and the full edit page); pre-populates the company name in the CH search box automatically
+- **Individual client type** — "Individual" added as a built-in client type; director clients created from CH officers are now automatically assigned this type
+- **Already added badge** — when re-syncing, officers already stored as directors for that company are marked "Already added" in the confirmation modal; their SA checkbox is pre-ticked if SA was previously flagged
+- **Remove director button** — each director in the Officers / Directors card now has a "Remove director" button to delete that record without a full re-sync
+
+### Fixed
+- **Director client type blank** — type ID is now passed directly from the panel's type map to the backend rather than relying on a name lookup that could silently fail
+- **Re-sync CH button not working** — two JS bugs fixed: backslash escaping in a template literal was causing a syntax error that broke the entire panel script; Blade `{{ }}` HTML-encodes inside `<script>` blocks which produced invalid JS (`&quot;`) — switched to `{!! !!}` for JS context
+- **Deleting a director client now also removes them as a director** — when an individual client linked to a company as a director is deleted, their `client_directors` record on the parent company is automatically removed, so they no longer appear as "Already added" on the next re-sync
+
+---
+
 ## v1.27 — 2026-06-29
 
 ### Added

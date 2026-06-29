@@ -1,5 +1,5 @@
 <?php
 
 return [
-    'number' => '1.27',
+    'number' => '1.28',
 ];
