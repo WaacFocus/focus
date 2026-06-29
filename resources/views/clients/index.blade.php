@@ -65,7 +65,7 @@
             </thead>
             <tbody>
                 @forelse($clients as $client)
-                <tr>
+                <tr data-href="{{ route('clients.show', $client) }}" style="cursor:pointer;">
                     <td class="col-code"><span class="text-muted small fw-semibold">{{ $client->client_code ?? '—' }}</span></td>
                     <td>
                         <a href="{{ route('clients.show', $client) }}" class="fw-semibold text-decoration-none">{{ $client->company_name }}</a>
@@ -162,5 +162,14 @@
 
     loadPrefs();
 })();
+
+// Clickable rows — navigate to client unless clicking a link, button, or form
+document.querySelectorAll('tr[data-href]').forEach(function (row) {
+    row.addEventListener('click', function (e) {
+        if (!e.target.closest('a, button, form')) {
+            window.location = row.dataset.href;
+        }
+    });
+});
 </script>
 @endpush

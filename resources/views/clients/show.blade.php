@@ -21,7 +21,12 @@
         @endif
     </div>
     <div class="d-flex gap-2">
-        <a href="{{ route('renewals.create', ['client_id' => $client->id]) }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-repeat me-1"></i>Add Renewal</a>
+        @if(!$client->ch_status && ($client->company_number || preg_match('/\b(limited|ltd|plc|llp)\b/i', $client->clientType?->name ?? '')))
+        <button type="button" class="btn btn-outline-primary"
+                onclick="openPanelAndSyncCH({{ $client->id }}, {{ json_encode($client->company_name) }})">
+            <img src="{{ asset('images/ch-icon.svg') }}" alt="" width="14" height="14" class="me-1 align-middle">Sync with Companies House
+        </button>
+        @endif
         <button type="button" class="btn btn-primary" onclick="openClientPanel({{ $client->id }})"><i class="bi bi-pencil me-1"></i>Edit</button>
     </div>
 </div>
@@ -383,3 +388,22 @@
 @include('clients._panel')
 @include('clients._service_panel')
 @endsection
+
+@push('scripts')
+<script>
+function openPanelAndSyncCH(clientId, companyName) {
+    openClientPanel(clientId);
+    var panelEl = document.getElementById('clientOffcanvas');
+    function onShown() {
+        panelEl.removeEventListener('shown.bs.offcanvas', onShown);
+        var inp = document.getElementById('chSearchInput');
+        if (!inp) return;
+        inp.value = companyName;
+        inp.focus();
+        var chSection = document.getElementById('chLookup');
+        if (chSection) chSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    panelEl.addEventListener('shown.bs.offcanvas', onShown);
+}
+</script>
+@endpush

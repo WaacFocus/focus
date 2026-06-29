@@ -4,6 +4,17 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.27 — 2026-06-29
+
+### Added
+- **Sync with Companies House button** — appears on the client detail page for limited company / LLP / PLC clients that haven't been synced yet; opens the edit panel with the company name pre-filled in the CH search box
+- **Clickable client rows** — clicking anywhere on a row in the clients list navigates to that client's detail page (links/buttons still work independently)
+
+### Removed
+- "Add Renewal" button from the client detail page header
+
+---
+
 ## v1.26 — 2026-06-29
 
 ### Added
