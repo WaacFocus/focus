@@ -210,11 +210,8 @@
                 <a href="{{ route('services.index') }}" class="nav-link {{ request()->routeIs('services.*') ? 'active' : '' }}">
                     <i class="bi bi-grid me-2"></i>Services
                 </a>
-                <a href="{{ route('renewals.index') }}" class="nav-link {{ request()->routeIs('renewals.*') ? 'active' : '' }}">
-                    <i class="bi bi-arrow-repeat me-2"></i>Engagement Letters
-                </a>
-                <a href="{{ route('engagement-letters.index') }}" class="nav-link {{ request()->routeIs('engagement-letters.*') || request()->routeIs('sign.*') ? 'active' : '' }}" style="padding-left:2.2rem;font-size:.88rem;">
-                    <i class="bi bi-envelope-open me-2"></i>Sent Letters
+                <a href="{{ route('engagement-letters.index') }}" class="nav-link {{ request()->routeIs('engagement-letters.*') || request()->routeIs('sign.*') ? 'active' : '' }}">
+                    <i class="bi bi-envelope-open me-2"></i>Engagement Letters
                 </a>
 
                 @can('manager')
@@ -241,6 +238,9 @@
                 </a>
                 <a href="{{ route('backup.index') }}" class="nav-link {{ request()->routeIs('backup.*') ? 'active' : '' }}">
                     <i class="bi bi-database-down me-2"></i>Backup & Import
+                </a>
+                <a href="{{ route('admin.engagement-letter-templates.index') }}" class="nav-link {{ request()->routeIs('admin.engagement-letter-templates.*') ? 'active' : '' }}">
+                    <i class="bi bi-file-text me-2"></i>Letter Sections
                 </a>
                 @endcan
             </div>
@@ -291,11 +291,8 @@
                 <a href="{{ route('services.index') }}" class="nav-link {{ request()->routeIs('services.*') ? 'active' : '' }}">
                     <i class="bi bi-grid me-2"></i>Services
                 </a>
-                <a href="{{ route('renewals.index') }}" class="nav-link {{ request()->routeIs('renewals.*') ? 'active' : '' }}">
-                    <i class="bi bi-arrow-repeat me-2"></i>Engagement Letters
-                </a>
-                <a href="{{ route('engagement-letters.index') }}" class="nav-link {{ request()->routeIs('engagement-letters.*') || request()->routeIs('sign.*') ? 'active' : '' }}" style="padding-left:2.2rem;font-size:.88rem;">
-                    <i class="bi bi-envelope-open me-2"></i>Sent Letters
+                <a href="{{ route('engagement-letters.index') }}" class="nav-link {{ request()->routeIs('engagement-letters.*') || request()->routeIs('sign.*') ? 'active' : '' }}">
+                    <i class="bi bi-envelope-open me-2"></i>Engagement Letters
                 </a>
 
                 @can('manager')
@@ -322,6 +319,9 @@
                 </a>
                 <a href="{{ route('backup.index') }}" class="nav-link {{ request()->routeIs('backup.*') ? 'active' : '' }}">
                     <i class="bi bi-database-down me-2"></i>Backup & Import
+                </a>
+                <a href="{{ route('admin.engagement-letter-templates.index') }}" class="nav-link {{ request()->routeIs('admin.engagement-letter-templates.*') ? 'active' : '' }}">
+                    <i class="bi bi-file-text me-2"></i>Letter Sections
                 </a>
                 @endcan
             </div>

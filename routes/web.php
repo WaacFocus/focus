@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EngagementLetterController;
+use App\Http\Controllers\EngagementLetterTemplateController;
 use App\Http\Controllers\SigningController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\ClientServiceController;
@@ -92,6 +93,17 @@ Route::middleware('auth')->group(function () {
         Route::resource('client-types', ClientTypeController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
         Route::get('activity', [ActivityController::class, 'index'])->name('activity.index');
         Route::get('changelog', [ChangelogController::class, 'index'])->name('changelog.index');
+        Route::post('admin/engagement-letter-templates/reorder', [EngagementLetterTemplateController::class, 'reorder'])->name('admin.engagement-letter-templates.reorder');
+        Route::resource('admin/engagement-letter-templates', EngagementLetterTemplateController::class)
+            ->names([
+                'index'   => 'admin.engagement-letter-templates.index',
+                'create'  => 'admin.engagement-letter-templates.create',
+                'store'   => 'admin.engagement-letter-templates.store',
+                'edit'    => 'admin.engagement-letter-templates.edit',
+                'update'  => 'admin.engagement-letter-templates.update',
+                'destroy' => 'admin.engagement-letter-templates.destroy',
+            ])
+            ->parameters(['engagement-letter-templates' => 'engagementLetterTemplate']);
         Route::get('admin/backup', [BackupController::class, 'index'])->name('backup.index');
         Route::get('admin/backup/export/{type}', [BackupController::class, 'export'])->name('backup.export');
         Route::get('admin/backup/template/{type}', [BackupController::class, 'template'])->name('backup.template');

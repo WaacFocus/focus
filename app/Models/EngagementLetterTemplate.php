@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class EngagementLetterTemplate extends Model
 {
-    protected $fillable = ['title', 'service_type', 'body', 'sort_order', 'is_active'];
+    protected $fillable = ['title', 'service_type', 'body', 'sort_order', 'is_active', 'default_included', 'is_mandatory'];
 }

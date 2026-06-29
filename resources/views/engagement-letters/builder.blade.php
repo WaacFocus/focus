@@ -9,7 +9,10 @@
 .section-card.included { border-color: var(--brand-teal, #17B4A7); }
 .section-header { padding: .65rem .75rem; cursor: pointer; user-select: none; display: flex; align-items: center; gap: .5rem; }
 .section-body { padding: 0 .75rem .75rem; display: none; }
-.section-card.included .section-body { display: block; }
+.section-card.expanded .section-body { display: block; }
+.section-card.mandatory .section-toggle { pointer-events: none; }
+.btn-view-section { line-height:1; padding:.15rem .4rem; font-size:.75rem; }
+.section-card.expanded .btn-view-section .bi::before { content: "\f235"; } /* chevron-up */
 .drag-handle { cursor: grab; color: #adb5bd; font-size: 1rem; flex-shrink: 0; }
 .drag-handle:active { cursor: grabbing; }
 .sortable-ghost { opacity: .4; background: #f0fdfa; }
@@ -62,7 +65,7 @@
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
             <span>Letter Sections</span>
-            <small class="text-muted fw-normal">Tick to include · drag to reorder</small>
+            <small class="text-muted fw-normal">Tick to include · drag to reorder · click <i class="bi bi-eye"></i> to view/edit wording</small>
         </div>
         <div class="card-body" id="sectionsList">
             @php
@@ -79,22 +82,33 @@
             @endphp
             @foreach($orderedTemplates as $tpl)
                 @php
-                    $saved    = $existingSections->firstWhere('template_id', $tpl->id);
-                    $included = $saved !== null;
-                    $body     = $saved['body'] ?? $tpl->body;
+                    $saved      = $existingSections->firstWhere('template_id', $tpl->id);
+                    $isNew      = $existingSections->isEmpty();
+                    $included   = $saved !== null || ($isNew && ($tpl->default_included || $tpl->is_mandatory));
+                    $mandatory  = $tpl->is_mandatory;
+                    $body       = $saved['body'] ?? $tpl->body;
                 @endphp
-                <div class="section-card {{ $included ? 'included' : '' }}" data-template-id="{{ $tpl->id }}">
+                <div class="section-card {{ $included ? 'included' : '' }} {{ $mandatory ? 'mandatory' : '' }}"
+                     data-template-id="{{ $tpl->id }}"
+                     data-mandatory="{{ $mandatory ? '1' : '0' }}">
                     <div class="section-header">
                         <i class="bi bi-grip-vertical drag-handle"></i>
-                        <div class="form-check mb-0">
+                        <div class="form-check mb-0 flex-shrink-0">
                             <input type="checkbox" class="form-check-input section-toggle"
                                    id="tpl_{{ $tpl->id }}"
-                                   {{ $included ? 'checked' : '' }}>
+                                   {{ $included ? 'checked' : '' }}
+                                   {{ $mandatory ? 'disabled' : '' }}>
                         </div>
-                        <label class="form-check-label fw-semibold flex-grow-1 mb-0" for="tpl_{{ $tpl->id }}" style="cursor:pointer;">
-                            {{ $tpl->title }}
-                        </label>
-                        <span class="badge bg-light text-muted small" style="font-size:.65rem;">{{ ucfirst($tpl->service_type ?? '') }}</span>
+                        @if($mandatory)
+                            <i class="bi bi-lock-fill text-warning flex-shrink-0" title="Mandatory section" style="font-size:.75rem;"></i>
+                        @endif
+                        <span class="fw-semibold flex-grow-1 mb-0 ms-1">{{ $tpl->title }}</span>
+                        @if($tpl->service_type)
+                            <span class="badge bg-light text-muted small me-1" style="font-size:.65rem;">{{ ucfirst($tpl->service_type) }}</span>
+                        @endif
+                        <button type="button" class="btn btn-outline-secondary btn-view-section" title="View / edit wording">
+                            <i class="bi bi-chevron-down"></i>
+                        </button>
                     </div>
                     <div class="section-body">
                         <textarea class="form-control form-control-sm section-body-text" rows="5"
@@ -122,11 +136,24 @@
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script>
 (function () {
-    // Toggle include on checkbox change
-    document.querySelectorAll('.section-toggle').forEach(function (cb) {
-        cb.addEventListener('change', function () {
+    // View button toggles wording textarea (independent of checkbox)
+    document.querySelectorAll('.btn-view-section').forEach(function (btn) {
+        btn.addEventListener('click', function () {
             var card = this.closest('.section-card');
-            card.classList.toggle('included', this.checked);
+            card.classList.toggle('expanded');
+            var icon = this.querySelector('i');
+            icon.classList.toggle('bi-chevron-down', !card.classList.contains('expanded'));
+            icon.classList.toggle('bi-chevron-up', card.classList.contains('expanded'));
+            if (card.classList.contains('expanded')) {
+                card.querySelector('.section-body-text').focus();
+            }
+        });
+    });
+
+    // Checkbox toggles included styling; mandatory sections are disabled (always on)
+    document.querySelectorAll('.section-toggle:not([disabled])').forEach(function (cb) {
+        cb.addEventListener('change', function () {
+            this.closest('.section-card').classList.toggle('included', this.checked);
         });
     });
 
@@ -142,10 +169,11 @@
         var sections = [];
         document.querySelectorAll('#sectionsList .section-card').forEach(function (card) {
             var toggle = card.querySelector('.section-toggle');
-            if (toggle.checked) {
+            var isMandatory = card.dataset.mandatory === '1';
+            if (toggle.checked || isMandatory) {
                 sections.push({
                     template_id: parseInt(card.dataset.templateId),
-                    title: card.querySelector('label.fw-semibold').textContent.trim(),
+                    title: card.querySelector('span.fw-semibold').textContent.trim(),
                     body: card.querySelector('.section-body-text').value,
                 });
             }
