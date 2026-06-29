@@ -267,7 +267,10 @@ class ClientController extends Controller
         $middleName = implode(' ', $parts);
 
         try {
-            $individualType = \App\Models\ClientType::whereRaw('LOWER(name) = ?', ['individual'])->first();
+            $typeId = $d['individual_type_id'] ?? null;
+            if (! $typeId) {
+                $typeId = \App\Models\ClientType::whereRaw('LOWER(name) LIKE ?', ['%individual%'])->value('id');
+            }
 
             $newClient = Client::create([
                 'client_code'          => $d['client_code'],
@@ -276,7 +279,7 @@ class ClientController extends Controller
                 'contact_middle_name'  => $middleName ?: null,
                 'contact_last_name'    => $lastName,
                 'status'               => 'active',
-                'client_type_id'       => $individualType?->id,
+                'client_type_id'       => $typeId,
             ]);
 
             if (! empty($d['sa_required'])) {

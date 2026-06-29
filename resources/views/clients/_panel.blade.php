@@ -613,15 +613,18 @@
             return rb ? parseInt(rb.value) : -1;
         })();
 
+        const individualTypeId = clientTypeMap['individual'] || null;
+
         const officersWithFlags = chPendingOfficers.map((o, i) => {
             const row       = document.querySelector(`#chModalBody tr[data-officer="${i}"]`);
             const cb        = row ? row.querySelector('.officer-create-cb') : null;
             const saCb      = row ? row.querySelector('.officer-sa-cb') : null;
             const codeInput = row ? row.querySelector('.officer-client-code input') : null;
             return Object.assign({}, o, {
-                create_as_client: cb ? cb.checked : false,
-                sa_required:      saCb ? saCb.checked : false,
-                client_code:      codeInput ? codeInput.value.trim() : '',
+                create_as_client:   cb ? cb.checked : false,
+                sa_required:        saCb ? saCb.checked : false,
+                client_code:        codeInput ? codeInput.value.trim() : '',
+                individual_type_id: individualTypeId,
             });
         });
 
