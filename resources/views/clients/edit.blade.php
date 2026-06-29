@@ -9,7 +9,7 @@
     <a href="{{ route('clients.show', $client) }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i>Back</a>
 </div>
 
-<form method="POST" action="{{ route('clients.update', $client) }}" id="clientForm" novalidate>
+<form method="POST" action="{{ route('clients.update', $client) }}" id="clientForm" novalidate autocomplete="off">
     @csrf @method('PUT')
     @include('clients._form')
     <div class="mt-3">

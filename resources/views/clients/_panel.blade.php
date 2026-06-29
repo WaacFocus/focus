@@ -10,7 +10,7 @@
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
     </div>
 
-    <form id="clientForm" action="{{ route('clients.store') }}" method="POST" novalidate
+    <form id="clientForm" action="{{ route('clients.store') }}" method="POST" novalidate autocomplete="off"
           style="display:flex;flex-direction:column;flex:1 1 auto;min-height:0;">
         @csrf
         <input type="hidden" name="_method" value="">
