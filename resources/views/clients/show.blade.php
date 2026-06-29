@@ -21,7 +21,12 @@
         @endif
     </div>
     <div class="d-flex gap-2">
-        @if(!$client->ch_status && ($client->company_number || preg_match('/\b(limited|ltd|plc|llp)\b/i', $client->clientType?->name ?? '')))
+        @if($client->ch_status && $client->company_number)
+        <button type="button" class="btn btn-outline-primary"
+                onclick="openPanelAndSyncCH({{ $client->id }}, {{ json_encode($client->company_name) }})">
+            <img src="{{ asset('images/ch-icon.svg') }}" alt="" width="14" height="14" class="me-1 align-middle">Re-sync with Companies House
+        </button>
+        @elseif(!$client->ch_status && ($client->company_number || preg_match('/\b(limited|ltd|plc|llp)\b/i', $client->clientType?->name ?? '')))
         <button type="button" class="btn btn-outline-primary"
                 onclick="openPanelAndSyncCH({{ $client->id }}, {{ json_encode($client->company_name) }})">
             <img src="{{ asset('images/ch-icon.svg') }}" alt="" width="14" height="14" class="me-1 align-middle">Sync with Companies House

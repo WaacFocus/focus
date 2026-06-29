@@ -7,7 +7,11 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 class="mb-0">Edit: {{ $client->company_name }}</h4>
     <div class="d-flex gap-2">
-        @if(!$client->ch_status && ($client->company_number || preg_match('/\b(limited|ltd|plc|llp)\b/i', $client->clientType?->name ?? '')))
+        @if($client->ch_status && $client->company_number)
+        <a href="{{ route('clients.show', $client) }}?sync=1" class="btn btn-outline-primary">
+            <img src="{{ asset('images/ch-icon.svg') }}" alt="" width="14" height="14" class="me-1 align-middle">Re-sync with Companies House
+        </a>
+        @elseif(!$client->ch_status && ($client->company_number || preg_match('/\b(limited|ltd|plc|llp)\b/i', $client->clientType?->name ?? '')))
         <a href="{{ route('clients.show', $client) }}?sync=1" class="btn btn-outline-primary">
             <img src="{{ asset('images/ch-icon.svg') }}" alt="" width="14" height="14" class="me-1 align-middle">Sync with Companies House
         </a>
