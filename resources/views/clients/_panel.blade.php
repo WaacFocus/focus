@@ -566,6 +566,8 @@
                 officersHtml = `<p class="text-muted small mt-3 mb-0"><i class="bi bi-info-circle me-1"></i>No active officers found.</p>`;
             }
 
+            const existingClientCode = (form.querySelector('[name="client_code"]') || {}).value || '';
+
             document.getElementById('chModalCompanyName').textContent = profile.company_name;
             document.getElementById('chModalBody').innerHTML = `
                 <div class="row g-0">
@@ -574,7 +576,7 @@
                             <label class="form-label small fw-semibold mb-1">Client Code for <strong>${profile.company_name}</strong> <span class="text-danger">*</span></label>
                             <input type="text" id="chCompanyClientCode" class="form-control form-control-sm"
                                    placeholder="e.g. LTD001" maxlength="50" autocomplete="off"
-                                   value="${form.querySelector('[name=\\'client_code\\']')?.value?.trim() || ''}">
+                                   value="${existingClientCode}">
                             <div class="invalid-feedback">Please enter a client code.</div>
                         </div>
                         <table class="table table-sm mb-0" style="font-size:.85rem;">

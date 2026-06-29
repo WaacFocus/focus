@@ -401,5 +401,11 @@ async function openPanelAndSyncCH(clientId, companyName) {
         if (chSection) chSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 }
+
+// Auto-trigger if arriving from edit page via ?sync=1
+if (new URLSearchParams(window.location.search).get('sync') === '1') {
+    history.replaceState(null, '', window.location.pathname);
+    openPanelAndSyncCH({{ $client->id }}, {{ json_encode($client->company_name) }});
+}
 </script>
 @endpush
