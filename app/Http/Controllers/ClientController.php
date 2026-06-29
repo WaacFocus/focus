@@ -241,6 +241,7 @@ class ClientController extends Controller
             ]);
 
             if (! empty($d['sa_required'])) {
+                // Assign Self Assessment service if it exists
                 $saService = \App\Models\Service::whereRaw('LOWER(name) LIKE ?', ['%self assessment%'])
                     ->where('is_active', true)
                     ->first();
@@ -249,6 +250,20 @@ class ClientController extends Controller
                         'start_date' => now()->format('Y-m-d'),
                     ]);
                 }
+
+                // Create a yearly SA job due on the next 31st January
+                $nextJan31 = \Carbon\Carbon::create(now()->year, 1, 31)->startOfDay();
+                if (! $nextJan31->isFuture()) {
+                    $nextJan31->addYear();
+                }
+
+                \App\Models\Job::create([
+                    'name'      => 'Self Assessment',
+                    'client_id' => $newClient->id,
+                    'frequency' => 'yearly',
+                    'due_date'  => $nextJan31,
+                    'status'    => 'pending',
+                ]);
             }
         } catch (\Throwable) {
             // Duplicate client_code or other DB constraint — skip silently
