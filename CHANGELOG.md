@@ -4,6 +4,15 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.21 — 2026-06-29
+
+### Added
+- **CH Registered Address** stored separately from main client address — address line 1 & 2, locality, region, postcode, country all saved as distinct CH fields
+- Confirmation modal now shows full registered address (all lines) before setup
+- Client detail Companies House card displays formatted registered address
+
+---
+
 ## v1.20 — 2026-06-29
 
 ### Added

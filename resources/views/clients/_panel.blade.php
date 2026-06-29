@@ -216,6 +216,23 @@
                     <label class="form-label small fw-semibold">SIC Codes</label>
                     <input type="text" name="ch_sic_codes" class="form-control form-control-sm" placeholder="e.g. 69201, 69202">
                 </div>
+                <div class="col-12"><label class="form-label small fw-semibold mb-1">Registered Address</label></div>
+                <div class="col-12">
+                    <input type="text" name="ch_reg_address_line_1" class="form-control form-control-sm mb-1" placeholder="Address line 1">
+                    <input type="text" name="ch_reg_address_line_2" class="form-control form-control-sm" placeholder="Address line 2">
+                </div>
+                <div class="col-4">
+                    <input type="text" name="ch_reg_locality" class="form-control form-control-sm" placeholder="Town">
+                </div>
+                <div class="col-4">
+                    <input type="text" name="ch_reg_region" class="form-control form-control-sm" placeholder="County / Region">
+                </div>
+                <div class="col-4">
+                    <input type="text" name="ch_reg_postcode" class="form-control form-control-sm" placeholder="Postcode">
+                </div>
+                <div class="col-6">
+                    <input type="text" name="ch_reg_country" class="form-control form-control-sm" placeholder="Country">
+                </div>
                 <div class="col-4">
                     <label class="form-label small fw-semibold">Accounts Year End</label>
                     <input type="date" name="ch_accounts_year_end" class="form-control form-control-sm">
@@ -478,7 +495,14 @@
             chPendingOfficers = officers.officers ?? [];
 
             // Build modal body
-            const addressParts = [profile.address, profile.town, profile.county, profile.postcode].filter(Boolean);
+            const addressParts = [
+                profile.ch_reg_address_line_1,
+                profile.ch_reg_address_line_2,
+                profile.ch_reg_locality,
+                profile.ch_reg_region,
+                profile.ch_reg_postcode,
+                profile.ch_reg_country,
+            ].filter(Boolean);
             const statusBadge  = profile.company_status === 'active'
                 ? `<span class="badge bg-success">${profile.company_status}</span>`
                 : `<span class="badge bg-secondary">${(profile.company_status||'').replace(/-/g,' ')}</span>`;
@@ -514,7 +538,7 @@
                                 <tr><td class="text-muted" style="width:38%;">Company Number</td><td><strong>${profile.company_number}</strong></td></tr>
                                 <tr><td class="text-muted">Type</td><td>${chTypeLabel(profile.company_type)}</td></tr>
                                 <tr><td class="text-muted">Status</td><td>${statusBadge}</td></tr>
-                                ${addressParts.length ? `<tr><td class="text-muted">Address</td><td>${addressParts.join(', ')}</td></tr>` : ''}
+                                ${addressParts.length ? `<tr><td class="text-muted">Registered Address</td><td>${addressParts.join(', ')}</td></tr>` : ''}
                                 ${profile.ch_incorporated_on ? `<tr><td class="text-muted">Incorporated</td><td>${new Date(profile.ch_incorporated_on).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</td></tr>` : ''}
                                 ${profile.ch_jurisdiction ? `<tr><td class="text-muted">Jurisdiction</td><td>${chJurisdictionLabel(profile.ch_jurisdiction)}</td></tr>` : ''}
                                 ${profile.ch_sic_codes ? `<tr><td class="text-muted">SIC Codes</td><td>${profile.ch_sic_codes}</td></tr>` : ''}
@@ -550,6 +574,12 @@
         if (data.ch_incorporated_on)                 setField('ch_incorporated_on',                 data.ch_incorporated_on);
         if (data.ch_jurisdiction)                    setField('ch_jurisdiction',                    data.ch_jurisdiction);
         if (data.ch_sic_codes)                       setField('ch_sic_codes',                       data.ch_sic_codes);
+        if (data.ch_reg_address_line_1) setField('ch_reg_address_line_1', data.ch_reg_address_line_1);
+        if (data.ch_reg_address_line_2) setField('ch_reg_address_line_2', data.ch_reg_address_line_2);
+        if (data.ch_reg_locality)       setField('ch_reg_locality',       data.ch_reg_locality);
+        if (data.ch_reg_region)         setField('ch_reg_region',         data.ch_reg_region);
+        if (data.ch_reg_postcode)       setField('ch_reg_postcode',       data.ch_reg_postcode);
+        if (data.ch_reg_country)        setField('ch_reg_country',        data.ch_reg_country);
         if (data.ch_accounts_year_end)               setField('ch_accounts_year_end',               data.ch_accounts_year_end);
         if (data.ch_accounts_next_due)               setField('ch_accounts_next_due',               data.ch_accounts_next_due);
         if (data.ch_confirmation_statement_next_due) setField('ch_confirmation_statement_next_due', data.ch_confirmation_statement_next_due);
@@ -632,7 +662,9 @@
              'email','phone','address','town','county','postcode',
              'fpa_amount','billing_interval','payment_method',
              'vat_number','company_number','utr_number','paye_ref','notes',
-             'ch_status','ch_jurisdiction','ch_sic_codes']
+             'ch_status','ch_jurisdiction','ch_sic_codes',
+             'ch_reg_address_line_1','ch_reg_address_line_2','ch_reg_locality',
+             'ch_reg_region','ch_reg_postcode','ch_reg_country']
                 .forEach(f => setField(f, data[f]));
 
             ['ch_incorporated_on','ch_accounts_year_end','ch_accounts_next_due','ch_confirmation_statement_next_due']

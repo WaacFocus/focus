@@ -64,7 +64,7 @@
             </div>
         </div>
 
-        @if($client->ch_status || $client->ch_incorporated_on || $client->ch_sic_codes || $client->ch_accounts_year_end)
+        @if($client->ch_status || $client->ch_incorporated_on || $client->ch_sic_codes || $client->ch_accounts_year_end || $client->ch_reg_address_line_1)
         @php
             $jurisdictionMap = [
                 'england-wales'          => 'England & Wales',
@@ -99,6 +99,21 @@
                 @endif
                 @if($client->ch_sic_codes)
                 <div class="mb-2"><small class="text-muted">SIC Codes:</small> {{ $client->ch_sic_codes }}</div>
+                @endif
+                @php
+                    $chRegAddress = implode(', ', array_filter([
+                        $client->ch_reg_address_line_1,
+                        $client->ch_reg_address_line_2,
+                        $client->ch_reg_locality,
+                        $client->ch_reg_region,
+                        $client->ch_reg_postcode,
+                        $client->ch_reg_country,
+                    ]));
+                @endphp
+                @if($chRegAddress)
+                <div class="mb-2"><small class="text-muted">Registered Address:</small><br>
+                    <span class="ms-2 small">{{ $chRegAddress }}</span>
+                </div>
                 @endif
                 @if($client->ch_accounts_year_end || $client->ch_accounts_next_due)
                 <hr class="my-2">
