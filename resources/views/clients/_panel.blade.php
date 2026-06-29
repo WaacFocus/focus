@@ -573,7 +573,8 @@
                         <div class="mb-3 p-3 rounded" style="background:#f0f4ff;border:1px solid #c7d7fb;">
                             <label class="form-label small fw-semibold mb-1">Client Code for <strong>${profile.company_name}</strong> <span class="text-danger">*</span></label>
                             <input type="text" id="chCompanyClientCode" class="form-control form-control-sm"
-                                   placeholder="e.g. LTD001" maxlength="50" autocomplete="off">
+                                   placeholder="e.g. LTD001" maxlength="50" autocomplete="off"
+                                   value="${form.querySelector('[name=\\'client_code\\']')?.value?.trim() || ''}">
                             <div class="invalid-feedback">Please enter a client code.</div>
                         </div>
                         <table class="table table-sm mb-0" style="font-size:.85rem;">
