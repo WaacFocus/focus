@@ -204,6 +204,7 @@ class ClientController extends Controller
     public function destroy(Client $client)
     {
         abort_unless(auth()->user()->isManager(), 403);
+        $client->jobs()->delete();
         $client->delete();
 
         return redirect()->route('clients.index')->with('success', 'Client deleted.');
