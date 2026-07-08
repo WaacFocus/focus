@@ -65,7 +65,20 @@ class EngagementLetterController extends Controller
         ]);
 
         if ($action === 'send') {
-            return $this->doSend($letter, $client);
+            if (!$client->email) {
+                return redirect()->back()->with('error', 'This client has no email address on record.');
+            }
+            try {
+                $this->executeSend($letter, $client);
+            } catch (\Throwable $e) {
+                return redirect()->back()->with('error', 'Failed to send: ' . $e->getMessage());
+            }
+            if ($this->getDirectorClients($client)->isNotEmpty()) {
+                return redirect()->route('engagement-letters.directors', $letter)
+                    ->with('success', 'Engagement letter sent to ' . $client->company_name . '.');
+            }
+            return redirect()->route('engagement-letters.show', $letter)
+                ->with('success', 'Engagement letter sent to ' . $client->email . '.');
         }
 
         return redirect()->route('engagement-letters.show', $letter)
@@ -112,7 +125,20 @@ class EngagementLetterController extends Controller
         ]);
 
         if ($action === 'send') {
-            return $this->doSend($engagementLetter, $client);
+            if (!$client->email) {
+                return redirect()->back()->with('error', 'This client has no email address on record.');
+            }
+            try {
+                $this->executeSend($engagementLetter, $client);
+            } catch (\Throwable $e) {
+                return redirect()->back()->with('error', 'Failed to send: ' . $e->getMessage());
+            }
+            if ($this->getDirectorClients($client)->isNotEmpty()) {
+                return redirect()->route('engagement-letters.directors', $engagementLetter)
+                    ->with('success', 'Engagement letter sent to ' . $client->company_name . '.');
+            }
+            return redirect()->route('engagement-letters.show', $engagementLetter)
+                ->with('success', 'Engagement letter sent to ' . $client->email . '.');
         }
 
         return redirect()->route('engagement-letters.show', $engagementLetter)
@@ -141,25 +167,96 @@ class EngagementLetterController extends Controller
         return redirect()->route('engagement-letters.index')->with('success', 'Letter deleted.');
     }
 
+    public function directorLetters(EngagementLetter $engagementLetter): \Illuminate\Contracts\View\View
+    {
+        $engagementLetter->load('client');
+        $company = $engagementLetter->client;
+
+        $directorClients = $this->getDirectorClients($company)->map(function ($item) {
+            $item['sent_letter'] = EngagementLetter::where('client_id', $item['client']->id)
+                ->whereYear('created_at', now()->year)
+                ->where('status', '!=', 'draft')
+                ->latest()
+                ->first();
+            return $item;
+        });
+
+        return view('engagement-letters.director-letters', [
+            'letter'          => $engagementLetter,
+            'company'         => $company,
+            'directorClients' => $directorClients,
+        ]);
+    }
+
+    public function sendDirectorLetter(EngagementLetter $engagementLetter, Client $directorClient): \Illuminate\Http\JsonResponse
+    {
+        $templates = EngagementLetterTemplate::where('is_active', true)
+            ->where(function ($q) {
+                $q->where('is_mandatory', true)
+                  ->orWhere('title', 'Self Assessment');
+            })
+            ->orderBy('sort_order')
+            ->get();
+
+        $sections = $templates->map(fn($t) => [
+            'template_id' => $t->id,
+            'title'       => $t->title,
+            'body'        => $t->body,
+        ])->values()->toArray();
+
+        $letter = EngagementLetter::create([
+            'client_id' => $directorClient->id,
+            'subject'   => 'Engagement Letter — ' . $directorClient->company_name,
+            'sections'  => $sections,
+            'status'    => 'draft',
+        ]);
+
+        try {
+            $this->executeSend($letter, $directorClient);
+        } catch (\Throwable $e) {
+            $letter->delete();
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
+
+        return response()->json(['success' => true, 'letter_id' => $letter->id]);
+    }
+
     private function doSend(EngagementLetter $letter, Client $client): \Illuminate\Http\RedirectResponse
     {
         if (!$client->email) {
             return redirect()->back()->with('error', 'This client has no email address on record.');
         }
 
-        $token       = Str::uuid()->toString();
+        try {
+            $this->executeSend($letter, $client);
+        } catch (\Throwable $e) {
+            return redirect()->back()->with('error', 'Failed to send: ' . $e->getMessage());
+        }
+
+        if ($this->getDirectorClients($client)->isNotEmpty()) {
+            return redirect()->route('engagement-letters.directors', $letter)
+                ->with('success', 'Engagement letter sent to ' . $client->company_name . '.');
+        }
+
+        return redirect()->route('engagement-letters.show', $letter)
+            ->with('success', 'Engagement letter sent to ' . $client->email . '.');
+    }
+
+    private function executeSend(EngagementLetter $letter, Client $client): void
+    {
+        $token        = Str::uuid()->toString();
         $composedHtml = $this->composeHtml($letter, $client);
-        $signingUrl  = route('sign.show', $token);
+        $signingUrl   = route('sign.show', $token);
 
         $letter->update([
-            'token'        => $token,
-            'composed_html'=> $composedHtml,
-            'status'       => 'sent',
-            'sent_at'      => now(),
-            'sent_by'      => auth()->id(),
+            'token'         => $token,
+            'composed_html' => $composedHtml,
+            'status'        => 'sent',
+            'sent_at'       => now(),
+            'sent_by'       => auth()->id(),
         ]);
 
-        $smtp     = app(Smtp2goService::class);
+        $smtp      = app(Smtp2goService::class);
         $emailHtml = view('emails.engagement-letter-request', [
             'client'     => $client,
             'letter'     => $letter,
@@ -173,9 +270,22 @@ class EngagementLetterController extends Controller
             $emailHtml,
             'Woods Accounting & Consulting'
         );
+    }
 
-        return redirect()->route('engagement-letters.show', $letter)
-            ->with('success', 'Engagement letter sent to ' . $client->email . '.');
+    private function getDirectorClients(Client $company): \Illuminate\Support\Collection
+    {
+        return $company->directors()
+            ->where('sa_required', true)
+            ->whereNull('resigned_on')
+            ->get()
+            ->map(function ($director) {
+                $client = Client::whereRaw('LOWER(company_name) = ?', [strtolower(trim($director->name))])
+                    ->where('status', 'active')
+                    ->first();
+                return $client ? ['director' => $director, 'client' => $client] : null;
+            })
+            ->filter()
+            ->values();
     }
 
     private function composeHtml(EngagementLetter $letter, Client $client): string

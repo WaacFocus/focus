@@ -82,6 +82,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('engagement-letters', EngagementLetterController::class);
     Route::post('engagement-letters/{engagementLetter}/send', [EngagementLetterController::class, 'send'])->name('engagement-letters.send');
     Route::get('engagement-letters/{engagementLetter}/pdf', [EngagementLetterController::class, 'pdf'])->name('engagement-letters.pdf');
+    Route::get('engagement-letters/{engagementLetter}/directors', [EngagementLetterController::class, 'directorLetters'])->name('engagement-letters.directors');
+    Route::post('engagement-letters/{engagementLetter}/directors/{client}/send', [EngagementLetterController::class, 'sendDirectorLetter'])->name('engagement-letters.directors.send');
 
     Route::resource('jobs', JobController::class);
     Route::post('jobs/{job}/complete', [JobController::class, 'complete'])->name('jobs.complete');

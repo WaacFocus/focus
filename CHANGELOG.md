@@ -4,6 +4,15 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.35 — 2026-07-08
+
+### Added
+- **Director engagement letters** — after sending a company's engagement letter, if the company has directors with Self Assessment required who are registered as active clients, the system redirects to a director letters page
+- **Director letters page** — lists each SA-required director client with their name, role, and email; each card has a "Send Engagement Letter" button that creates and sends a letter with all mandatory sections plus the Self Assessment section
+- **Director no-email modal** — if a director has no email address, a modal prominently shows the director's name and role and prompts for their email before sending
+
+---
+
 ## v1.34 — 2026-07-08
 
 ### Added
