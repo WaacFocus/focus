@@ -113,7 +113,7 @@ class ClientController extends Controller
             return response()->json($client);
         }
 
-        $client->load(['clientType', 'billingLines', 'services', 'renewals.service', 'jobs.assignedTo', 'directors']);
+        $client->load(['clientType', 'billingLines', 'services', 'renewals.service', 'jobs.assignedTo', 'directors', 'engagementLetters']);
 
         $availableServices = Service::where('is_active', true)
             ->whereNotIn('id', $client->services->pluck('id'))

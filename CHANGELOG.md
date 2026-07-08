@@ -4,6 +4,18 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.33 — 2026-07-08
+
+### Added
+- **Engagement letter service auto-population** — when creating a new letter from a client's page, sections whose `service_type` matches the client's assigned services are automatically pre-ticked
+- **Engagement letter template sync migrations** — four migrations ensure every service has a linked letter template and every template has a linked service; core mandatory sections (Introduction, Our Responsibilities, etc.) are preserved
+
+### Changed
+- **Add Letter button** — now links to the engagement letter builder pre-populated with the client and subject rather than the old renewals letter section
+- **Tasks filter** — all dropdown filters now submit immediately on change without needing to click Filter
+
+---
+
 ## v1.32 — 2026-07-08
 
 ### Added

@@ -359,26 +359,26 @@
 
         <div class="card shadow-sm">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <span class="fw-semibold">Engagement Letters ({{ $client->renewals->count() }})</span>
-                <a href="{{ route('renewals.create', ['client_id' => $client->id]) }}" class="btn btn-sm btn-outline-primary">Add Letter</a>
+                <span class="fw-semibold">Engagement Letters ({{ $client->engagementLetters->count() }})</span>
+                <a href="{{ route('engagement-letters.create', ['client_id' => $client->id]) }}" class="btn btn-sm btn-outline-primary">
+                    <i class="bi bi-plus-lg me-1"></i>New Letter
+                </a>
             </div>
-            @if($client->renewals->isNotEmpty())
+            @if($client->engagementLetters->isNotEmpty())
             <div class="table-responsive">
-                <table class="table mb-0 align-middle">
+                <table class="table mb-0 align-middle small">
                     <thead class="table-light">
-                        <tr><th>Letter Type</th><th>Last Completed</th><th>Next Due</th><th>Status</th><th></th></tr>
+                        <tr><th>Subject</th><th>Sent</th><th>Status</th><th></th></tr>
                     </thead>
                     <tbody>
-                        @foreach($client->renewals as $renewal)
+                        @foreach($client->engagementLetters as $el)
                         <tr>
-                            <td>{{ $renewal->description }}</td>
-                            <td class="text-muted small">{{ $renewal->completed_date ? $renewal->completed_date->format('d M Y') : '—' }}</td>
-                            <td class="{{ $renewal->is_overdue ? 'text-danger fw-semibold' : '' }}">
-                                {{ $renewal->due_date ? $renewal->due_date->format('d M Y') : '—' }}
-                                @if($renewal->is_overdue)<span class="badge bg-danger ms-1">Overdue</span>@endif
+                            <td class="fw-medium">{{ $el->subject }}</td>
+                            <td class="text-muted">{{ $el->sent_at ? $el->sent_at->format('d M Y') : '—' }}</td>
+                            <td><span class="badge bg-{{ $el->status_badge }}">{{ ucfirst($el->status) }}</span></td>
+                            <td class="text-end">
+                                <a href="{{ route('engagement-letters.show', $el) }}" class="btn btn-sm btn-outline-secondary">View</a>
                             </td>
-                            <td><span class="badge bg-{{ $renewal->status_badge }}">{{ ucfirst($renewal->status) }}</span></td>
-                            <td><a href="{{ route('renewals.edit', $renewal) }}" class="btn btn-sm btn-outline-secondary">Edit</a></td>
                         </tr>
                         @endforeach
                     </tbody>

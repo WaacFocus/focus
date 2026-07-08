@@ -25,12 +25,23 @@ class EngagementLetterController extends Controller
 
     public function create(Request $request)
     {
-        $templates  = EngagementLetterTemplate::where('is_active', true)->orderBy('sort_order')->get();
-        $clients    = Client::where('status', 'active')->orderBy('company_name')->get();
-        $renewal    = $request->filled('renewal_id') ? Renewal::find($request->renewal_id) : null;
-        $letter     = new EngagementLetter();
+        $templates = EngagementLetterTemplate::where('is_active', true)->orderBy('sort_order')->get();
+        $clients   = Client::where('status', 'active')->orderBy('company_name')->get();
+        $renewal   = $request->filled('renewal_id') ? Renewal::find($request->renewal_id) : null;
+        $letter    = new EngagementLetter();
 
-        return view('engagement-letters.builder', compact('templates', 'clients', 'renewal', 'letter'));
+        $clientServiceTypes = collect();
+
+        if ($request->filled('client_id')) {
+            $preClient = Client::with('services')->find($request->client_id);
+            if ($preClient) {
+                $letter->client_id  = (int) $request->client_id;
+                $letter->subject    = 'Engagement Letter — ' . $preClient->company_name;
+                $clientServiceTypes = $preClient->services->map(fn($s) => strtolower($s->name));
+            }
+        }
+
+        return view('engagement-letters.builder', compact('templates', 'clients', 'renewal', 'letter', 'clientServiceTypes'));
     }
 
     public function store(Request $request)

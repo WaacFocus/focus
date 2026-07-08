@@ -92,7 +92,15 @@ class ServiceController extends Controller
 
         $data['is_active'] = $request->boolean('is_active', true);
 
+        $oldType = strtolower($service->name);
         $service->update($data);
+        $newType = strtolower($service->name);
+
+        // Keep the linked engagement letter template in sync with the service name
+        if ($oldType !== $newType) {
+            EngagementLetterTemplate::where('service_type', $oldType)
+                ->update(['service_type' => $newType, 'title' => $service->name]);
+        }
 
         return redirect()->route('services.index')->with('success', 'Service updated.');
     }

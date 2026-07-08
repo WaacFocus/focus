@@ -65,6 +65,11 @@ class Client extends Model
         return $this->hasMany(Renewal::class);
     }
 
+    public function engagementLetters(): HasMany
+    {
+        return $this->hasMany(EngagementLetter::class)->orderByDesc('created_at');
+    }
+
     // Virtual accessor so all existing $client->contact_name reads keep working
     public function getContactNameAttribute(): ?string
     {
