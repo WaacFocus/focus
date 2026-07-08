@@ -4,6 +4,13 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.34 — 2026-07-08
+
+### Added
+- **No-email prompt on engagement letter send** — if the selected client has no email address, a modal prompts for email (and optionally phone) before sending; the client record is updated via AJAX and the letter is sent immediately after
+
+---
+
 ## v1.33 — 2026-07-08
 
 ### Added

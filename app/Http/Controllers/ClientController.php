@@ -233,6 +233,23 @@ class ClientController extends Controller
         return back()->with('success', 'Self Assessment job created — due ' . $nextJan31->format('d M Y') . '.');
     }
 
+    public function updateContact(Request $request, Client $client): \Illuminate\Http\JsonResponse
+    {
+        $data = $request->validate([
+            'email' => 'required|email|max:255',
+            'phone' => 'nullable|string|max:50',
+        ]);
+
+        $update = ['email' => $data['email']];
+        if (!empty($data['phone'])) {
+            $update['phone'] = $data['phone'];
+        }
+
+        $client->update($update);
+
+        return response()->json(['success' => true]);
+    }
+
     public function destroyDirector(Client $client, \App\Models\ClientDirector $director)
     {
         abort_unless($director->client_id === $client->id, 404);

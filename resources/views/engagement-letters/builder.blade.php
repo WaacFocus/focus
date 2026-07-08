@@ -46,6 +46,7 @@
                         <option value="{{ $c->id }}"
                             data-name="{{ $c->contact_name ?: $c->company_name }}"
                             data-company="{{ $c->company_name }}"
+                                    data-email="{{ $c->email }}"
                             @selected(old('client_id', $letter->client_id ?? $renewal?->client_id) == $c->id)>
                             {{ $c->company_name }}
                         </option>
@@ -122,21 +123,64 @@
 
     {{-- Actions --}}
     <div class="d-flex gap-2 align-items-center">
-        <button type="submit" name="action" value="draft" class="btn btn-outline-secondary">
+        <button type="button" id="draftBtn" class="btn btn-outline-secondary">
             <i class="bi bi-floppy me-1"></i>Save Draft
         </button>
-        <button type="submit" name="action" value="send" class="btn btn-primary" id="sendBtn">
+        <button type="button" class="btn btn-primary" id="sendBtn">
             <i class="bi bi-send me-1"></i>Send to Client
         </button>
+        <input type="hidden" name="action" id="actionInput" value="draft">
         <a href="{{ route('engagement-letters.index') }}" class="btn btn-link text-muted">Cancel</a>
     </div>
 </form>
+
+{{-- No-email modal --}}
+<div class="modal fade" id="noEmailModal" tabindex="-1" aria-labelledby="noEmailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="noEmailModalLabel">
+                    <i class="bi bi-envelope-exclamation me-2 text-warning"></i>No Email Address on Record
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted mb-3">
+                    <span id="noEmailClientName" class="fw-semibold"></span> has no email address saved.
+                    Please add one to continue sending this letter.
+                </p>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
+                    <input type="email" id="contactEmail" class="form-control" placeholder="client@example.com" required>
+                    <div class="invalid-feedback">Please enter a valid email address.</div>
+                </div>
+                <div class="mb-1">
+                    <label class="form-label fw-semibold">Phone <span class="text-muted fw-normal">(optional)</span></label>
+                    <input type="text" id="contactPhone" class="form-control" placeholder="e.g. 01234 567890">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="saveContactBtn">
+                    <i class="bi bi-check-lg me-1"></i>Save &amp; Send
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script>
 (function () {
+    var clientSelect  = document.getElementById('clientSelect');
+    var subjectInput  = document.querySelector('input[name="subject"]');
+    var letterForm    = document.getElementById('letterForm');
+    var actionInput   = document.getElementById('actionInput');
+    var noEmailModal  = new bootstrap.Modal(document.getElementById('noEmailModal'));
+    var pendingClientId = null;
+
     // View button toggles wording textarea (independent of checkbox)
     document.querySelectorAll('.btn-view-section').forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -165,8 +209,7 @@
         ghostClass: 'sortable-ghost',
     });
 
-    // Build sections JSON before submit
-    document.getElementById('letterForm').addEventListener('submit', function (e) {
+    function buildSectionsJson() {
         var sections = [];
         document.querySelectorAll('#sectionsList .section-card').forEach(function (card) {
             var toggle = card.querySelector('.section-toggle');
@@ -179,17 +222,97 @@
                 });
             }
         });
-        if (sections.length === 0) {
-            e.preventDefault();
-            alert('Please include at least one section.');
+        return sections;
+    }
+
+    // Save Draft button
+    document.getElementById('draftBtn').addEventListener('click', function () {
+        var sections = buildSectionsJson();
+        if (sections.length === 0) { alert('Please include at least one section.'); return; }
+        document.getElementById('sectionsJson').value = JSON.stringify(sections);
+        actionInput.value = 'draft';
+        letterForm.submit();
+    });
+
+    // Send button: check email first
+    document.getElementById('sendBtn').addEventListener('click', function () {
+        var opt = clientSelect.options[clientSelect.selectedIndex];
+        if (!opt || !opt.value) {
+            clientSelect.focus();
+            clientSelect.reportValidity();
             return;
         }
+
+        var sections = buildSectionsJson();
+        if (sections.length === 0) { alert('Please include at least one section.'); return; }
         document.getElementById('sectionsJson').value = JSON.stringify(sections);
+
+        if (opt.dataset.email) {
+            // Email on record — submit immediately
+            actionInput.value = 'send';
+            letterForm.submit();
+        } else {
+            // No email — show modal
+            pendingClientId = opt.value;
+            document.getElementById('noEmailClientName').textContent = opt.dataset.company;
+            document.getElementById('contactEmail').value = '';
+            document.getElementById('contactPhone').value = '';
+            document.getElementById('contactEmail').classList.remove('is-invalid');
+            noEmailModal.show();
+            setTimeout(function () { document.getElementById('contactEmail').focus(); }, 300);
+        }
+    });
+
+    // Modal Save & Send
+    document.getElementById('saveContactBtn').addEventListener('click', function () {
+        var emailInput = document.getElementById('contactEmail');
+        var phoneInput = document.getElementById('contactPhone');
+        var email = emailInput.value.trim();
+
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            emailInput.classList.add('is-invalid');
+            emailInput.focus();
+            return;
+        }
+        emailInput.classList.remove('is-invalid');
+
+        var btn = this;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Saving…';
+
+        fetch('/clients/' + pendingClientId + '/contact', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({ email: email, phone: phoneInput.value.trim() || null }),
+        })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+            if (data.success) {
+                // Update the option's data-email so it's reflected if user comes back
+                var opt = clientSelect.querySelector('option[value="' + pendingClientId + '"]');
+                if (opt) opt.dataset.email = email;
+
+                noEmailModal.hide();
+                actionInput.value = 'send';
+                letterForm.submit();
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Save &amp; Send';
+                alert('Could not save contact details. Please try again.');
+            }
+        })
+        .catch(function () {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Save &amp; Send';
+            alert('Network error. Please try again.');
+        });
     });
 
     // Auto-update subject when client changes
-    var clientSelect = document.getElementById('clientSelect');
-    var subjectInput = document.querySelector('input[name="subject"]');
     clientSelect.addEventListener('change', function () {
         var opt = this.options[this.selectedIndex];
         if (opt.value && !subjectInput.value.trim()) {

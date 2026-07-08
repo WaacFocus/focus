@@ -89,6 +89,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('clients/{client}/sa-job', [ClientController::class, 'createSaJob'])->name('clients.sa-job');
     Route::delete('clients/{client}/directors/{director}', [ClientController::class, 'destroyDirector'])->name('clients.directors.destroy');
+    Route::patch('clients/{client}/contact', [ClientController::class, 'updateContact'])->name('clients.contact.update');
 
     Route::get('api/companies-house/search', [CompaniesHouseController::class, 'search'])->name('companies-house.search');
     Route::get('api/companies-house/{number}/officers', [CompaniesHouseController::class, 'officers'])->name('companies-house.officers');
