@@ -4,6 +4,13 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.37 — 2026-07-08
+
+### Fixed
+- **Engagement letter service auto-tick (robust rewrite)** — matching is now done in the controller via a DB query rather than string comparison in Blade; templates are resolved to IDs using both `service_type` and `LOWER(TRIM(title))` against the client's service names, eliminating any risk of case/whitespace mismatch or Blade scope issues
+
+---
+
 ## v1.36 — 2026-07-08
 
 ### Fixed

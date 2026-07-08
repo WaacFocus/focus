@@ -30,18 +30,30 @@ class EngagementLetterController extends Controller
         $renewal   = $request->filled('renewal_id') ? Renewal::find($request->renewal_id) : null;
         $letter    = new EngagementLetter();
 
-        $clientServiceTypes = collect();
+        $autoIncludeIds = collect();
 
         if ($request->filled('client_id')) {
             $preClient = Client::with('services')->find($request->client_id);
             if ($preClient) {
-                $letter->client_id  = (int) $request->client_id;
-                $letter->subject    = 'Engagement Letter — ' . $preClient->company_name;
-                $clientServiceTypes = $preClient->services->map(fn($s) => strtolower($s->name));
+                $letter->client_id = (int) $request->client_id;
+                $letter->subject   = 'Engagement Letter — ' . $preClient->company_name;
+
+                $serviceNames = $preClient->services->map(fn($s) => strtolower(trim($s->name)))->filter()->values();
+
+                if ($serviceNames->isNotEmpty()) {
+                    $autoIncludeIds = EngagementLetterTemplate::where('is_active', true)
+                        ->where(function ($q) use ($serviceNames) {
+                            $q->whereIn('service_type', $serviceNames->toArray());
+                            foreach ($serviceNames as $name) {
+                                $q->orWhereRaw('LOWER(TRIM(title)) = ?', [$name]);
+                            }
+                        })
+                        ->pluck('id');
+                }
             }
         }
 
-        return view('engagement-letters.builder', compact('templates', 'clients', 'renewal', 'letter', 'clientServiceTypes'));
+        return view('engagement-letters.builder', compact('templates', 'clients', 'renewal', 'letter', 'autoIncludeIds'));
     }
 
     public function store(Request $request)
