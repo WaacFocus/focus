@@ -4,6 +4,14 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.36 — 2026-07-08
+
+### Fixed
+- **Engagement letter service auto-tick** — section matching now also compares template title (lowercased) against the client's service names, so services like "Annual Accounts" correctly tick the "Annual Accounts" section even when the template's `service_type` was seeded as `"accounts"`
+- **ServiceController duplicate template prevention** — when creating a service whose name matches an existing template title, the existing template's `service_type` is updated to align rather than creating a duplicate section
+
+---
+
 ## v1.35 — 2026-07-08
 
 ### Added

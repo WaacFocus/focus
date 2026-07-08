@@ -56,16 +56,26 @@ class ServiceController extends Controller
                 ]);
             });
 
-        // Seed a starter engagement letter section for this service
-        EngagementLetterTemplate::create([
-            'title'            => $service->name,
-            'service_type'     => strtolower($service->name),
-            'body'             => "We are pleased to confirm the terms of our engagement to provide {$service->name} services.\n\nThe scope of our services will be agreed with you and confirmed in writing prior to commencement.",
-            'sort_order'       => (EngagementLetterTemplate::max('sort_order') ?? 0) + 1,
-            'is_active'        => true,
-            'default_included' => false,
-            'is_mandatory'     => false,
-        ]);
+        // Link to or create an engagement letter section for this service
+        $serviceType  = strtolower($service->name);
+        $existingTpl  = EngagementLetterTemplate::whereRaw('LOWER(title) = ?', [$serviceType])->first();
+
+        if ($existingTpl) {
+            // Align the service_type so the builder matching works
+            if ($existingTpl->service_type !== $serviceType) {
+                $existingTpl->update(['service_type' => $serviceType]);
+            }
+        } else {
+            EngagementLetterTemplate::create([
+                'title'            => $service->name,
+                'service_type'     => $serviceType,
+                'body'             => "We are pleased to confirm the terms of our engagement to provide {$service->name} services.\n\nThe scope of our services will be agreed with you and confirmed in writing prior to commencement.",
+                'sort_order'       => (EngagementLetterTemplate::max('sort_order') ?? 0) + 1,
+                'is_active'        => true,
+                'default_included' => false,
+                'is_mandatory'     => false,
+            ]);
+        }
 
         return redirect()->route('services.index')->with('success', 'Service created.');
     }

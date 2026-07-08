@@ -85,7 +85,10 @@
                 @php
                     $saved      = $existingSections->firstWhere('template_id', $tpl->id);
                     $isNew      = $existingSections->isEmpty();
-                    $serviceMatch = $tpl->service_type && isset($clientServiceTypes) && $clientServiceTypes->contains($tpl->service_type);
+                    $serviceMatch = isset($clientServiceTypes) && $clientServiceTypes->isNotEmpty() && (
+                        ($tpl->service_type && $clientServiceTypes->contains($tpl->service_type)) ||
+                        $clientServiceTypes->contains(strtolower($tpl->title))
+                    );
                     $included   = $saved !== null || ($isNew && ($tpl->default_included || $tpl->is_mandatory || $serviceMatch));
                     $mandatory  = $tpl->is_mandatory;
                     $body       = $saved['body'] ?? $tpl->body;
