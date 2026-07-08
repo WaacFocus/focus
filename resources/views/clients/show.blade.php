@@ -323,7 +323,7 @@
 
         <div class="card shadow-sm mb-4">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <span class="fw-semibold"><i class="bi bi-briefcase me-2 text-primary"></i>Jobs ({{ $client->jobs->whereNotIn('status', ['completed'])->count() }} active)</span>
+                <span class="fw-semibold"><i class="bi bi-briefcase me-2 text-primary"></i>Jobs ({{ $client->jobs->reject(fn($j) => $j->isComplete())->count() }} active)</span>
                 <div class="d-flex gap-2">
                     <form method="POST" action="{{ route('clients.sa-job', $client) }}"
                           onsubmit="return confirm('Create a yearly Self Assessment job for {{ addslashes($client->company_name) }}?')">
@@ -335,7 +335,7 @@
                     <a href="{{ route('jobs.index', ['client_id' => $client->id]) }}" class="btn btn-sm btn-outline-secondary">View all</a>
                 </div>
             </div>
-            @php $activeJobs = $client->jobs->whereNotIn('status', ['completed'])->sortBy('due_date'); @endphp
+            @php $activeJobs = $client->jobs->reject(fn($j) => $j->isComplete())->sortBy('due_date'); @endphp
             @if($activeJobs->count())
             <div class="table-responsive">
                 <table class="table mb-0 align-middle small">
@@ -352,7 +352,7 @@
                                 {{ $job->due_date->format('d M Y') }}
                             </td>
                             <td class="text-center">
-                                <span class="badge bg-{{ $job->status_badge }}">{{ ucfirst(str_replace('_', ' ', $job->status)) }}</span>
+                                <span class="badge bg-{{ $job->status_badge }}">{{ $job->status_label }}</span>
                             </td>
                         </tr>
                         @endforeach

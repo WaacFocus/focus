@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\Job;
+use App\Models\JobStatus;
 use App\Models\Renewal;
 use App\Models\SavedReport;
 use App\Models\Task;
@@ -52,7 +53,7 @@ class ReportBuilderController extends Controller
                 ],
                 'filter_fields' => [
                     'name'      => ['label' => 'Job Name',    'type' => 'text'],
-                    'status'    => ['label' => 'Status',      'type' => 'select', 'options' => ['pending' => 'Pending', 'in_progress' => 'In Progress', 'completed' => 'Completed']],
+                    'status'    => ['label' => 'Status',      'type' => 'select', 'options' => JobStatus::where('is_active', true)->orderBy('sort_order')->pluck('name', 'slug')->toArray()],
                     'frequency' => ['label' => 'Frequency',   'type' => 'select', 'options' => ['weekly' => 'Weekly', 'monthly' => 'Monthly', 'quarterly' => 'Quarterly', 'yearly' => 'Yearly', 'one-off' => 'One-off']],
                     'due_date'  => ['label' => 'Due Date',    'type' => 'date'],
                 ],

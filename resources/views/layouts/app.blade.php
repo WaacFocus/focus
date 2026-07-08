@@ -242,6 +242,9 @@
                 <a href="{{ route('admin.engagement-letter-templates.index') }}" class="nav-link {{ request()->routeIs('admin.engagement-letter-templates.*') ? 'active' : '' }}">
                     <i class="bi bi-file-text me-2"></i>Letter Sections
                 </a>
+                <a href="{{ route('admin.job-statuses.index') }}" class="nav-link {{ request()->routeIs('admin.job-statuses.*') ? 'active' : '' }}">
+                    <i class="bi bi-tags me-2"></i>Job Statuses
+                </a>
                 @endcan
             </div>
 
@@ -322,6 +325,9 @@
                 </a>
                 <a href="{{ route('admin.engagement-letter-templates.index') }}" class="nav-link {{ request()->routeIs('admin.engagement-letter-templates.*') ? 'active' : '' }}">
                     <i class="bi bi-file-text me-2"></i>Letter Sections
+                </a>
+                <a href="{{ route('admin.job-statuses.index') }}" class="nav-link {{ request()->routeIs('admin.job-statuses.*') ? 'active' : '' }}">
+                    <i class="bi bi-tags me-2"></i>Job Statuses
                 </a>
                 @endcan
             </div>

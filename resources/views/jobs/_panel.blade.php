@@ -44,6 +44,16 @@
                     <div class="invalid-feedback" data-field="client_id"></div>
                 </div>
                 <div class="col-6">
+                    <label class="form-label small fw-semibold">Service</label>
+                    <select name="service_id" id="jobPanelService" class="form-select form-select-sm">
+                        <option value="">— None —</option>
+                        @foreach($services as $service)
+                            <option value="{{ $service->id }}">{{ $service->name }}</option>
+                        @endforeach
+                    </select>
+                    <div class="invalid-feedback" data-field="service_id"></div>
+                </div>
+                <div class="col-6">
                     <label class="form-label small fw-semibold">Assigned To <span class="text-danger">*</span></label>
                     <select name="assigned_to" class="form-select form-select-sm" required>
                         <option value="">— Select user —</option>
@@ -79,10 +89,8 @@
                 </div>
                 <div class="col-4">
                     <label class="form-label small fw-semibold">Status</label>
-                    <select name="status" class="form-select form-select-sm">
-                        <option value="pending" selected>Pending</option>
-                        <option value="in_progress">In Progress</option>
-                        <option value="completed">Completed</option>
+                    <select name="status" id="jobPanelStatus" class="form-select form-select-sm">
+                        {{-- populated by JS based on service selection --}}
                     </select>
                     <div class="invalid-feedback" data-field="status"></div>
                 </div>
@@ -114,6 +122,39 @@
     const saveBtn  = document.getElementById('saveJobBtn');
     const csrf     = document.querySelector('meta[name="csrf-token"]').content;
     const storeUrl = '{{ route("jobs.store") }}';
+
+    const statusesByService = {!! json_encode($statusesByService) !!};
+
+    function getStatusList(serviceId) {
+        const sid = serviceId ? String(serviceId) : null;
+        if (sid && statusesByService[sid] && statusesByService[sid].length) {
+            return statusesByService[sid];
+        }
+        return statusesByService['global'] || [];
+    }
+
+    function rebuildStatusSelect(serviceId, currentSlug) {
+        const sel  = document.getElementById('jobPanelStatus');
+        const list = getStatusList(serviceId);
+        sel.innerHTML = list.map(function (s) {
+            return '<option value="' + s.slug + '"' + (s.slug === currentSlug ? ' selected' : '') + '>' + s.name + '</option>';
+        }).join('');
+        if (currentSlug && !list.find(function(s) { return s.slug === currentSlug; })) {
+            // Current slug not in list — add it as disabled placeholder
+            sel.insertAdjacentHTML('afterbegin', '<option value="' + currentSlug + '" selected disabled>' + currentSlug + '</option>');
+        }
+        if (!currentSlug && list.length) {
+            sel.value = list[0].slug;
+        }
+    }
+
+    document.getElementById('jobPanelService').addEventListener('change', function () {
+        const currentStatus = document.getElementById('jobPanelStatus').value;
+        rebuildStatusSelect(this.value, currentStatus);
+    });
+
+    // Initialise status select on page load (default: no service, default to first global)
+    rebuildStatusSelect(null, 'pending');
 
     function setLoading(on) {
         saveBtn.disabled = on;
@@ -155,6 +196,7 @@
             form.action = storeUrl;
             form.querySelector('[name="_method"]').value = '';
             document.getElementById('saveJobBtnText').textContent = 'Create Job';
+            rebuildStatusSelect(null, 'pending');
             bsPanel.show();
             return;
         }
@@ -170,10 +212,11 @@
             });
             const data = await res.json();
 
-            ['name','description','client_id','assigned_to','frequency','status','notes']
+            ['name','description','client_id','service_id','assigned_to','frequency','notes']
                 .forEach(f => setField(f, data[f]));
 
             setField('due_date', data.due_date ? data.due_date.substring(0, 10) : '');
+            rebuildStatusSelect(data.service_id, data.status);
 
             panelEl.querySelector('#jobPanelIcon').className = 'bi bi-pencil me-2';
             panelEl.querySelector('#jobPanelTitle').textContent = data.name;

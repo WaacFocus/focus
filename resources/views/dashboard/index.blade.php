@@ -152,8 +152,9 @@
                             <label class="form-label form-label-sm mb-1">Status</label>
                             <select name="jf_status" class="form-select form-select-sm">
                                 <option value="">All</option>
-                                <option value="pending"     {{ request('jf_status') === 'pending'     ? 'selected' : '' }}>Pending</option>
-                                <option value="in_progress" {{ request('jf_status') === 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                                @foreach($jobStatuses as $js)
+                                    <option value="{{ $js->slug }}" {{ request('jf_status') === $js->slug ? 'selected' : '' }}>{{ $js->name }}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="col-sm-6 col-md-2">
@@ -217,7 +218,7 @@
                     </thead>
                     <tbody id="myJobsTable">
                         @foreach($my_jobs as $job)
-                        <tr id="job-row-{{ $job->id }}" class="{{ $job->status !== 'completed' && $job->due_date->isPast() ? 'table-danger' : '' }}">
+                        <tr id="job-row-{{ $job->id }}" class="{{ !$job->isComplete() && $job->due_date->isPast() ? 'table-danger' : '' }}">
                             <td data-col="0">
                                 <div class="fw-semibold">{{ $job->name }}</div>
                                 @if($job->description)
@@ -226,16 +227,16 @@
                             </td>
                             <td data-col="1">{{ $job->client?->company_name ?? '—' }}</td>
                             <td data-col="2"><span class="badge bg-light text-dark">{{ $job->frequency_label }}</span></td>
-                            <td data-col="3" class="{{ $job->status !== 'completed' && $job->due_date->isPast() ? 'text-danger fw-semibold' : '' }}">
+                            <td data-col="3" class="{{ !$job->isComplete() && $job->due_date->isPast() ? 'text-danger fw-semibold' : '' }}">
                                 {{ $job->due_date->format('d M Y') }}
-                                @if($job->due_date->isPast())
+                                @if(!$job->isComplete() && $job->due_date->isPast())
                                     <span class="badge bg-danger ms-1">Overdue</span>
-                                @elseif($job->due_date->isToday())
+                                @elseif(!$job->isComplete() && $job->due_date->isToday())
                                     <span class="badge bg-warning ms-1">Today</span>
                                 @endif
                             </td>
                             <td data-col="4" class="text-center">
-                                <span class="badge bg-{{ $job->status_badge }}">{{ ucfirst(str_replace('_', ' ', $job->status)) }}</span>
+                                <span class="badge bg-{{ $job->status_badge }}">{{ $job->status_label }}</span>
                             </td>
                             <td data-col="fixed" class="text-end">
                                 <button class="btn btn-sm btn-success"

@@ -17,6 +17,7 @@ use App\Http\Controllers\ReportBuilderController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\JobController;
+use App\Http\Controllers\JobStatusController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\ImpersonateController;
@@ -117,6 +118,11 @@ Route::middleware('auth')->group(function () {
                 'destroy' => 'admin.engagement-letter-templates.destroy',
             ])
             ->parameters(['engagement-letter-templates' => 'engagementLetterTemplate']);
+        Route::post('admin/job-statuses/reorder', [JobStatusController::class, 'reorder'])->name('admin.job-statuses.reorder');
+        Route::get('admin/job-statuses', [JobStatusController::class, 'index'])->name('admin.job-statuses.index');
+        Route::post('admin/job-statuses', [JobStatusController::class, 'store'])->name('admin.job-statuses.store');
+        Route::patch('admin/job-statuses/{jobStatus}', [JobStatusController::class, 'update'])->name('admin.job-statuses.update');
+        Route::delete('admin/job-statuses/{jobStatus}', [JobStatusController::class, 'destroy'])->name('admin.job-statuses.destroy');
         Route::get('admin/backup', [BackupController::class, 'index'])->name('backup.index');
         Route::get('admin/backup/export/{type}', [BackupController::class, 'export'])->name('backup.export');
         Route::get('admin/backup/template/{type}', [BackupController::class, 'template'])->name('backup.template');

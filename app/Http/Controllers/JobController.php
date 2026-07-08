@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\Job;
+use App\Models\JobStatus;
+use App\Models\Service;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,7 +28,8 @@ class JobController extends Controller
         } elseif ($request->filled('status')) {
             $query->where('status', $request->status);
         } else {
-            $query->whereIn('status', ['pending', 'in_progress']);
+            $activeSlugs = JobStatus::where('is_completion', false)->where('is_active', true)->pluck('slug')->toArray();
+            $query->whereIn('status', $activeSlugs ?: ['pending', 'in_progress']);
         }
         if ($request->assigned_to === 'all') {
             // show all users
@@ -42,15 +45,28 @@ class JobController extends Controller
             $query->whereBetween('due_date', [now()->startOfDay(), now()->addDays((int) $request->days)->endOfDay()]);
         }
 
-        $jobs    = $query->orderByRaw("CASE status WHEN 'pending' THEN 0 WHEN 'in_progress' THEN 1 ELSE 2 END")
-                         ->orderBy('due_date')
-                         ->paginate(25)
-                         ->withQueryString();
+        $jobs = $query->orderByRaw(
+                "(SELECT sort_order FROM job_statuses WHERE slug = practice_jobs.status AND service_id IS NULL LIMIT 1) ASC"
+            )
+            ->orderBy('due_date')
+            ->paginate(25)
+            ->withQueryString();
 
-        $clients = Client::orderBy('company_name')->get(['id', 'company_name']);
-        $users   = User::orderBy('name')->get(['id', 'name']);
+        $clients  = Client::orderBy('company_name')->get(['id', 'company_name']);
+        $users    = User::orderBy('name')->get(['id', 'name']);
+        $services = Service::where('is_active', true)->orderBy('name')->get(['id', 'name']);
+        $statuses = JobStatus::where('is_active', true)->orderBy('sort_order')->get();
 
-        return view('jobs.index', compact('jobs', 'clients', 'users'));
+        // Build status map for JS: keyed by 'global' and service_id strings
+        $statusesByService = ['global' => $statuses->filter(fn($s) => is_null($s->service_id))->values()];
+        foreach ($statuses->filter(fn($s) => !is_null($s->service_id))->groupBy('service_id') as $sid => $group) {
+            $statusesByService[(string)$sid] = $group->values();
+        }
+
+        // Completion slugs for JS to detect when to trigger "next job" toast
+        $completionSlugs = $statuses->where('is_completion', true)->pluck('slug')->values();
+
+        return view('jobs.index', compact('jobs', 'clients', 'users', 'services', 'statuses', 'statusesByService', 'completionSlugs'));
     }
 
     public function show(Request $request, Job $job)
@@ -68,10 +84,11 @@ class JobController extends Controller
             'name'        => 'required|string|max:255',
             'description' => 'nullable|string',
             'client_id'   => 'nullable|exists:clients,id',
+            'service_id'  => 'nullable|exists:services,id',
             'assigned_to' => 'required|exists:users,id',
             'frequency'   => 'required|in:weekly,monthly,quarterly,yearly,one-off',
             'due_date'    => 'required|date',
-            'status'      => 'required|in:pending,in_progress,completed',
+            'status'      => 'required|string|exists:job_statuses,slug',
             'notes'       => 'nullable|string',
         ]);
 
@@ -90,10 +107,11 @@ class JobController extends Controller
             'name'        => 'required|string|max:255',
             'description' => 'nullable|string',
             'client_id'   => 'nullable|exists:clients,id',
+            'service_id'  => 'nullable|exists:services,id',
             'assigned_to' => 'required|exists:users,id',
             'frequency'   => 'required|in:weekly,monthly,quarterly,yearly,one-off',
             'due_date'    => 'required|date',
-            'status'      => 'required|in:pending,in_progress,completed',
+            'status'      => 'required|string|exists:job_statuses,slug',
             'notes'       => 'nullable|string',
         ]);
 
@@ -108,28 +126,34 @@ class JobController extends Controller
 
     public function updateStatus(Request $request, Job $job)
     {
-        $request->validate(['status' => 'required|in:pending,in_progress,completed']);
+        $request->validate(['status' => 'required|string|exists:job_statuses,slug']);
 
-        $data = ['status' => $request->status];
+        $jobStatus = JobStatus::where('slug', $request->status)->first();
+        $data      = ['status' => $request->status];
 
-        if ($request->status === 'completed') {
+        if ($jobStatus?->is_completion) {
             $data['completed_at'] = now();
             $job->update($data);
             $next = $job->scheduleNext();
             return response()->json([
-                'message'  => 'Status updated.',
-                'next_due' => $next?->due_date->format('d M Y'),
+                'message'       => 'Status updated.',
+                'is_completion' => true,
+                'next_due'      => $next?->due_date->format('d M Y'),
             ]);
         }
 
         $job->update($data);
-        return response()->json(['message' => 'Status updated.']);
+        return response()->json(['message' => 'Status updated.', 'is_completion' => false]);
     }
 
     public function complete(Request $request, Job $job)
     {
+        $completionSlug = JobStatus::forService($job->service_id)
+            ->where('is_completion', true)
+            ->first()?->slug ?? 'completed';
+
         $job->update([
-            'status'       => 'completed',
+            'status'       => $completionSlug,
             'completed_at' => now(),
         ]);
 

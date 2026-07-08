@@ -16,11 +16,11 @@
             </div>
             <div class="col-md-2">
                 <select name="status" class="form-select">
-                    <option value=""            @selected(!request()->filled('status'))>Active Jobs</option>
-                    <option value="all"         @selected(request('status') === 'all')>All (inc. completed)</option>
-                    <option value="pending"     @selected(request('status') === 'pending')>Pending</option>
-                    <option value="in_progress" @selected(request('status') === 'in_progress')>In Progress</option>
-                    <option value="completed"   @selected(request('status') === 'completed')>Completed</option>
+                    <option value=""    @selected(!request()->filled('status'))>Active Jobs</option>
+                    <option value="all" @selected(request('status') === 'all')>All (inc. completed)</option>
+                    @foreach($statuses as $s)
+                        <option value="{{ $s->slug }}" @selected(request('status') === $s->slug)>{{ $s->name }}</option>
+                    @endforeach
                 </select>
             </div>
             <div class="col-md-2">
@@ -78,7 +78,7 @@
             </thead>
             <tbody>
                 @forelse($jobs as $job)
-                <tr class="{{ $job->status !== 'completed' && $job->due_date->isPast() ? 'table-danger' : '' }}">
+                <tr class="{{ !$job->isComplete() && $job->due_date->isPast() ? 'table-danger' : '' }}" data-complete="{{ $job->isComplete() ? '1' : '0' }}">
                     <td data-col="0">
                         <div class="fw-semibold">{{ $job->name }}</div>
                         @if($job->description)
@@ -88,23 +88,21 @@
                     <td data-col="1">{{ $job->client?->company_name ?? '—' }}</td>
                     <td data-col="2">{{ $job->assignedTo->name }}</td>
                     <td data-col="3"><span class="badge bg-light text-dark">{{ $job->frequency_label }}</span></td>
-                    <td data-col="4" class="{{ $job->status !== 'completed' && $job->due_date->isPast() ? 'text-danger fw-semibold' : '' }}">
+                    <td data-col="4" class="{{ !$job->isComplete() && $job->due_date->isPast() ? 'text-danger fw-semibold' : '' }}">
                         {{ $job->due_date->format('d M Y') }}
-                        @if($job->status !== 'completed' && $job->due_date->isPast())
+                        @if(!$job->isComplete() && $job->due_date->isPast())
                             <span class="badge bg-danger ms-1">Overdue</span>
-                        @elseif($job->status !== 'completed' && $job->due_date->isToday())
+                        @elseif(!$job->isComplete() && $job->due_date->isToday())
                             <span class="badge bg-warning ms-1">Today</span>
                         @endif
                     </td>
                     <td data-col="5" class="text-center" style="min-width:140px">
-                        <select class="form-select form-select-sm status-select
-                                       status-{{ $job->status }}"
+                        <select class="form-select form-select-sm status-select"
                                 data-job-id="{{ $job->id }}"
+                                data-service-id="{{ $job->service_id }}"
                                 data-original="{{ $job->status }}"
                                 onchange="updateJobStatus(this)">
-                            <option value="pending"     {{ $job->status === 'pending'     ? 'selected' : '' }}>Pending</option>
-                            <option value="in_progress" {{ $job->status === 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                            <option value="completed"   {{ $job->status === 'completed'   ? 'selected' : '' }}>Completed</option>
+                            {{-- options populated by JS --}}
                         </select>
                     </td>
                     <td data-col="fixed" class="text-end">
@@ -132,7 +130,7 @@
     @endif
 </div>
 
-@include('jobs._panel', ['clients' => $clients, 'users' => $users])
+@include('jobs._panel', ['clients' => $clients, 'users' => $users, 'services' => $services, 'statusesByService' => $statusesByService])
 @endsection
 
 @push('styles')
@@ -152,9 +150,6 @@
 }
 .job-col-check:focus { outline: none; box-shadow: 0 0 0 .2rem rgba(12,61,56,.25); }
 .status-select { border: 0; font-size: .75rem; font-weight: 600; border-radius: .375rem; padding: .2rem .5rem; cursor: pointer; }
-.status-select.status-pending     { background: #e2e3e5; color: #41464b; }
-.status-select.status-in_progress { background: #cfe2ff; color: #084298; }
-.status-select.status-completed   { background: #d1e7dd; color: #0a3622; }
 .status-select:focus { box-shadow: none; outline: 2px solid #17B4A7; }
 .status-select option { background: #fff; color: #212529; font-weight: 400; }
 </style>
@@ -276,6 +271,44 @@
     });
 })();
 
+// Status colour map
+const STATUS_COLORS = {
+    'secondary':   { bg: '#e2e3e5', color: '#41464b' },
+    'in-progress': { bg: '#cfe2ff', color: '#084298' },
+    'success':     { bg: '#d1e7dd', color: '#0a3622' },
+    'warning':     { bg: '#fff3cd', color: '#664d03' },
+    'danger':      { bg: '#f8d7da', color: '#58151c' },
+    'info':        { bg: '#cff4fc', color: '#055160' },
+    'primary':     { bg: '#17B4A7', color: '#fff' },
+    'dark':        { bg: '#343a40', color: '#fff' },
+};
+
+const statusesByService = @json($statusesByService);
+const completionSlugs  = @json($completionSlugs);
+
+function getStatusList(serviceId) {
+    const sid = serviceId ? String(serviceId) : null;
+    if (sid && statusesByService[sid] && statusesByService[sid].length) return statusesByService[sid];
+    return statusesByService['global'] || [];
+}
+
+function applyStatusColor(sel, colorKey) {
+    const c = STATUS_COLORS[colorKey] || STATUS_COLORS['secondary'];
+    sel.style.background = c.bg;
+    sel.style.color      = c.color;
+}
+
+// Initialise all status selects in the table
+document.querySelectorAll('.status-select').forEach(function (sel) {
+    const list    = getStatusList(sel.dataset.serviceId);
+    const current = sel.dataset.original;
+    sel.innerHTML = list.map(function (s) {
+        return '<option value="' + s.slug + '"' + (s.slug === current ? ' selected' : '') + '>' + s.name + '</option>';
+    }).join('');
+    const currentStatus = list.find(function (s) { return s.slug === current; });
+    if (currentStatus) applyStatusColor(sel, currentStatus.color);
+});
+
 async function updateJobStatus(sel) {
     const jobId    = sel.dataset.jobId;
     const newStatus = sel.value;
@@ -295,15 +328,20 @@ async function updateJobStatus(sel) {
         });
 
         if (res.ok) {
+            const data = await res.json();
             sel.dataset.original = newStatus;
-            sel.className = `form-select form-select-sm status-select status-${newStatus}`;
+
+            const list = getStatusList(sel.dataset.serviceId);
+            const statusObj = list.find(function (s) { return s.slug === newStatus; });
+            if (statusObj) applyStatusColor(sel, statusObj.color);
 
             const row = sel.closest('tr');
-            if (newStatus === 'completed') {
+            if (data.is_completion) {
                 row.classList.remove('table-danger');
-                const data = await res.json();
+                row.dataset.complete = '1';
+                row.querySelectorAll('.badge.bg-danger.ms-1, .badge.bg-warning.ms-1').forEach(function (b) { b.remove(); });
                 if (data.next_due) {
-                    showToast(`Completed — next job due ${data.next_due}`);
+                    showToast('Completed — next job due ' + data.next_due);
                 }
             }
         } else {

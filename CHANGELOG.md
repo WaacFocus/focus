@@ -4,6 +4,21 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.29 — 2026-07-08
+
+### Added
+- **Flexible job statuses** — job statuses are now fully configurable; default statuses (Pending, In Progress, Completed) are seeded automatically and can be renamed, recoloured, and reordered in the admin panel
+- **Per-service job statuses** — each service can have its own set of statuses that override the global defaults; when a job is linked to a service, its status dropdown shows that service's statuses
+- **Job Statuses admin panel** — new Admin → Job Statuses page; add custom statuses with a name, colour, and completion flag; drag rows to reorder within each group (global or per-service)
+- **Service field on jobs** — jobs can now be linked to a service; the status dropdown updates automatically when a service is selected in the create/edit panel
+- **Completion flag** — any status can be marked as a "completion" status; recurring jobs are automatically rescheduled when set to a completion status
+
+### Changed
+- Job status dropdowns throughout (jobs list, dashboard, client detail) now reflect active statuses from the database rather than hardcoded options
+- Overdue/today badge logic uses the completion flag rather than checking for the literal string "completed"
+
+---
+
 ## v1.28 — 2026-06-29
 
 ### Added

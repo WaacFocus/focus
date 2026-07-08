@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Client;
 use App\Models\Job;
+use App\Models\JobStatus;
 use App\Models\Renewal;
 use App\Models\Task;
 use Illuminate\Http\Request;
@@ -41,7 +42,8 @@ class DashboardController extends Controller
         if ($request->filled('jf_status')) {
             $jobsQuery->where('status', $request->jf_status);
         } else {
-            $jobsQuery->whereIn('status', ['pending', 'in_progress']);
+            $activeSlugs = JobStatus::where('is_completion', false)->where('is_active', true)->pluck('slug')->toArray();
+            $jobsQuery->whereIn('status', $activeSlugs ?: ['pending', 'in_progress']);
         }
         if ($request->filled('jf_frequency')) {
             $jobsQuery->where('frequency', $request->jf_frequency);
@@ -60,6 +62,8 @@ class DashboardController extends Controller
         $my_job_clients = Client::whereHas('jobs', fn($q) => $q->where('assigned_to', Auth::id()))
             ->orderBy('company_name')->get(['id', 'company_name']);
 
-        return view('dashboard.index', compact('stats', 'upcoming_renewals', 'recent_tasks', 'my_jobs', 'my_job_clients'));
+        $jobStatuses = JobStatus::where('is_active', true)->orderBy('sort_order')->get();
+
+        return view('dashboard.index', compact('stats', 'upcoming_renewals', 'recent_tasks', 'my_jobs', 'my_job_clients', 'jobStatuses'));
     }
 }

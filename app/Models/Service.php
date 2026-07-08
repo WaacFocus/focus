@@ -29,6 +29,11 @@ class Service extends Model
         return $this->hasMany(Renewal::class);
     }
 
+    public function jobStatuses(): HasMany
+    {
+        return $this->hasMany(JobStatus::class)->orderBy('sort_order');
+    }
+
     public function getBillingCycleLabelAttribute(): string
     {
         return match ($this->billing_cycle) {

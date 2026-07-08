@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Client;
 use App\Models\ClientBillingLine;
 use App\Models\Job;
+use App\Models\JobStatus;
 use App\Models\User;
 use App\Services\Smtp2goService;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -22,8 +23,9 @@ class ReportController extends Controller
 
     private function upcomingJobsData(): \Illuminate\Database\Eloquent\Collection
     {
+        $completionSlugs = JobStatus::where('is_completion', true)->pluck('slug')->toArray() ?: ['completed'];
         return Job::with(['client', 'assignedTo'])
-            ->whereNotIn('status', ['completed'])
+            ->whereNotIn('status', $completionSlugs)
             ->where('due_date', '<=', now()->addDays(30))
             ->orderBy('due_date')
             ->get();
