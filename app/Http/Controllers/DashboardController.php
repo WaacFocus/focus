@@ -29,6 +29,7 @@ class DashboardController extends Controller
             ->get();
 
         $recent_tasks = Task::whereIn('status', ['pending', 'in_progress'])
+            ->where('assigned_to', Auth::id())
             ->orderByRaw('is_urgent DESC')
             ->orderBy('due_date')
             ->take(5)

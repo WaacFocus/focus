@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Task extends Model
 {
     protected $fillable = [
-        'name', 'description', 'status', 'priority', 'is_urgent', 'due_date', 'completed_at',
+        'assigned_to', 'name', 'description', 'status', 'priority', 'is_urgent', 'due_date', 'completed_at',
     ];
 
     protected $casts = [
@@ -15,6 +15,11 @@ class Task extends Model
         'completed_at'=> 'datetime',
         'is_urgent'   => 'boolean',
     ];
+
+    public function assignedTo()
+    {
+        return $this->belongsTo(\App\Models\User::class, 'assigned_to');
+    }
 
     public function getStatusBadgeAttribute(): string
     {

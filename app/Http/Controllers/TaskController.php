@@ -3,13 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\Task;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Task::query();
+        $query = Task::with('assignedTo');
+
+        // Default to current user's tasks; 'all' shows everyone's
+        $assignedFilter = $request->input('assigned', 'me');
+        if ($assignedFilter === 'me') {
+            $query->where('assigned_to', auth()->id());
+        } elseif ($assignedFilter !== 'all') {
+            $query->where('assigned_to', $assignedFilter);
+        }
 
         if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
@@ -33,12 +42,15 @@ class TaskController extends Controller
             ->paginate(25)
             ->withQueryString();
 
-        return view('tasks.index', compact('tasks'));
+        $users = User::orderBy('name')->get(['id', 'name']);
+
+        return view('tasks.index', compact('tasks', 'users'));
     }
 
     public function create()
     {
-        return view('tasks.create');
+        $users = User::orderBy('name')->get(['id', 'name']);
+        return view('tasks.create', compact('users'));
     }
 
     public function store(Request $request)
@@ -49,9 +61,11 @@ class TaskController extends Controller
             'status'      => 'required|in:pending,in_progress,completed,cancelled',
             'priority'    => 'required|in:low,medium,high',
             'due_date'    => 'nullable|date',
+            'assigned_to' => 'nullable|exists:users,id',
         ]);
 
-        $data['is_urgent'] = $request->boolean('is_urgent');
+        $data['is_urgent']   = $request->boolean('is_urgent');
+        $data['assigned_to'] = $data['assigned_to'] ?? auth()->id();
 
         if ($data['status'] === 'completed') {
             $data['completed_at'] = now();
@@ -69,7 +83,8 @@ class TaskController extends Controller
 
     public function edit(Task $task)
     {
-        return view('tasks.edit', compact('task'));
+        $users = User::orderBy('name')->get(['id', 'name']);
+        return view('tasks.edit', compact('task', 'users'));
     }
 
     public function update(Request $request, Task $task)
@@ -80,9 +95,11 @@ class TaskController extends Controller
             'status'      => 'required|in:pending,in_progress,completed,cancelled',
             'priority'    => 'required|in:low,medium,high',
             'due_date'    => 'nullable|date',
+            'assigned_to' => 'nullable|exists:users,id',
         ]);
 
-        $data['is_urgent'] = $request->boolean('is_urgent');
+        $data['is_urgent']   = $request->boolean('is_urgent');
+        $data['assigned_to'] = $data['assigned_to'] ?? auth()->id();
 
         if ($data['status'] === 'completed' && $task->status !== 'completed') {
             $data['completed_at'] = now();

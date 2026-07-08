@@ -16,6 +16,15 @@
                 <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="Search tasks...">
             </div>
             <div class="col-md-2">
+                <select name="assigned" class="form-select">
+                    <option value="me"  @selected(request('assigned', 'me') === 'me')>My Tasks</option>
+                    <option value="all" @selected(request('assigned') === 'all')>All Users</option>
+                    @foreach($users as $user)
+                        <option value="{{ $user->id }}" @selected(request('assigned') == $user->id)>{{ $user->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
                 <select name="status" class="form-select">
                     <option value="">All Statuses</option>
                     @foreach(['pending','in_progress','completed','cancelled'] as $s)
@@ -31,10 +40,10 @@
                     <option value="low"    @selected(request('priority') === 'low')>Low</option>
                 </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-1">
                 <select name="urgent" class="form-select">
-                    <option value="">All Tasks</option>
-                    <option value="1" @selected(request('urgent') === '1')>Urgent only</option>
+                    <option value="">All</option>
+                    <option value="1" @selected(request('urgent') === '1')>Urgent</option>
                 </select>
             </div>
             <div class="col-md-2 d-flex gap-2">
@@ -52,6 +61,7 @@
                 <tr>
                     <th style="width:36px;"></th>
                     <th>Task</th>
+                    <th>Assigned to</th>
                     <th class="text-center">Priority</th>
                     <th class="text-center">Status</th>
                     <th>Due Date</th>
@@ -80,6 +90,7 @@
                         </div>
                         @if($task->description)<small class="text-muted">{{ Str::limit($task->description, 60) }}</small>@endif
                     </td>
+                    <td><span class="small text-muted">{{ $task->assignedTo?->name ?? '—' }}</span></td>
                     <td class="text-center"><span class="badge bg-{{ $task->priority_badge }}">{{ $task->priority }}</span></td>
                     <td class="text-center"><span class="badge bg-{{ $task->status_badge }}">{{ ucfirst(str_replace('_',' ',$task->status)) }}</span></td>
                     <td class="{{ $task->due_date && $task->due_date->isPast() && $task->status !== 'completed' ? 'text-danger fw-semibold' : '' }}">
@@ -96,7 +107,7 @@
                     </td>
                 </tr>
                 @empty
-                <tr><td colspan="6" class="text-center text-muted py-4">No tasks found.</td></tr>
+                <tr><td colspan="7" class="text-center text-muted py-4">No tasks found.</td></tr>
                 @endforelse
             </tbody>
         </table>

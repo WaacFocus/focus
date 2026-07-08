@@ -29,6 +29,18 @@
             <label class="form-label">Due Date</label>
             <input type="date" name="due_date" value="{{ old('due_date', isset($task->due_date) ? $task->due_date->format('Y-m-d') : '') }}" class="form-control">
         </div>
+        <div class="col-md-4">
+            <label class="form-label">Assign to</label>
+            <select name="assigned_to" class="form-select">
+                <option value="">— Myself ({{ auth()->user()->name }}) —</option>
+                @foreach($users as $user)
+                    @if($user->id !== auth()->id())
+                    <option value="{{ $user->id }}" @selected(old('assigned_to', $task->assigned_to ?? null) == $user->id)>{{ $user->name }}</option>
+                    @endif
+                @endforeach
+            </select>
+            <div class="form-text">Leave blank to assign to yourself.</div>
+        </div>
         <div class="col-12">
             <div class="form-check form-switch">
                 <input class="form-check-input" type="checkbox" name="is_urgent" id="is_urgent" value="1"
