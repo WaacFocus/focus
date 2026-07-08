@@ -4,6 +4,14 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.39 — 2026-07-08
+
+### Fixed
+- **Timestamps now BST-aware** — app timezone changed from `UTC` to `Europe/London`; all timestamps (signing, sending, reports, emails) now display in the correct local time year-round, automatically switching between GMT and BST
+- **Signed PDF timezone label** — was hardcoded as "UTC"; now uses `T` format token so it shows "GMT" or "BST" correctly
+
+---
+
 ## v1.38 — 2026-07-08
 
 ### Fixed

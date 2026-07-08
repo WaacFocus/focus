@@ -83,7 +83,7 @@ body { font-family: Arial, sans-serif; font-size: 10px; color: #222; margin: 0; 
     @endif
 
     <div class="sig-row"><span class="sig-label">Signed by</span><span class="sig-value">{{ $letter->signed_name }}</span></div>
-    <div class="sig-row"><span class="sig-label">Date &amp; Time</span><span class="sig-value">{{ $letter->signed_at->format('d F Y \a\t H:i:s') }} UTC</span></div>
+    <div class="sig-row"><span class="sig-label">Date &amp; Time</span><span class="sig-value">{{ $letter->signed_at->format('d F Y \a\t H:i:s T') }}</span></div>
     <div class="sig-row"><span class="sig-label">IP Address</span><span class="sig-value sig-mono">{{ $letter->signed_ip }}</span></div>
     <div class="sig-row"><span class="sig-label">Method</span><span class="sig-value">{{ $letter->signature_type === 'drawn' ? 'Hand-drawn signature' : 'Typed signature' }}</span></div>
     <div class="sig-row"><span class="sig-label">Status</span><span class="sig-value sig-status">&#10003; Signed &amp; Accepted</span></div>
