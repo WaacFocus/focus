@@ -40,9 +40,10 @@
                     <option value="prospect" @selected(request('status') === 'prospect')>Prospect</option>
                 </select>
             </div>
-            <div class="col-md-3 d-flex gap-2">
+            <div class="col-md-3 d-flex gap-2 align-items-center">
                 <button type="submit" class="btn btn-outline-secondary flex-grow-1"><i class="bi bi-search me-1"></i>Filter</button>
                 <a href="{{ route('clients.index') }}" class="btn btn-outline-secondary">Clear</a>
+                <div id="clientFilterSpinner" class="spinner-border spinner-border-sm text-secondary d-none" role="status"></div>
             </div>
         </form>
     </div>
@@ -161,6 +162,27 @@
     });
 
     loadPrefs();
+})();
+
+// Live search — debounced form submit on typing
+(function () {
+    const form    = document.querySelector('.card.shadow-sm.mb-4 form');
+    const search  = form.querySelector('[name="search"]');
+    const spinner = document.getElementById('clientFilterSpinner');
+    let   timer;
+
+    function submit() {
+        spinner.classList.remove('d-none');
+        form.submit();
+    }
+
+    form.querySelectorAll('select').forEach(function (sel) {
+        sel.addEventListener('change', submit);
+    });
+    search.addEventListener('input', function () {
+        clearTimeout(timer);
+        timer = setTimeout(submit, 450);
+    });
 })();
 
 // Clickable rows — navigate to client unless clicking a link, button, or form
