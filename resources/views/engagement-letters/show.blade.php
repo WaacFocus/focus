@@ -71,9 +71,9 @@
         <div class="card shadow-sm border-warning mb-4">
             <div class="card-body">
                 <div class="small fw-semibold mb-1"><i class="bi bi-link-45deg me-1"></i>Signing Link</div>
-                <div class="text-break small text-muted mb-2">{{ route('sign.show', $letter->token) }}</div>
-                <button class="btn btn-sm btn-outline-secondary w-100"
-                        onclick="navigator.clipboard.writeText('{{ route('sign.show', $letter->token) }}').then(() => this.textContent = 'Copied!')">
+                <div class="text-break small text-muted mb-2" id="signingLinkText">{{ route('sign.show', $letter->token) }}</div>
+                <button class="btn btn-sm btn-outline-secondary w-100" id="copySigningLink"
+                        data-url="{{ route('sign.show', $letter->token) }}">
                     <i class="bi bi-clipboard me-1"></i>Copy Link
                 </button>
             </div>
@@ -94,3 +94,45 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+(function () {
+    var btn = document.getElementById('copySigningLink');
+    if (!btn) return;
+
+    btn.addEventListener('click', function () {
+        var url  = this.dataset.url;
+        var self = this;
+
+        function markCopied() {
+            self.innerHTML = '<i class="bi bi-check-lg me-1"></i>Copied!';
+            self.classList.add('btn-success');
+            self.classList.remove('btn-outline-secondary');
+            setTimeout(function () {
+                self.innerHTML = '<i class="bi bi-clipboard me-1"></i>Copy Link';
+                self.classList.remove('btn-success');
+                self.classList.add('btn-outline-secondary');
+            }, 2000);
+        }
+
+        function fallback() {
+            var el = document.createElement('textarea');
+            el.value = url;
+            el.style.cssText = 'position:fixed;left:-9999px;top:-9999px;opacity:0;';
+            document.body.appendChild(el);
+            el.focus();
+            el.select();
+            try { document.execCommand('copy'); markCopied(); } catch (e) { prompt('Copy this link:', url); }
+            document.body.removeChild(el);
+        }
+
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(url).then(markCopied).catch(fallback);
+        } else {
+            fallback();
+        }
+    });
+})();
+</script>
+@endpush

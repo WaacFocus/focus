@@ -4,6 +4,13 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.40 — 2026-07-08
+
+### Fixed
+- **Copy signing link** — replaced broken inline `onclick` with a proper JS handler; tries the Clipboard API first (HTTPS) and falls back to `execCommand` for HTTP environments; button turns green and shows "Copied!" briefly then restores correctly
+
+---
+
 ## v1.39 — 2026-07-08
 
 ### Fixed
