@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Services\Smtp2goService;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Attributes\Hidden;
@@ -25,6 +26,23 @@ class User extends Authenticatable
             'password'                => 'hashed',
             'preferences'             => 'array',
         ];
+    }
+
+    public function sendPasswordResetNotification($token): void
+    {
+        $url = route('password.reset', ['token' => $token, 'email' => $this->email]);
+
+        $html = '
+            <p>Hi ' . e($this->name) . ',</p>
+            <p>You requested a password reset for your Focus account. Click the button below to set a new password. This link expires in 60 minutes.</p>
+            <p style="margin:24px 0;">
+                <a href="' . $url . '" style="background:#17B4A7;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:600;">Reset Password</a>
+            </p>
+            <p>If you did not request this, you can safely ignore this email.</p>
+            <p style="color:#999;font-size:12px;">Or copy this link into your browser:<br>' . $url . '</p>
+        ';
+
+        app(Smtp2goService::class)->send($this->email, $this->name, 'Reset your Focus password', $html);
     }
 
     public function isManager(): bool
