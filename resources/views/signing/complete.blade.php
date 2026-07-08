@@ -31,17 +31,29 @@
             <h2 class="fw-bold" style="color:#3DBFB8;">Letter Signed</h2>
             <p class="text-muted">Thank you, <strong>{{ $letter->signed_name }}</strong>. Your engagement letter has been signed successfully.</p>
         </div>
+        @if($letter->signature_image)
+        <div class="mb-4 p-3" style="background:#fff;border:1px solid #c8eeec;border-radius:.5rem;">
+            <div class="small text-muted mb-2" style="text-transform:uppercase;letter-spacing:.05em;font-size:.7rem;">Your Signature</div>
+            <img src="{{ $letter->signature_image }}" alt="Signature" style="max-height:60px;max-width:100%;">
+        </div>
+        @endif
         <div class="rounded p-3 text-start mb-4" style="background:#f0fafa;border:1px solid #c8eeec;">
             <div class="small text-muted mb-1" style="text-transform:uppercase;letter-spacing:.05em;font-size:.7rem;">Signing Details</div>
             <table class="w-100" style="font-size:.9rem;">
                 <tr>
-                    <td class="text-muted py-1" style="width:110px;">Signed on</td>
+                    <td class="text-muted py-1" style="width:130px;">Signed on</td>
                     <td class="fw-semibold">{{ $letter->signed_at->format('d F Y \a\t H:i') }}</td>
                 </tr>
                 <tr>
                     <td class="text-muted py-1">IP Address</td>
                     <td><code>{{ $letter->signed_ip }}</code></td>
                 </tr>
+                @if($letter->transaction_id)
+                <tr>
+                    <td class="text-muted py-1">Transaction ID</td>
+                    <td><code style="font-size:.75rem;word-break:break-all;">{{ $letter->transaction_id }}</code></td>
+                </tr>
+                @endif
             </table>
         </div>
         <p class="text-muted small mb-0">A copy of the signed engagement letter has been emailed to you for your records.</p>

@@ -53,6 +53,16 @@
                 <div class="mb-1"><small class="text-muted">Signed by:</small> <strong class="ms-1">{{ $letter->signed_name }}</strong></div>
                 <div class="mb-1"><small class="text-muted">Signed:</small> <span class="ms-1">{{ $letter->signed_at->format('d M Y, H:i') }}</span></div>
                 <div class="mb-1"><small class="text-muted">IP Address:</small> <code class="ms-1">{{ $letter->signed_ip }}</code></div>
+                <div class="mb-1"><small class="text-muted">Method:</small> <span class="ms-1">{{ $letter->signature_type === 'drawn' ? 'Hand-drawn' : ($letter->signature_type === 'typed' ? 'Typed' : '—') }}</span></div>
+                @if($letter->transaction_id)
+                <div class="mb-1"><small class="text-muted">Transaction ID:</small> <code class="ms-1" style="font-size:.7rem;">{{ $letter->transaction_id }}</code></div>
+                @endif
+                @if($letter->signature_image)
+                <div class="mt-2 p-2 rounded" style="background:#f8f9fa;border:1px solid #dee2e6;">
+                    <small class="text-muted d-block mb-1">Signature:</small>
+                    <img src="{{ $letter->signature_image }}" alt="Signature" style="max-height:50px;max-width:220px;">
+                </div>
+                @endif
                 @endif
             </div>
         </div>

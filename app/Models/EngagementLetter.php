@@ -10,7 +10,8 @@ class EngagementLetter extends Model
     protected $fillable = [
         'client_id', 'renewal_id', 'sent_by', 'subject', 'sections',
         'composed_html', 'token', 'status', 'sent_at', 'signed_at',
-        'signed_name', 'signed_ip',
+        'signed_name', 'signed_ip', 'transaction_id',
+        'signature_image', 'signature_type', 'signed_user_agent',
     ];
 
     protected $casts = [

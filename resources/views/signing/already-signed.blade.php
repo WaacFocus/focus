@@ -35,13 +35,19 @@
             <div class="small text-muted mb-1" style="text-transform:uppercase;letter-spacing:.05em;font-size:.7rem;">Signing Details</div>
             <table class="w-100" style="font-size:.9rem;">
                 <tr>
-                    <td class="text-muted py-1" style="width:110px;">Signed by</td>
+                    <td class="text-muted py-1" style="width:130px;">Signed by</td>
                     <td class="fw-semibold">{{ $letter->signed_name }}</td>
                 </tr>
                 <tr>
                     <td class="text-muted py-1">Signed on</td>
                     <td>{{ $letter->signed_at->format('d F Y \a\t H:i') }}</td>
                 </tr>
+                @if($letter->transaction_id)
+                <tr>
+                    <td class="text-muted py-1">Transaction ID</td>
+                    <td><code style="font-size:.75rem;word-break:break-all;">{{ $letter->transaction_id }}</code></td>
+                </tr>
+                @endif
             </table>
         </div>
         <p class="text-muted small mb-0">If you believe this is an error, please contact us directly.</p>

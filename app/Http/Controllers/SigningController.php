@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Services\Smtp2goService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class SigningController extends Controller
 {
@@ -34,19 +35,23 @@ class SigningController extends Controller
         abort_if($letter->status !== 'sent', 404);
 
         $request->validate([
-            'signed_name' => 'required|string|max:255',
-            'agreed'      => 'accepted',
+            'signed_name'    => 'required|string|max:255',
+            'agreed'         => 'accepted',
+            'signature_data' => 'required|string|max:600000',
+            'signature_type' => 'required|in:drawn,typed',
         ]);
 
         $letter->load('client', 'renewal', 'sentBy');
 
-        $ip = $request->ip();
-
         $letter->update([
-            'status'      => 'signed',
-            'signed_at'   => now(),
-            'signed_name' => $request->signed_name,
-            'signed_ip'   => $ip,
+            'status'            => 'signed',
+            'signed_at'         => now(),
+            'signed_name'       => $request->signed_name,
+            'signed_ip'         => $request->ip(),
+            'transaction_id'    => (string) Str::uuid(),
+            'signature_image'   => $request->signature_data,
+            'signature_type'    => $request->signature_type,
+            'signed_user_agent' => $request->userAgent(),
         ]);
 
         // Update the linked renewal

@@ -24,11 +24,16 @@ body { font-family: Arial, sans-serif; font-size: 10px; color: #222; margin: 0; 
 
 .signature-block { margin-top: 32px; border-top: 2px solid #3DBFB8; padding-top: 14px; }
 .sig-title { font-size: 8px; text-transform: uppercase; color: #3DBFB8; letter-spacing: .06em; font-weight: bold; margin-bottom: 8px; }
+.sig-image { margin-bottom: 8px; padding: 4px 0; border-bottom: 1px solid #e9ecef; }
+.sig-image img { max-height: 55px; max-width: 260px; }
 .sig-row { display: flex; margin-bottom: 4px; }
-.sig-label { font-size: 9px; color: #888; width: 100px; flex-shrink: 0; }
+.sig-label { font-size: 9px; color: #888; width: 110px; flex-shrink: 0; }
 .sig-value { font-size: 9px; font-weight: bold; }
-.sig-ip { font-size: 8.5px; font-family: monospace; }
+.sig-mono { font-size: 8px; font-family: monospace; letter-spacing: .02em; }
 .sig-status { color: #3DBFB8; }
+.txn-box { margin-top: 10px; border: 1px solid #c8eeec; border-radius: 3px; padding: 5px 8px; background: #f7fffe; }
+.txn-label { font-size: 7.5px; text-transform: uppercase; letter-spacing: .07em; color: #3DBFB8; font-weight: bold; }
+.txn-id { font-size: 9px; font-family: monospace; color: #333; letter-spacing: .03em; }
 
 .footer { margin-top: 24px; border-top: 1px solid #e9ecef; padding-top: 8px; font-size: 8px; color: #aaa; display: flex; justify-content: space-between; }
 </style>
@@ -70,10 +75,25 @@ body { font-family: Arial, sans-serif; font-size: 10px; color: #222; margin: 0; 
 @if($letter->signed_at)
 <div class="signature-block">
     <div class="sig-title">Digital Signature Record</div>
+
+    @if($letter->signature_image)
+    <div class="sig-image">
+        <img src="{{ $letter->signature_image }}" alt="Signature">
+    </div>
+    @endif
+
     <div class="sig-row"><span class="sig-label">Signed by</span><span class="sig-value">{{ $letter->signed_name }}</span></div>
     <div class="sig-row"><span class="sig-label">Date &amp; Time</span><span class="sig-value">{{ $letter->signed_at->format('d F Y \a\t H:i:s') }} UTC</span></div>
-    <div class="sig-row"><span class="sig-label">IP Address</span><span class="sig-value sig-ip">{{ $letter->signed_ip }}</span></div>
-    <div class="sig-row"><span class="sig-label">Status</span><span class="sig-value sig-status">Signed &amp; Accepted</span></div>
+    <div class="sig-row"><span class="sig-label">IP Address</span><span class="sig-value sig-mono">{{ $letter->signed_ip }}</span></div>
+    <div class="sig-row"><span class="sig-label">Method</span><span class="sig-value">{{ $letter->signature_type === 'drawn' ? 'Hand-drawn signature' : 'Typed signature' }}</span></div>
+    <div class="sig-row"><span class="sig-label">Status</span><span class="sig-value sig-status">&#10003; Signed &amp; Accepted</span></div>
+
+    @if($letter->transaction_id)
+    <div class="txn-box">
+        <div class="txn-label">Transaction ID</div>
+        <div class="txn-id">{{ $letter->transaction_id }}</div>
+    </div>
+    @endif
 </div>
 @endif
 
