@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In — Focus</title>
+    <title>Set New Password — Focus</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
@@ -34,7 +34,7 @@
             border-color: #0ea397;
             color: #fff;
         }
-        .form-control:focus, .form-check-input:focus {
+        .form-control:focus {
             border-color: #17B4A7;
             box-shadow: 0 0 0 .25rem rgba(23,180,167,.2);
         }
@@ -44,15 +44,9 @@
     <div class="login-card">
         <div class="text-center mb-4">
             <img src="{{ asset('images/logo.png') }}" alt="Focus" height="56" class="mb-3" onerror="this.style.display='none'">
-            <h4 class="fw-bold mb-1" style="color:#0C3D38;">Focus</h4>
-            <p class="text-muted small mb-0">Accounting Practice Management</p>
+            <h4 class="fw-bold mb-1" style="color:#0C3D38;">Set New Password</h4>
+            <p class="text-muted small mb-0">Choose a new password for your account</p>
         </div>
-
-        @if (session('status'))
-            <div class="alert alert-success py-2 small">
-                <i class="bi bi-check-circle me-1"></i>{{ session('status') }}
-            </div>
-        @endif
 
         @if ($errors->any())
             <div class="alert alert-danger py-2 small">
@@ -60,8 +54,9 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('login') }}">
+        <form method="POST" action="{{ route('password.update') }}">
             @csrf
+            <input type="hidden" name="token" value="{{ $token }}">
 
             <div class="mb-3">
                 <label for="email" class="form-label fw-semibold small">Email address</label>
@@ -69,50 +64,50 @@
                     <span class="input-group-text bg-light border-end-0">
                         <i class="bi bi-envelope text-muted"></i>
                     </span>
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        class="form-control border-start-0 @error('email') is-invalid @enderror"
-                        value="{{ old('email') }}"
-                        placeholder="you@example.com"
-                        autofocus
-                        autocomplete="email"
-                        required
-                    >
+                    <input type="email" id="email" name="email"
+                           class="form-control border-start-0 @error('email') is-invalid @enderror"
+                           value="{{ old('email', $email) }}"
+                           placeholder="you@example.com"
+                           autocomplete="email" required>
                 </div>
             </div>
 
             <div class="mb-3">
-                <label for="password" class="form-label fw-semibold small">Password</label>
+                <label for="password" class="form-label fw-semibold small">New password</label>
                 <div class="input-group">
                     <span class="input-group-text bg-light border-end-0">
                         <i class="bi bi-lock text-muted"></i>
                     </span>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        class="form-control border-start-0"
-                        placeholder="••••••••"
-                        autocomplete="current-password"
-                        required
-                    >
+                    <input type="password" id="password" name="password"
+                           class="form-control border-start-0 @error('password') is-invalid @enderror"
+                           placeholder="Min. 8 characters"
+                           autocomplete="new-password" required>
                 </div>
             </div>
 
-            <div class="mb-4 d-flex align-items-center justify-content-between">
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" id="remember" name="remember">
-                    <label class="form-check-label small text-muted" for="remember">Remember me</label>
+            <div class="mb-4">
+                <label for="password_confirmation" class="form-label fw-semibold small">Confirm new password</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0">
+                        <i class="bi bi-lock-fill text-muted"></i>
+                    </span>
+                    <input type="password" id="password_confirmation" name="password_confirmation"
+                           class="form-control border-start-0"
+                           placeholder="Repeat password"
+                           autocomplete="new-password" required>
                 </div>
-                <a href="{{ route('password.request') }}" class="small text-decoration-none" style="color:#17B4A7;">Forgot password?</a>
             </div>
 
-            <button type="submit" class="btn btn-brand w-100 fw-semibold">
-                <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+            <button type="submit" class="btn btn-brand w-100 fw-semibold mb-3">
+                <i class="bi bi-check-lg me-2"></i>Set New Password
             </button>
         </form>
+
+        <div class="text-center">
+            <a href="{{ route('login') }}" class="small text-muted text-decoration-none">
+                <i class="bi bi-arrow-left me-1"></i>Back to sign in
+            </a>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

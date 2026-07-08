@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\EngagementLetterController;
 use App\Http\Controllers\EngagementLetterTemplateController;
 use App\Http\Controllers\SigningController;
@@ -34,6 +35,13 @@ Route::post('/sign/{token}', [SigningController::class, 'sign'])->name('sign.sig
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login')->middleware('guest');
 Route::post('/login', [AuthController::class, 'login'])->middleware('guest');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+
+Route::middleware('guest')->group(function () {
+    Route::get('/forgot-password', [PasswordResetController::class, 'showForgotForm'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetController::class, 'sendResetLink'])->name('password.email');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'resetPassword'])->name('password.update');
+});
 
 // 2FA challenge — accessible without full auth (user is pending)
 Route::middleware('guest')->group(function () {
