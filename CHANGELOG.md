@@ -4,6 +4,25 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.32 — 2026-07-08
+
+### Added
+- **Annual Fees Breakdown on Billing report** — new section lists every annually-billed client (FPA and additional billing lines) with client code, description, and amount; total matches the Annual Fees metric card
+- **Firm logo on report exports** — billing PDF and email now show the Woods logo in the header
+
+### Changed
+- **Billing report — Monthly Fees Breakdown** — renamed from "Client Breakdown"; Interval column removed; Client Code column added; section header highlighted in brand dark colour
+- **Billing report — "Revenue" → "Fees"** — all labels updated: Monthly/Annual/Quarterly Fees, GRF — Gross Recurring Fees
+- **Billing report exports (PDF + email)** — updated to match web layout: column widths aligned, Annual Fees Breakdown section added, Interval column removed, logo added
+- **FPA Totals by Billing Interval** section removed from Billing report
+- **Tasks filters** — changing any dropdown filter (User, Status, Priority, Urgent) now submits immediately without needing to click Filter
+- **Director "Create as client?" column** — client code field moved to its own always-visible column so ticking Yes no longer shifts the row; directors already stored show an "Already a client" teal badge spanning both columns with a green row tint instead of a checkbox
+
+### Removed
+- **SA Job button** removed from client detail Jobs card
+
+---
+
 ## v1.31 — 2026-07-08
 
 ### Added

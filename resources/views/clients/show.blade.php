@@ -325,13 +325,6 @@
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
                 <span class="fw-semibold"><i class="bi bi-briefcase me-2 text-primary"></i>Jobs ({{ $client->jobs->reject(fn($j) => $j->isComplete())->count() }} active)</span>
                 <div class="d-flex gap-2">
-                    <form method="POST" action="{{ route('clients.sa-job', $client) }}"
-                          onsubmit="return confirm('Create a yearly Self Assessment job for {{ addslashes($client->company_name) }}?')">
-                        @csrf
-                        <button type="submit" class="btn btn-sm btn-outline-info">
-                            <i class="bi bi-file-earmark-text me-1"></i>SA Job
-                        </button>
-                    </form>
                     <a href="{{ route('jobs.index', ['client_id' => $client->id]) }}" class="btn btn-sm btn-outline-secondary">View all</a>
                 </div>
             </div>

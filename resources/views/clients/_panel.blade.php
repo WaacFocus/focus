@@ -531,20 +531,38 @@
                                 <th>Appointed</th>
                                 <th class="text-center" title="Set as main contact for the company">Contact?</th>
                                 <th class="text-center" title="Self Assessment required">SA?</th>
-                                <th>Create as client?</th>
+                                <th class="text-center">Create as client?</th>
+                                <th style="min-width:120px;">Client Code</th>
                             </tr>
                         </thead>
                         <tbody>
                         ${chPendingOfficers.map((o, i) => {
-                            const normName   = o.name.trim().toLowerCase();
-                            const existing   = existingDirectors.find(d => d.name.trim().toLowerCase() === normName);
+                            const normName     = o.name.trim().toLowerCase();
+                            const existing     = existingDirectors.find(d => d.name.trim().toLowerCase() === normName);
                             const saPrechecked = existing ? existing.sa_required : false;
-                            const alreadyBadge = existing
-                                ? `<span class="badge bg-secondary ms-1" style="font-size:.7rem;">Already added</span>`
-                                : '';
+                            const rowStyle     = existing ? 'background:#f0fdf4;' : '';
+                            const alreadyCell  = existing
+                                ? `<td colspan="2" class="text-center">
+                                       <span class="badge text-white" style="background:#17B4A7;font-size:.8rem;padding:.35em .65em;">
+                                           <i class="bi bi-check-circle me-1"></i>Already a client
+                                       </span>
+                                   </td>`
+                                : `<td class="text-center">
+                                       <div class="form-check d-inline-block mb-0">
+                                           <input class="form-check-input officer-create-cb" type="checkbox"
+                                                  id="occ_${i}" onchange="toggleOfficerCode(this)">
+                                           <label class="form-check-label small text-muted" for="occ_${i}">Yes</label>
+                                       </div>
+                                   </td>
+                                   <td>
+                                       <div class="officer-client-code" style="visibility:hidden;">
+                                           <input type="text" class="form-control form-control-sm"
+                                                  placeholder="Client code" maxlength="50">
+                                       </div>
+                                   </td>`;
                             return `
-                            <tr data-officer="${i}">
-                                <td class="fw-semibold">${o.name}${alreadyBadge}</td>
+                            <tr data-officer="${i}" style="${rowStyle}">
+                                <td class="fw-semibold">${o.name}</td>
                                 <td class="text-muted">${chRoleLabel(o.role)}</td>
                                 <td class="text-muted">${o.appointed_on ? new Date(o.appointed_on).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}) : '—'}</td>
                                 <td class="text-center">
@@ -554,17 +572,7 @@
                                 <td class="text-center">
                                     <input type="checkbox" class="form-check-input officer-sa-cb" value="${i}"${saPrechecked ? ' checked' : ''}>
                                 </td>
-                                <td>
-                                    <div class="form-check mb-1">
-                                        <input class="form-check-input officer-create-cb" type="checkbox"
-                                               id="occ_${i}" onchange="toggleOfficerCode(this)">
-                                        <label class="form-check-label small text-muted" for="occ_${i}">Yes</label>
-                                    </div>
-                                    <div class="officer-client-code" style="display:none;min-width:110px;">
-                                        <input type="text" class="form-control form-control-sm"
-                                               placeholder="Client code" maxlength="50">
-                                    </div>
-                                </td>
+                                ${alreadyCell}
                             </tr>`;
                         }).join('')}
                         </tbody>
@@ -852,7 +860,7 @@
 
     window.toggleOfficerCode = function (checkbox) {
         const codeWrap = checkbox.closest('tr').querySelector('.officer-client-code');
-        codeWrap.style.display = checkbox.checked ? '' : 'none';
+        codeWrap.style.visibility = checkbox.checked ? 'visible' : 'hidden';
         const input = codeWrap.querySelector('input');
         input.classList.remove('is-invalid');
         if (checkbox.checked) input.focus();

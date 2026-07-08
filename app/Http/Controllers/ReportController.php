@@ -113,21 +113,29 @@ class ReportController extends Controller
     public function fixedPrices()
     {
         $clients         = $this->fixedPricesData();
-        $totalFpa   = $clients->sum('fpa_amount');
-        $byInterval = $clients->groupBy(fn ($c) => $c->billing_interval ?: 'Unspecified');
-        $users      = User::orderBy('name')->get();
-        $metrics    = $this->fixedPricesMetrics($clients);
+        $totalFpa        = $clients->sum('fpa_amount');
+        $byInterval      = $clients->groupBy(fn ($c) => $c->billing_interval ?: 'Unspecified');
+        $users           = User::orderBy('name')->get();
+        $metrics         = $this->fixedPricesMetrics($clients);
+        $annualLines     = ClientBillingLine::with('client:id,company_name,client_code')
+            ->where('interval', 'annually')
+            ->orderBy('client_id')
+            ->get();
 
-        return view('reports.fixed-prices', compact('clients', 'totalFpa', 'byInterval', 'users', 'metrics'));
+        return view('reports.fixed-prices', compact('clients', 'totalFpa', 'byInterval', 'users', 'metrics', 'annualLines'));
     }
 
     public function fixedPricesPdf(string $orientation = 'portrait')
     {
-        $clients  = $this->fixedPricesData();
-        $totalFpa = $clients->sum('fpa_amount');
-        $metrics  = $this->fixedPricesMetrics($clients);
+        $clients         = $this->fixedPricesData();
+        $totalFpa        = $clients->sum('fpa_amount');
+        $metrics         = $this->fixedPricesMetrics($clients);
+        $annualLines     = ClientBillingLine::with('client:id,company_name,client_code')
+            ->where('interval', 'annually')->orderBy('client_id')->get();
+        $annualFpaClients = $clients->where('billing_interval', 'annually')->values();
+        $annualTotal      = $annualFpaClients->sum('fpa_amount') + $annualLines->sum('amount');
 
-        $pdf = Pdf::loadView('reports.pdf.fixed-prices', compact('clients', 'totalFpa', 'metrics'))
+        $pdf = Pdf::loadView('reports.pdf.fixed-prices', compact('clients', 'totalFpa', 'metrics', 'annualLines', 'annualFpaClients', 'annualTotal'))
             ->setPaper('A4', $orientation);
 
         return $pdf->download('billing-' . now()->format('Y-m-d') . '-' . $orientation . '.pdf');
@@ -177,11 +185,15 @@ class ReportController extends Controller
             $subject      = 'Upcoming Jobs Report — ' . now()->format('d F Y');
             $html         = view('emails.upcoming-jobs', compact('jobs', 'overdueCount', 'todayCount', 'byUser'))->render();
         } else {
-            $clients  = $this->fixedPricesData();
-            $totalFpa = $clients->sum('fpa_amount');
-            $metrics  = $this->fixedPricesMetrics($clients);
-            $subject  = 'Billing Report — ' . now()->format('d F Y');
-            $html     = view('emails.fixed-prices', compact('clients', 'totalFpa', 'metrics'))->render();
+            $clients          = $this->fixedPricesData();
+            $totalFpa         = $clients->sum('fpa_amount');
+            $metrics          = $this->fixedPricesMetrics($clients);
+            $annualLines      = ClientBillingLine::with('client:id,company_name,client_code')
+                ->where('interval', 'annually')->orderBy('client_id')->get();
+            $annualFpaClients = $clients->where('billing_interval', 'annually')->values();
+            $annualTotal      = $annualFpaClients->sum('fpa_amount') + $annualLines->sum('amount');
+            $subject          = 'Billing Report — ' . now()->format('d F Y');
+            $html             = view('emails.fixed-prices', compact('clients', 'totalFpa', 'metrics', 'annualLines', 'annualFpaClients', 'annualTotal'))->render();
         }
 
         $sent   = 0;

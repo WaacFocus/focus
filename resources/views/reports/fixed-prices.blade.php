@@ -23,7 +23,7 @@
     <div class="col-md-3">
         <div class="card shadow-sm border-0">
             <div class="card-body">
-                <div class="text-muted small mb-1 text-uppercase fw-semibold" style="font-size:.7rem;letter-spacing:.05em;">Monthly Revenue</div>
+                <div class="text-muted small mb-1 text-uppercase fw-semibold" style="font-size:.7rem;letter-spacing:.05em;">Monthly Fees</div>
                 <div class="fs-4 fw-bold text-primary">£{{ number_format($metrics['monthly'], 2) }}</div>
                 <div class="text-muted small">Per month billed monthly</div>
             </div>
@@ -32,7 +32,7 @@
     <div class="col-md-3">
         <div class="card shadow-sm border-0">
             <div class="card-body">
-                <div class="text-muted small mb-1 text-uppercase fw-semibold" style="font-size:.7rem;letter-spacing:.05em;">Annual Revenue</div>
+                <div class="text-muted small mb-1 text-uppercase fw-semibold" style="font-size:.7rem;letter-spacing:.05em;">Annual Fees</div>
                 <div class="fs-4 fw-bold text-success">£{{ number_format($metrics['annual'], 2) }}</div>
                 <div class="text-muted small">Per year billed annually</div>
             </div>
@@ -42,7 +42,7 @@
     <div class="col-md-3">
         <div class="card shadow-sm border-0">
             <div class="card-body">
-                <div class="text-muted small mb-1 text-uppercase fw-semibold" style="font-size:.7rem;letter-spacing:.05em;">Quarterly Revenue</div>
+                <div class="text-muted small mb-1 text-uppercase fw-semibold" style="font-size:.7rem;letter-spacing:.05em;">Quarterly Fees</div>
                 <div class="fs-4 fw-bold" style="color:var(--brand-orange,#F7941D);">£{{ number_format($metrics['quarterly'], 2) }}</div>
                 <div class="text-muted small">Per quarter billed quarterly</div>
             </div>
@@ -52,7 +52,7 @@
     <div class="col-md-{{ $metrics['quarterly'] > 0 ? 3 : 6 }}">
         <div class="card shadow-sm border-0" style="background:var(--brand-dark,#0C3D38);">
             <div class="card-body">
-                <div class="text-white-50 small mb-1 text-uppercase fw-semibold" style="font-size:.7rem;letter-spacing:.05em;">GRF — Gross Recurring Revenue</div>
+                <div class="text-white-50 small mb-1 text-uppercase fw-semibold" style="font-size:.7rem;letter-spacing:.05em;">GRF — Gross Recurring Fees</div>
                 <div class="fs-4 fw-bold text-white">£{{ number_format($metrics['grf'], 2) }}</div>
                 <div class="text-white-50 small">
                     Annualised (monthly ×12
@@ -105,40 +105,33 @@
 
 {{-- Client breakdown --}}
 <div class="card shadow-sm">
-    <div class="card-header bg-white fw-semibold d-flex justify-content-between align-items-center">
-        <span>Client Breakdown</span>
-        <span class="text-muted small fw-normal">{{ $clients->count() }} clients with fixed prices</span>
+    <div class="card-header d-flex justify-content-between align-items-center" style="background:var(--brand-dark,#0C3D38);">
+        <span class="fw-semibold text-white">Monthly Fees Breakdown</span>
+        <span class="small fw-normal" style="color:rgba(255,255,255,.6);">{{ $clients->count() }} clients with fixed prices</span>
     </div>
     <div class="table-responsive">
         <table class="table table-hover mb-0 align-middle">
+            <colgroup>
+                <col style="width:40%">
+                <col style="width:20%">
+                <col style="width:40%">
+            </colgroup>
             <thead class="table-light">
                 <tr>
                     <th>Client</th>
                     <th>Code</th>
-                    <th class="text-end">FPA Amount</th>
-                    <th>Interval</th>
+                    <th class="text-end">Amount</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($clients as $client)
                 <tr>
-                    <td>
-                        <a href="{{ route('clients.show', $client) }}" class="fw-medium text-decoration-none">
-                            {{ $client->company_name }}
-                        </a>
-                    </td>
+                    <td><a href="{{ route('clients.show', $client) }}" class="fw-medium text-decoration-none">{{ $client->company_name }}</a></td>
                     <td><span class="text-muted small">{{ $client->client_code ?: '—' }}</span></td>
                     <td class="text-end">{{ $client->fpa_amount ? '£'.number_format($client->fpa_amount, 2) : '—' }}</td>
-                    <td>
-                        @if($client->billing_interval)
-                            <span class="badge bg-light text-dark">{{ ucfirst($client->billing_interval) }}</span>
-                        @else
-                            <span class="text-muted">—</span>
-                        @endif
-                    </td>
                 </tr>
                 @empty
-                <tr><td colspan="4" class="text-center text-muted py-4">No clients have fixed price amounts set.</td></tr>
+                <tr><td colspan="3" class="text-center text-muted py-4">No clients have fixed price amounts set.</td></tr>
                 @endforelse
             </tbody>
             @if($clients->isNotEmpty())
@@ -146,7 +139,6 @@
                 <tr class="fw-semibold">
                     <td colspan="2">Totals</td>
                     <td class="text-end">£{{ number_format($totalFpa, 2) }}</td>
-                    <td></td>
                 </tr>
             </tfoot>
             @endif
@@ -154,26 +146,61 @@
     </div>
 </div>
 
-{{-- Breakdown by interval --}}
-@if($byInterval->isNotEmpty())
+{{-- Annual fees breakdown --}}
+@php
+    $annualFpaClients = $clients->where('billing_interval', 'annually')->values();
+    $annualTotal = $annualFpaClients->sum('fpa_amount') + $annualLines->sum('amount');
+@endphp
+@if($annualTotal > 0)
 <div class="card shadow-sm mt-4">
-    <div class="card-header bg-white fw-semibold">FPA Totals by Billing Interval</div>
+    <div class="card-header d-flex justify-content-between align-items-center" style="background:var(--brand-dark,#0C3D38);">
+        <span class="fw-semibold text-white">Annual Fees Breakdown</span>
+        <span class="small fw-normal" style="color:rgba(255,255,255,.6);">£{{ number_format($annualTotal, 2) }} / year</span>
+    </div>
     <div class="table-responsive">
-        <table class="table mb-0 align-middle">
+        <table class="table table-hover mb-0 align-middle">
+            <colgroup>
+                <col style="width:40%">
+                <col style="width:20%">
+                <col style="width:15%">
+                <col style="width:25%">
+            </colgroup>
             <thead class="table-light">
                 <tr>
-                    <th>Billing Interval</th>
-                    <th class="text-end fw-semibold">FPA Total</th>
+                    <th>Client</th>
+                    <th>Code</th>
+                    <th>Description</th>
+                    <th class="text-end">Amount</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($byInterval as $interval => $group)
+                @foreach($annualFpaClients as $c)
                 <tr>
-                    <td><span class="badge bg-secondary">{{ ucfirst($interval) }}</span></td>
-                    <td class="text-end fw-semibold">£{{ number_format($group->sum('fpa_amount'), 2) }}</td>
+                    <td>
+                        <a href="{{ route('clients.show', $c) }}" class="fw-medium text-decoration-none">{{ $c->company_name }}</a>
+                    </td>
+                    <td><span class="text-muted small">{{ $c->client_code ?: '—' }}</span></td>
+                    <td class="text-muted small">Fixed Price Agreement</td>
+                    <td class="text-end">£{{ number_format($c->fpa_amount, 2) }}</td>
+                </tr>
+                @endforeach
+                @foreach($annualLines as $line)
+                <tr>
+                    <td>
+                        <a href="{{ route('clients.show', $line->client) }}" class="fw-medium text-decoration-none">{{ $line->client->company_name }}</a>
+                    </td>
+                    <td><span class="text-muted small">{{ $line->client->client_code ?: '—' }}</span></td>
+                    <td class="text-muted small">{{ $line->description ?: '—' }}</td>
+                    <td class="text-end">£{{ number_format($line->amount, 2) }}</td>
                 </tr>
                 @endforeach
             </tbody>
+            <tfoot class="table-light">
+                <tr class="fw-semibold">
+                    <td colspan="3">Total</td>
+                    <td class="text-end">£{{ number_format($annualTotal, 2) }}</td>
+                </tr>
+            </tfoot>
         </table>
     </div>
 </div>

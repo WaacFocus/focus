@@ -16,7 +16,7 @@
                 <input type="text" name="search" value="{{ request('search') }}" class="form-control" placeholder="Search tasks...">
             </div>
             <div class="col-md-2">
-                <select name="assigned" class="form-select">
+                <select name="assigned" class="form-select auto-filter">
                     <option value="me"  @selected(request('assigned', 'me') === 'me')>My Tasks</option>
                     <option value="all" @selected(request('assigned') === 'all')>All Users</option>
                     @foreach($users as $user)
@@ -25,7 +25,7 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <select name="status" class="form-select">
+                <select name="status" class="form-select auto-filter">
                     <option value="">All Statuses</option>
                     @foreach(['pending','in_progress','completed','cancelled'] as $s)
                         <option value="{{ $s }}" @selected(request('status') === $s)>{{ ucfirst(str_replace('_',' ',$s)) }}</option>
@@ -33,7 +33,7 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <select name="priority" class="form-select">
+                <select name="priority" class="form-select auto-filter">
                     <option value="">All Priorities</option>
                     <option value="high"   @selected(request('priority') === 'high')>High</option>
                     <option value="medium" @selected(request('priority') === 'medium')>Medium</option>
@@ -41,7 +41,7 @@
                 </select>
             </div>
             <div class="col-md-1">
-                <select name="urgent" class="form-select">
+                <select name="urgent" class="form-select auto-filter">
                     <option value="">All</option>
                     <option value="1" @selected(request('urgent') === '1')>Urgent</option>
                 </select>
@@ -127,6 +127,8 @@
 
 @push('scripts')
 <script>
+document.querySelectorAll('.auto-filter').forEach(el => el.addEventListener('change', () => el.closest('form').submit()));
+
 async function toggleUrgent(taskId, btn) {
     btn.disabled = true;
     try {
