@@ -33,7 +33,8 @@ class RenewalController extends Controller
             $query->where('due_date', '<', now())->whereIn('status', ['pending', 'sent']);
         }
 
-        $renewals = $query->orderBy('due_date')->paginate(25)->withQueryString();
+        $perPage  = in_array((int) $request->input('per_page'), [25, 50, 100, 250]) ? (int) $request->input('per_page') : 25;
+        $renewals = $query->orderBy('due_date')->paginate($perPage)->withQueryString();
         $clients  = Client::orderBy('company_name')->pluck('company_name', 'id');
 
         return view('renewals.index', compact('renewals', 'clients', 'filter'));

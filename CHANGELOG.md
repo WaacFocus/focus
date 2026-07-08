@@ -4,6 +4,13 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.41 — 2026-07-08
+
+### Added
+- **Formatted pagination with per-page selector** — all list pages (Clients, Jobs, Tasks, Engagement Letters, Renewals, Services, Activity) now show "Showing X–Y of Z" with a dropdown to switch between 25, 50, 100, or 250 items per page; page navigation shows numbered links with ellipsis for large page counts; selection is preserved alongside existing filters
+
+---
+
 ## v1.40 — 2026-07-08
 
 ### Fixed

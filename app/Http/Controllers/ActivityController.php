@@ -29,7 +29,8 @@ class ActivityController extends Controller
             $query->whereDate('created_at', '<=', $request->date_to);
         }
 
-        $logs = $query->paginate(50)->withQueryString();
+        $perPage = in_array((int) $request->input('per_page'), [25, 50, 100, 250]) ? (int) $request->input('per_page') : 25;
+        $logs    = $query->paginate($perPage)->withQueryString();
 
         $users = User::orderBy('name')->get();
 

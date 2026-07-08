@@ -97,9 +97,9 @@
             </tbody>
         </table>
     </div>
-    @if($clients->hasPages())
-        <div class="card-footer bg-white">{{ $clients->links() }}</div>
-    @endif
+    <div class="card-footer bg-white border-top">
+        @include('partials.pagination', ['paginator' => $clients])
+    </div>
 </div>
 
 @include('clients._panel')

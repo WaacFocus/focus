@@ -125,9 +125,9 @@
             </tbody>
         </table>
     </div>
-    @if($jobs->hasPages())
-        <div class="card-footer bg-white">{{ $jobs->links() }}</div>
-    @endif
+    <div class="card-footer bg-white border-top">
+        @include('partials.pagination', ['paginator' => $jobs])
+    </div>
 </div>
 
 @include('jobs._panel', ['clients' => $clients, 'users' => $users, 'services' => $services, 'statusesByService' => $statusesByService])

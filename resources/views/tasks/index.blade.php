@@ -112,9 +112,9 @@
             </tbody>
         </table>
     </div>
-    @if($tasks->hasPages())
-        <div class="card-footer bg-white">{{ $tasks->links() }}</div>
-    @endif
+    <div class="card-footer bg-white border-top">
+        @include('partials.pagination', ['paginator' => $tasks])
+    </div>
 </div>
 @endsection
 

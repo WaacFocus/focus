@@ -97,8 +97,8 @@
             </tbody>
         </table>
     </div>
-    @if($renewals->hasPages())
-        <div class="card-footer bg-white">{{ $renewals->links() }}</div>
-    @endif
+    <div class="card-footer bg-white border-top">
+        @include('partials.pagination', ['paginator' => $renewals])
+    </div>
 </div>
 @endsection

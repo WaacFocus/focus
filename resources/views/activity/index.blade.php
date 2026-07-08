@@ -175,14 +175,9 @@
             </table>
         </div>
 
-        @if($logs->hasPages())
-            <div class="card-footer bg-white border-top d-flex align-items-center justify-content-between">
-                <div class="text-muted small">
-                    Showing {{ $logs->firstItem() }}–{{ $logs->lastItem() }} of {{ number_format($logs->total()) }}
-                </div>
-                {{ $logs->links() }}
-            </div>
-        @endif
+        <div class="card-footer bg-white border-top">
+            @include('partials.pagination', ['paginator' => $logs])
+        </div>
     @endif
 </div>
 

@@ -16,9 +16,11 @@ class EngagementLetterController extends Controller
 {
     public function index()
     {
+        $perPage = in_array((int) request('per_page'), [25, 50, 100, 250]) ? (int) request('per_page') : 25;
         $letters = EngagementLetter::with('client', 'sentBy')
             ->orderByDesc('created_at')
-            ->paginate(25);
+            ->paginate($perPage)
+            ->withQueryString();
 
         return view('engagement-letters.index', compact('letters'));
     }

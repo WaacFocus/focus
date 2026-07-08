@@ -27,7 +27,8 @@ class ClientController extends Controller
             $query->where('status', $request->status);
         }
 
-        $clients     = $query->orderBy('company_name')->paginate(20)->withQueryString();
+        $perPage     = in_array((int) $request->input('per_page'), [25, 50, 100, 250]) ? (int) $request->input('per_page') : 25;
+        $clients     = $query->orderBy('company_name')->paginate($perPage)->withQueryString();
         $clientTypes = ClientType::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
 
         return view('clients.index', compact('clients', 'clientTypes'));

@@ -49,7 +49,7 @@ class JobController extends Controller
                 "(SELECT sort_order FROM job_statuses WHERE slug = practice_jobs.status AND service_id IS NULL LIMIT 1) ASC"
             )
             ->orderBy('due_date')
-            ->paginate(25)
+            ->paginate(in_array((int) $request->input('per_page'), [25, 50, 100, 250]) ? (int) $request->input('per_page') : 25)
             ->withQueryString();
 
         $clients  = Client::orderBy('company_name')->get(['id', 'company_name']);

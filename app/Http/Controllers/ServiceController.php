@@ -17,7 +17,8 @@ class ServiceController extends Controller
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
-        $services = $query->orderBy('name')->paginate(20)->withQueryString();
+        $perPage  = in_array((int) $request->input('per_page'), [25, 50, 100, 250]) ? (int) $request->input('per_page') : 25;
+        $services = $query->orderBy('name')->paginate($perPage)->withQueryString();
 
         return view('services.index', compact('services'));
     }

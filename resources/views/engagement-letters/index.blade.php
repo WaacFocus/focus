@@ -87,8 +87,8 @@
             </tbody>
         </table>
     </div>
-    @if($letters->hasPages())
-        <div class="card-footer bg-white">{{ $letters->links() }}</div>
-    @endif
+    <div class="card-footer bg-white border-top">
+        @include('partials.pagination', ['paginator' => $letters])
+    </div>
 </div>
 @endsection

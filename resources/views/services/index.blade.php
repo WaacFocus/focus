@@ -64,8 +64,8 @@
             </tbody>
         </table>
     </div>
-    @if($services->hasPages())
-        <div class="card-footer bg-white">{{ $services->links() }}</div>
-    @endif
+    <div class="card-footer bg-white border-top">
+        @include('partials.pagination', ['paginator' => $services])
+    </div>
 </div>
 @endsection

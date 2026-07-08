@@ -39,7 +39,7 @@ class TaskController extends Controller
         $tasks = $query->orderByRaw("is_urgent DESC")
             ->orderByRaw("CASE status WHEN 'in_progress' THEN 0 WHEN 'pending' THEN 1 ELSE 2 END")
             ->orderBy('due_date')
-            ->paginate(25)
+            ->paginate(in_array((int) $request->input('per_page'), [25, 50, 100, 250]) ? (int) $request->input('per_page') : 25)
             ->withQueryString();
 
         $users = User::orderBy('name')->get(['id', 'name']);
