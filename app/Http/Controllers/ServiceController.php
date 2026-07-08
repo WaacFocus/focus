@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EngagementLetterTemplate;
+use App\Models\JobStatus;
 use App\Models\Service;
 use Illuminate\Http\Request;
 
@@ -35,7 +37,35 @@ class ServiceController extends Controller
 
         $data['is_active'] = $request->boolean('is_active', true);
 
-        Service::create($data);
+        $service = Service::create($data);
+
+        // Seed service-specific job statuses by copying global defaults
+        JobStatus::whereNull('service_id')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->get()
+            ->each(function ($gs) use ($service) {
+                JobStatus::create([
+                    'service_id'    => $service->id,
+                    'name'          => $gs->name,
+                    'slug'          => $gs->slug,
+                    'color'         => $gs->color,
+                    'sort_order'    => $gs->sort_order,
+                    'is_completion' => $gs->is_completion,
+                    'is_active'     => true,
+                ]);
+            });
+
+        // Seed a starter engagement letter section for this service
+        EngagementLetterTemplate::create([
+            'title'            => $service->name,
+            'service_type'     => strtolower($service->name),
+            'body'             => "We are pleased to confirm the terms of our engagement to provide {$service->name} services.\n\nThe scope of our services will be agreed with you and confirmed in writing prior to commencement.",
+            'sort_order'       => (EngagementLetterTemplate::max('sort_order') ?? 0) + 1,
+            'is_active'        => true,
+            'default_included' => false,
+            'is_mandatory'     => false,
+        ]);
 
         return redirect()->route('services.index')->with('success', 'Service created.');
     }

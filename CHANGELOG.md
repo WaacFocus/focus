@@ -4,6 +4,14 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.31 — 2026-07-08
+
+### Added
+- **Service auto-seeding** — creating a new service now automatically: (1) seeds a set of service-specific job statuses by copying the global defaults (Pending, In Progress, Completed), ready to customise in Admin → Job Statuses; (2) creates a starter engagement letter section for the service, ready to edit in Admin → Letter Sections
+- **Dynamic category suggestions** — the Category field on the letter section form now includes all active service names as datalist suggestions alongside the built-in options
+
+---
+
 ## v1.30 — 2026-07-08
 
 ### Added

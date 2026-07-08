@@ -50,6 +50,9 @@
                     <option value="payroll">
                     <option value="bookkeeping">
                     <option value="secretarial">
+                    @foreach($services as $svcName)
+                        <option value="{{ strtolower($svcName) }}">
+                    @endforeach
                 </datalist>
                 <div class="form-text">Used as a label in the builder — no functional effect.</div>
             </div>

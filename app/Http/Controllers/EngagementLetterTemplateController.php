@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\EngagementLetterTemplate;
+use App\Models\Service;
 use Illuminate\Http\Request;
 
 class EngagementLetterTemplateController extends Controller
@@ -16,7 +17,8 @@ class EngagementLetterTemplateController extends Controller
     public function create()
     {
         $template = new EngagementLetterTemplate();
-        return view('admin.engagement-letter-templates.form', compact('template'));
+        $services = Service::where('is_active', true)->orderBy('name')->pluck('name');
+        return view('admin.engagement-letter-templates.form', compact('template', 'services'));
     }
 
     public function store(Request $request)
@@ -43,7 +45,8 @@ class EngagementLetterTemplateController extends Controller
     public function edit(EngagementLetterTemplate $engagementLetterTemplate)
     {
         $template = $engagementLetterTemplate;
-        return view('admin.engagement-letter-templates.form', compact('template'));
+        $services = Service::where('is_active', true)->orderBy('name')->pluck('name');
+        return view('admin.engagement-letter-templates.form', compact('template', 'services'));
     }
 
     public function update(Request $request, EngagementLetterTemplate $engagementLetterTemplate)
