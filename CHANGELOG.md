@@ -4,6 +4,17 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.30 — 2026-07-08
+
+### Added
+- **Canvas / typed signature on engagement letters** — signers can now draw their signature with a finger or mouse, or switch to "Type Name" mode which renders their name in a cursive script; both produce a signature image stored in the database
+- **Transaction ID** — a UUID is generated at the moment of signing and recorded on the engagement letter; visible on the signed PDF, the post-signing confirmation page, the already-signed page, and the staff letter detail view
+- **Full signing audit trail** — `signature_image` (base64 PNG), `signature_type` (drawn/typed), and `signed_user_agent` (browser/device) are now recorded alongside the existing name, date, and IP fields
+- **Signature on signed PDF** — the signature image appears in the Digital Signature Record block of the PDF, above the audit rows; transaction ID shown in a highlighted box
+- **Favicon on all pages** — favicon added to all standalone pages that have their own HTML head: login, forgot password, reset password, 2FA challenge, and all three engagement letter signing views
+
+---
+
 ## v1.29 — 2026-07-08
 
 ### Added
