@@ -13,7 +13,10 @@ class SigningController extends Controller
     public function show(string $token)
     {
         $letter = EngagementLetter::where('token', $token)->firstOrFail();
-        abort_if($letter->status === 'signed', 410, 'This engagement letter has already been signed.');
+        if ($letter->status === 'signed') {
+            $letter->load('client');
+            return view('signing.already-signed', compact('letter'));
+        }
         abort_if($letter->status !== 'sent', 404);
 
         $letter->load('client');
@@ -24,7 +27,10 @@ class SigningController extends Controller
     public function sign(Request $request, string $token)
     {
         $letter = EngagementLetter::where('token', $token)->firstOrFail();
-        abort_if($letter->status === 'signed', 410, 'This engagement letter has already been signed.');
+        if ($letter->status === 'signed') {
+            $letter->load('client');
+            return view('signing.already-signed', compact('letter'));
+        }
         abort_if($letter->status !== 'sent', 404);
 
         $request->validate([
