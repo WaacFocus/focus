@@ -4,6 +4,13 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.38 — 2026-07-08
+
+### Fixed
+- **Director letter send — Network error** — route parameter `{client}` did not match controller parameter `$directorClient`, causing Laravel model binding to fail with a 500 and an unparseable response; renamed to `$client` to align with the route
+
+---
+
 ## v1.37 — 2026-07-08
 
 ### Fixed

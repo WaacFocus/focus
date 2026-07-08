@@ -200,7 +200,7 @@ class EngagementLetterController extends Controller
         ]);
     }
 
-    public function sendDirectorLetter(EngagementLetter $engagementLetter, Client $directorClient): \Illuminate\Http\JsonResponse
+    public function sendDirectorLetter(EngagementLetter $engagementLetter, Client $client): \Illuminate\Http\JsonResponse
     {
         $templates = EngagementLetterTemplate::where('is_active', true)
             ->where(function ($q) {
@@ -217,14 +217,14 @@ class EngagementLetterController extends Controller
         ])->values()->toArray();
 
         $letter = EngagementLetter::create([
-            'client_id' => $directorClient->id,
-            'subject'   => 'Engagement Letter — ' . $directorClient->company_name,
+            'client_id' => $client->id,
+            'subject'   => 'Engagement Letter — ' . $client->company_name,
             'sections'  => $sections,
             'status'    => 'draft',
         ]);
 
         try {
-            $this->executeSend($letter, $directorClient);
+            $this->executeSend($letter, $client);
         } catch (\Throwable $e) {
             $letter->delete();
             return response()->json(['error' => $e->getMessage()], 422);
