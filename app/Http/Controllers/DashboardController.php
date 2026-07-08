@@ -15,7 +15,7 @@ class DashboardController extends Controller
     {
         $stats = [
             'clients'           => Client::where('status', 'active')->count(),
-            'pending_tasks'     => Task::whereIn('status', ['pending', 'in_progress'])->count(),
+            'pending_tasks'     => Task::whereIn('status', ['pending', 'in_progress'])->where('assigned_to', Auth::id())->count(),
             'upcoming_renewals' => Renewal::whereIn('status', ['pending', 'sent'])
                 ->where('due_date', '<=', now()->addDays(30))
                 ->count(),
