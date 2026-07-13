@@ -238,19 +238,36 @@
         if (tf.passkeys.length === 0) {
             list.innerHTML = '<p class="text-muted small mb-0">No passkeys registered.</p>';
         } else {
-            list.innerHTML = tf.passkeys.map(p => `
-                <div class="d-flex align-items-center justify-content-between py-1">
-                    <div>
-                        <i class="bi bi-key me-1 text-muted small"></i>
-                        <span class="small fw-medium">${p.nickname}</span>
-                        <span class="text-muted small ms-1">· ${p.created_at}</span>
-                    </div>
-                    <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2"
-                            onclick="deletePasskey('${p.id}')">
-                        <i class="bi bi-trash small"></i>
-                    </button>
-                </div>
-            `).join('');
+            list.textContent = '';
+            tf.passkeys.forEach(p => {
+                const row = document.createElement('div');
+                row.className = 'd-flex align-items-center justify-content-between py-1';
+
+                const left = document.createElement('div');
+                const icon = document.createElement('i');
+                icon.className = 'bi bi-key me-1 text-muted small';
+                const name = document.createElement('span');
+                name.className = 'small fw-medium';
+                name.textContent = p.nickname;
+                const date = document.createElement('span');
+                date.className = 'text-muted small ms-1';
+                date.textContent = '· ' + p.created_at;
+                left.appendChild(icon);
+                left.appendChild(name);
+                left.appendChild(date);
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-sm btn-outline-danger py-0 px-2';
+                btn.addEventListener('click', () => deletePasskey(p.id));
+                const btnIcon = document.createElement('i');
+                btnIcon.className = 'bi bi-trash small';
+                btn.appendChild(btnIcon);
+
+                row.appendChild(left);
+                row.appendChild(btn);
+                list.appendChild(row);
+            });
         }
     }
 

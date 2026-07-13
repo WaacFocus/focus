@@ -31,7 +31,8 @@ class WebAuthnRegisterController
         $credential = $request->save();
 
         if ($credential && $request->filled('nickname')) {
-            $credential->update(['nickname' => $request->input('nickname')]);
+            $nickname = substr(strip_tags(trim($request->input('nickname'))), 0, 100);
+            $credential->update(['nickname' => $nickname]);
         }
 
         return response()->noContent();

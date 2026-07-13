@@ -4,6 +4,14 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.42 — 2026-07-13
+
+### Security
+- **XSS fix — Report Builder preview** — added `escHtml()` helper to escape all database values before they are inserted into the preview table via `innerHTML`; covers column headers, all cell values (company names, descriptions, job names, contact names), preview error messages, and save success messages; a stored HTML payload in any client or renewal field now renders as literal text
+- **XSS fix — Passkey nickname** — two-layer remediation: server-side `strip_tags()` + 100-character cap applied before the nickname is written to the database (`WebAuthnRegisterController`); client-side rendering in the manager Users panel rewritten to use `createElement`/`textContent` DOM construction instead of `innerHTML` template literals, eliminating the XSS sink regardless of database contents
+
+---
+
 ## v1.41 — 2026-07-08
 
 ### Added

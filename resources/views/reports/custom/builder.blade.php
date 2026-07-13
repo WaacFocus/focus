@@ -371,11 +371,21 @@ async function runPreview() {
         renderPreview(data);
     } catch (e) {
         document.getElementById('previewBody').innerHTML =
-            `<div class="alert alert-danger m-3 small">${e.message}</div>`;
+            '<div class="alert alert-danger m-3 small">' + escHtml(e.message) + '</div>';
     } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="bi bi-eye me-1"></i> Preview Results';
     }
+}
+
+function escHtml(s) {
+    if (s === null || s === undefined) return '—';
+    return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
 function renderPreview(data) {
@@ -391,11 +401,11 @@ function renderPreview(data) {
 
     let html = '<div class="table-responsive"><table class="table table-sm table-hover mb-0 small">';
     html += '<thead class="table-light"><tr>';
-    data.headers.forEach(h => html += `<th>${h}</th>`);
+    data.headers.forEach(h => html += '<th>' + escHtml(h) + '</th>');
     html += '</tr></thead><tbody>';
     data.rows.forEach(row => {
         html += '<tr>';
-        row.forEach(cell => html += `<td>${cell ?? '—'}</td>`);
+        row.forEach(cell => html += '<td>' + escHtml(cell) + '</td>');
         html += '</tr>';
     });
     html += '</tbody></table></div>';
@@ -431,10 +441,9 @@ async function saveReport() {
         if (!res.ok) throw new Error(data.message ?? 'Save failed');
 
         const msgEl = document.getElementById('saveMsg');
-        msgEl.innerHTML = `<div class="alert alert-success alert-dismissible fade show py-2 small mb-0">
-            <i class="bi bi-check-circle me-1"></i>${data.message}
-            <button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button>
-        </div>`;
+        msgEl.innerHTML = '<div class="alert alert-success alert-dismissible fade show py-2 small mb-0">'
+            + '<i class="bi bi-check-circle me-1"></i>' + escHtml(data.message)
+            + '<button type="button" class="btn-close btn-close-sm" data-bs-dismiss="alert"></button></div>';
         msgEl.style.display = '';
 
         if (!EDITING) {
