@@ -71,7 +71,9 @@
             <tbody>
                 @forelse($tasks as $task)
                 <tr class="{{ $task->is_urgent ? 'urgent-row' : ($task->status === 'completed' ? 'text-muted' : '') }}"
-                    id="task-row-{{ $task->id }}">
+                    id="task-row-{{ $task->id }}"
+                    data-href="{{ route('tasks.edit', $task) }}"
+                    style="cursor:pointer;">
                     <td class="text-center ps-2">
                         <button type="button"
                                 class="btn btn-sm urgent-btn border-0 p-0"
@@ -128,6 +130,14 @@
 @push('scripts')
 <script>
 document.querySelectorAll('.auto-filter').forEach(el => el.addEventListener('change', () => el.closest('form').submit()));
+
+document.querySelectorAll('tr[data-href]').forEach(function (row) {
+    row.addEventListener('click', function (e) {
+        if (!e.target.closest('a, button, form')) {
+            window.location = row.dataset.href;
+        }
+    });
+});
 
 async function toggleUrgent(taskId, btn) {
     btn.disabled = true;

@@ -4,6 +4,13 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
+## v1.43 — 2026-07-13
+
+### Improved
+- **Clickable task rows** — clicking anywhere on a task row in the Tasks list now navigates to that task's edit page, matching the behaviour of the client list; clicking the urgent flag, edit button, or delete button still works independently
+
+---
+
 ## v1.42 — 2026-07-13
 
 ### Security
