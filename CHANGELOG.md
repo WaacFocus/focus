@@ -19,21 +19,21 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
-## v1.41 — 2026-07-08
+## v1.41 — 2026-07-17
 
 ### Added
 - **Formatted pagination with per-page selector** — all list pages (Clients, Jobs, Tasks, Engagement Letters, Renewals, Services, Activity) now show "Showing X–Y of Z" with a dropdown to switch between 25, 50, 100, or 250 items per page; page navigation shows numbered links with ellipsis for large page counts; selection is preserved alongside existing filters
 
 ---
 
-## v1.40 — 2026-07-08
+## v1.40 — 2026-07-17
 
 ### Fixed
 - **Copy signing link** — replaced broken inline `onclick` with a proper JS handler; tries the Clipboard API first (HTTPS) and falls back to `execCommand` for HTTP environments; button turns green and shows "Copied!" briefly then restores correctly
 
 ---
 
-## v1.39 — 2026-07-08
+## v1.39 — 2026-07-17
 
 ### Fixed
 - **Timestamps now BST-aware** — app timezone changed from `UTC` to `Europe/London`; all timestamps (signing, sending, reports, emails) now display in the correct local time year-round, automatically switching between GMT and BST
@@ -41,21 +41,21 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
-## v1.38 — 2026-07-08
+## v1.38 — 2026-07-17
 
 ### Fixed
 - **Director letter send — Network error** — route parameter `{client}` did not match controller parameter `$directorClient`, causing Laravel model binding to fail with a 500 and an unparseable response; renamed to `$client` to align with the route
 
 ---
 
-## v1.37 — 2026-07-08
+## v1.37 — 2026-07-17
 
 ### Fixed
 - **Engagement letter service auto-tick (robust rewrite)** — matching is now done in the controller via a DB query rather than string comparison in Blade; templates are resolved to IDs using both `service_type` and `LOWER(TRIM(title))` against the client's service names, eliminating any risk of case/whitespace mismatch or Blade scope issues
 
 ---
 
-## v1.36 — 2026-07-08
+## v1.36 — 2026-07-17
 
 ### Fixed
 - **Engagement letter service auto-tick** — section matching now also compares template title (lowercased) against the client's service names, so services like "Annual Accounts" correctly tick the "Annual Accounts" section even when the template's `service_type` was seeded as `"accounts"`
@@ -63,7 +63,7 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
-## v1.35 — 2026-07-08
+## v1.35 — 2026-07-17
 
 ### Added
 - **Director engagement letters** — after sending a company's engagement letter, if the company has directors with Self Assessment required who are registered as active clients, the system redirects to a director letters page
@@ -72,14 +72,14 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
-## v1.34 — 2026-07-08
+## v1.34 — 2026-07-17
 
 ### Added
 - **No-email prompt on engagement letter send** — if the selected client has no email address, a modal prompts for email (and optionally phone) before sending; the client record is updated via AJAX and the letter is sent immediately after
 
 ---
 
-## v1.33 — 2026-07-08
+## v1.33 — 2026-07-17
 
 ### Added
 - **Engagement letter service auto-population** — when creating a new letter from a client's page, sections whose `service_type` matches the client's assigned services are automatically pre-ticked
@@ -91,7 +91,7 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
-## v1.32 — 2026-07-08
+## v1.32 — 2026-07-17
 
 ### Added
 - **Annual Fees Breakdown on Billing report** — new section lists every annually-billed client (FPA and additional billing lines) with client code, description, and amount; total matches the Annual Fees metric card
@@ -110,7 +110,7 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
-## v1.31 — 2026-07-08
+## v1.31 — 2026-07-17
 
 ### Added
 - **Service auto-seeding** — creating a new service now automatically: (1) seeds a set of service-specific job statuses by copying the global defaults (Pending, In Progress, Completed), ready to customise in Admin → Job Statuses; (2) creates a starter engagement letter section for the service, ready to edit in Admin → Letter Sections
@@ -118,7 +118,7 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
-## v1.30 — 2026-07-08
+## v1.30 — 2026-07-17
 
 ### Added
 - **Canvas / typed signature on engagement letters** — signers can now draw their signature with a finger or mouse, or switch to "Type Name" mode which renders their name in a cursive script; both produce a signature image stored in the database
@@ -129,7 +129,7 @@ All notable changes to this project are documented here, grouped by version.
 
 ---
 
-## v1.29 — 2026-07-08
+## v1.29 — 2026-07-17
 
 ### Added
 - **Flexible job statuses** — job statuses are now fully configurable; default statuses (Pending, In Progress, Completed) are seeded automatically and can be renamed, recoloured, and reordered in the admin panel
